@@ -38,4 +38,4 @@ sudo systemctl daemon-reload && sudo systemctl enable smtp_relay && sudo systemc
 - Restrict port 80 to your n8n server’s IP
 - Use strong SECRET_KEY
 - Add HTTPS via Nginx/Certbot if needed
-
+- EC2 instance: 54.67.32.206
