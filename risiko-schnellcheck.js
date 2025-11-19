@@ -18,19 +18,6 @@ function getUTMParams() {
     return utm;
 }
 
-
-// ---- Append UTM params to iframe src ----
-function appendUTMToUrl(url, utmParams) {
-    const u = new URL(url, window.location.href);
-
-    Object.entries(utmParams).forEach(([key, value]) => {
-        u.searchParams.set(key, value);
-    });
-
-    return u.toString();
-}
-
-
 document.addEventListener("DOMContentLoaded", function () {
     const utmParams = getUTMParams();
     if (!Object.keys(utmParams).length) return;
