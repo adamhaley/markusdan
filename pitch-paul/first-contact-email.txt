@@ -1,0 +1,77 @@
+// Spintax-enabled outreach message sent by Tatjana Haufler
+const spintax = $json.spintax || `Hallo,
+
+durch das Wachstumschancengesetz (§ 7g EStG und § 7 Abs. 2 EStG) hat sich die Situation für Zahnärzte { grundlegend | drastisch | dramatisch | deutlich | spürbar | maßgeblich | nachhaltig | entscheidend } verändert. Es geht um Praxisrücklagen.
+
+Wir würden Ihnen gerne aktuelle Informationen dazu zukommen lassen.
+Wer wäre die richtige Ansprechperson in Ihrer Praxis dafür?
+
+Vielen Dank
+
+Tatjana Haufler
+Key-Account
+
+Deutsches Edelsteinhaus DEH GmbH
+Kogenwiese 5
+88279 Amtzell
+
+Telefon: +49 (0) 7520 9139297
+Website: www.deutsches-edelsteinhaus.com
+E-Mail: t.haufler@deutsches-edelsteinhaus.com
+
+Sitz der Gesellschaft: 88279 Amtzell
+Handelsregister Ulm HRB 737047
+Geschäftsführer: Alexander Streeb, Oliver Kleimaier
+
+Diese E-Mail enthält für den Adressaten persönlich bestimmte vertrauliche und/oder rechtlich geschützte Informationen. Wenn Sie nicht der richtige Adressat sind oder diese E-Mail irrtümlich erhalten haben, informieren Sie bitte sofort den Absender und vernichten Sie diese Mail. Das unerlaubte Kopieren sowie die unbefugte Weitergabe dieser Mail ist nicht gestattet. Der Inhalt dieser E-Mail ist nur rechtsverbindlich, wenn er von unserer Seite schriftlich durch Brief oder Telefax bestätigt wird. Die Versendung von E-Mails an uns hat keine fristwahrende Wirkung.
+`;
+
+// ---------- Spintax Parser ----------
+function spin(text) {
+  const regex = /\{([^{}]+)\}/;
+
+  let match;
+  const variables = [];
+
+  while ((match = regex.exec(text)) !== null) {
+    const full = match[0];
+    const options = match[1].split("|").map(s => s.trim());
+    const choice = options[Math.floor(Math.random() * options.length)];
+
+    variables.push({ options, selected: choice });
+    text = text.replace(full, choice);
+  }
+
+  return { text, variables };
+}
+
+// ---------- Format Cleanup ----------
+function formatPlainText(str) {
+  return str
+    .replace(/[ \t]+/g, " ")    
+    .replace(/\r\n/g, "\n")     
+    .replace(/\n{3,}/g, "\n\n") 
+    .trim() + "\n";
+}
+
+// ---------- Process ----------
+const spun = spin(spintax);
+const cleanedBody = formatPlainText(spun.text);
+
+//   Set subject here
+const subject = "Kurze Frage zu Ihrer Zahnarztpraxis";
+
+//   Set sender name here
+const from = `Tatjana Haufler <t.haufler@deutsches-edelsteinhaus.com>`;
+
+// Final output for downstream nodes
+return [
+  {
+    json: {
+      from,
+      subject,
+      body: cleanedBody
+    }
+  }
+];
+
