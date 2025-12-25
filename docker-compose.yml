@@ -1,0 +1,130 @@
+version: "3.7"
+
+services:
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - ${DATA_FOLDER}/caddy_config:/config
+      - ${DATA_FOLDER}/caddy_config/Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - default
+      - supabase_default
+
+  n8n:
+    build: .
+    group_add:
+      - 999
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - NODES_EXCLUDE=[]   
+      - NODE_FUNCTION_ALLOW_BUILTIN=*
+      - NODE_FUNCTION_ALLOW_EXTERNAL=*
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - N8N_RESTRICT_FILE_ACCESS_TO=/files;${DATA_FOLDER}/local_files
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - n8n_data:/home/node/.n8n
+      - ${DATA_FOLDER}/local_files:/files
+    networks:
+      - default
+      - supabase_default
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - default
+  wordpress:
+    image: bitnami/wordpress:latest
+    container_name: wordpress
+    restart: unless-stopped
+    environment:
+      # Core
+      WORDPRESS_DATABASE_HOST: mariadb
+      WORDPRESS_DATABASE_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DATABASE_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DATABASE_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: wp_
+
+      # Admin bootstrap (only used on first run)
+      WORDPRESS_USERNAME: admin
+      WORDPRESS_PASSWORD: adminpassword
+      WORDPRESS_EMAIL: adamhaley@gmail.com
+
+      # Redis
+      WORDPRESS_ENABLE_REDIS: "yes"
+      WORDPRESS_REDIS_HOST: redis
+      WORDPRESS_REDIS_PORT: 6379
+
+      # Performance / sanity
+      PHP_MEMORY_LIMIT: 512M
+      PHP_MAX_EXECUTION_TIME: 300
+      WORDPRESS_DEBUG: "false"
+    networks:
+      - default
+    volumes:
+      - wordpress_data:/bitnami/wordpress
+
+  mariadb:
+    image: bitnami/mariadb:latest
+    container_name: wordpress-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+    networks:
+      - default
+    volumes:
+      - mariadb_data:/bitnami/mariadb
+  html2pdf:
+    build:
+      context: /opt/html2pdf
+    image: html2pdf:latest
+    container_name: html2pdf
+    environment:
+      HTML2PDF_API_KEY: "${HTML2PDF_API_KEY}"
+    expose:
+      - "8000"
+    restart: unless-stopped
+    networks:
+      - default
+      - supabase_default
+
+# --------------------------
+# Volumes
+# --------------------------
+volumes:
+  wordpress_data:
+  mariadb_data:
+  caddy_data:
+    external: true
+  n8n_data:
+    external: true
+  redis-data:
+# --------------------------
+# Networks
+# --------------------------
+networks:
+  default:
+  supabase_default:
+    external: true
+
