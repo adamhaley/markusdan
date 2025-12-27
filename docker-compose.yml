@@ -108,7 +108,11 @@ services:
     networks:
       - default
       - supabase_default
-
+  epub-service:
+    build: /opt/epub-service
+    container_name: epub-service
+    networks:
+      - default
 # --------------------------
 # Volumes
 # --------------------------
