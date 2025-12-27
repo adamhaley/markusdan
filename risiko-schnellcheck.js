@@ -18,7 +18,7 @@ function getUTMParams() {
     return utm;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+window.addEventListener('load', function () {
     const utmParams = getUTMParams();
     if (!Object.keys(utmParams).length) return;
 
