@@ -35,6 +35,7 @@ services:
       - N8N_RESTRICT_FILE_ACCESS_TO=/files;${DATA_FOLDER}/local_files
       - NODE_OPTIONS=--disable-proto=throw
       - N8N_RUNNERS_ENABLED=false
+      - N8N_SECURE_COOKIE=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
@@ -98,7 +99,7 @@ services:
       - mariadb_data:/bitnami/mariadb
   html2pdf:
     build:
-      context: /opt/html2pdf
+      context: ${DATA_FOLDER}/html2pdf
     image: html2pdf:latest
     container_name: html2pdf
     environment:
@@ -110,12 +111,48 @@ services:
       - default
       - supabase_default
   epub-service:
-    build: /opt/epub-service
+    build: ${DATA_FOLDER}/epub-service
     container_name: epub-service
     networks:
       - default
     volumes:
       - ${DATA_FOLDER}/local_files:/files
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - /opt/ollama/data:/root/.ollama
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 6G
+  megyk-dashboard:
+    build: /opt/megyk/megyk/
+    container_name: megyk-dashboard
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3100
+      # add NEXT_PUBLIC_* / SUPABASE_* here
+    networks:
+      - default
+  megyk-books:
+    build: /opt/megyk/book-summaries-megyk/
+    container_name: megyk-books
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3200
+      # add NEXT_PUBLIC_* / SUPABASE_* here
+    networks:
+      - default
+
 # --------------------------
 # Volumes
 # --------------------------
@@ -127,6 +164,9 @@ volumes:
   n8n_data:
     external: true
   redis-data:
+  ollama-data:
+    driver: local
+
 # --------------------------
 # Networks
 # --------------------------
@@ -134,4 +174,3 @@ networks:
   default:
   supabase_default:
     external: true
-
