@@ -143,7 +143,9 @@ services:
     networks:
       - default
   megyk-books:
-    build: /opt/megyk/book-summaries-megyk/
+    build:
+      context: /opt/megyk/book-summaries-megyk/
+      dockerfile: Dockerfile
     container_name: megyk-books
     restart: unless-stopped
     environment:
