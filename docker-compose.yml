@@ -133,7 +133,9 @@ services:
           cpus: "2"
           memory: 6G
   megyk-dashboard:
-    build: /opt/megyk/megyk/
+    build: 
+      context: /opt/megyk/megyk/
+      dockerfile: Dockerfile
     container_name: megyk-dashboard
     restart: unless-stopped
     environment:
