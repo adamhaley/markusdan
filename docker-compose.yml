@@ -156,6 +156,7 @@ services:
       - NEXT_PUBLIC_SUPABASE_URL=https://supabase.megyk.com
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=
       - SUPABASE_SERVICE_ROLE_KEY=
+      - N8N_WEBHOOK_URL=https://n8n.megyk.com/webhook/get_summary_v3
       - N8N_SIGNUP_WEBHOOK_URL=https://n8n.megyk.com/webhook/app_signups
 
     networks:
