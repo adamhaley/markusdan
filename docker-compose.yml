@@ -138,7 +138,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_SUPABASE_URL=https://supabase.megyk.com
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
     container_name: megyk-dashboard
     restart: unless-stopped
     env_file:
@@ -156,15 +156,48 @@ services:
       args:
         - NEXT_PUBLIC_SITE_URL=https://app.megyk.com
         - NEXT_PUBLIC_SUPABASE_URL=https://supabase.megyk.com
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
     container_name: megyk-books
     restart: unless-stopped
+    env_file:
+      - /opt/megyk/book-summaries-megyk/.env.local
     environment:
       - NODE_ENV=production
       - PORT=3200
-      - SUPABASE_SERVICE_ROLE_KEY=
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - N8N_WEBHOOK_URL=https://n8n.megyk.com/webhook/get_summary_v3
       - N8N_SIGNUP_WEBHOOK_URL=https://n8n.megyk.com/webhook/app_signups
+    networks:
+      - default
+      - supabase_default
+  megyk-books-staging:
+    container_name: megyk-books-staging
+    environment:
+      - NODE_ENV=production
+      - PORT=3200
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - N8N_WEBHOOK_URL=https://n8n.megyk.com/webhook/get_summary_v3
+      - N8N_SIGNUP_WEBHOOK_URL=https://n8n.megyk.com/webhook/app_signups
+    build:
+      context: /opt/megyk/book-summaries-megyk-staging
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_SITE_URL=https://staging.megyk.com
+        - NEXT_PUBLIC_SUPABASE_URL=https://supabase.megyk.com
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+
+    ports:
+      - "3201:3200"
+    env_file:
+      - /opt/megyk/book-summaries-megyk-staging/.env.staging
+    restart: unless-stopped
+
+  faq-email-daemon:
+    build: ./webinar-faqs
+    container_name: faq-email-daemon
+    restart: unless-stopped
+    env_file:
+      - ./webinar-faqs/.env
     networks:
       - default
       - supabase_default
