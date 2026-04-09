@@ -138,7 +138,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_SUPABASE_URL=https://supabase.megyk.com
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     container_name: megyk-dashboard
     restart: unless-stopped
     env_file:
@@ -156,7 +156,7 @@ services:
       args:
         - NEXT_PUBLIC_SITE_URL=https://app.megyk.com
         - NEXT_PUBLIC_SUPABASE_URL=https://supabase.megyk.com
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     container_name: megyk-books
     restart: unless-stopped
     env_file:
@@ -184,7 +184,7 @@ services:
       args:
         - NEXT_PUBLIC_SITE_URL=https://staging.megyk.com
         - NEXT_PUBLIC_SUPABASE_URL=https://supabase.megyk.com
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 
     ports:
       - "3201:3200"
@@ -193,11 +193,11 @@ services:
     restart: unless-stopped
 
   faq-email-daemon:
-    build: ./webinar-faqs
+    build: ../webinar-faqs
     container_name: faq-email-daemon
     restart: unless-stopped
     env_file:
-      - ./webinar-faqs/.env
+      - ../webinar-faqs/.env
     networks:
       - default
       - supabase_default
