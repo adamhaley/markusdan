@@ -38,6 +38,8 @@ services:
       - N8N_SECURE_COOKIE=true
       - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
       - N8N_PAYLOAD_SIZE_MAX=256
+      - N8N_TRUST_PROXY=true
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
@@ -166,7 +168,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3200
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - N8N_WEBHOOK_URL=https://n8n.megyk.com/webhook/get_summary_v3
       - N8N_SIGNUP_WEBHOOK_URL=https://n8n.megyk.com/webhook/app_signups
     networks:
@@ -177,7 +178,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3200
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - N8N_WEBHOOK_URL=https://n8n.megyk.com/webhook/get_summary_v3
       - N8N_SIGNUP_WEBHOOK_URL=https://n8n.megyk.com/webhook/app_signups
     build:
@@ -191,7 +191,7 @@ services:
     ports:
       - "3201:3200"
     env_file:
-      - /opt/megyk/book-summaries-megyk-staging/.env.staging
+      - /opt/megyk/book-summaries-megyk-staging/.env.local
     restart: unless-stopped
 
   faq-email-daemon:
