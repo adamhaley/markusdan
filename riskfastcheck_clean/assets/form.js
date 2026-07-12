@@ -1,6 +1,39 @@
 const STORAGE_KEY = "risk-fast-check-form";
 const PRESERVE_STEP_ONE_KEY = "risk-fast-check-preserve-step-one";
 const STEP_CONFIG_PATH = "assets/steps.json";
+const REQUIRED_FLOW_KEYS = [
+  "email",
+  "phone",
+  "real_estate_ownership",
+  "securities_ownership",
+  "precious_metals_ownership",
+  "life_insurance_ownership",
+  "bank_savings_ownership",
+  "alternative_assets_ownership",
+];
+const OUTPUT_KEYS = [
+  "email",
+  "phone",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "real_estate_ownership",
+  "real_estate_investment_amount",
+  "securities_ownership",
+  "securities_investment_amount",
+  "precious_metals_ownership",
+  "precious_metals_investment_amount",
+  "life_insurance_ownership",
+  "life_insurance_monthly_payment",
+  "bank_savings_ownership",
+  "bank_savings_amount",
+  "alternative_assets_ownership",
+  "alternative_assets_investment_amount",
+  "feedback",
+  "submittedAt",
+];
 
 function getState() {
   try {
@@ -42,6 +75,10 @@ function shouldClearState(form) {
   return true;
 }
 
+function shouldReturnToStart(form) {
+  return Number(form.dataset.step || 1) > 1 && !readField("email") && !readField("phone");
+}
+
 function isReload() {
   const [navigation] = performance.getEntriesByType("navigation");
   return navigation ? navigation.type === "reload" : performance.navigation?.type === 1;
@@ -69,6 +106,8 @@ function bindTextFields(form) {
 
 function bindExclusiveChoices(form) {
   form.querySelectorAll("input[data-group]").forEach((field) => {
+    field.type = "radio";
+    field.name = field.dataset.group;
     const stored = readField(field.name);
     field.checked = stored === field.value;
 
@@ -81,6 +120,16 @@ function bindExclusiveChoices(form) {
         wrapper.dataset.invalid = "false";
       }
     });
+  });
+}
+
+function saveCurrentFormValues(form) {
+  form.querySelectorAll("input[type='email'], input[type='tel'], input[type='text'], textarea").forEach((field) => {
+    saveField(field.name, field.value);
+  });
+
+  form.querySelectorAll("input[type='radio'][data-group]:checked").forEach((field) => {
+    saveField(field.name, field.value);
   });
 }
 
@@ -226,6 +275,22 @@ function showValidationSummary(form, firstInvalid) {
   }
 }
 
+function showFlowSummary(form) {
+  let summary = form.querySelector("[data-validation-summary]");
+  if (!summary) {
+    summary = document.createElement("div");
+    summary.className = "validation-summary";
+    summary.setAttribute("data-validation-summary", "");
+    summary.setAttribute("role", "alert");
+    summary.setAttribute("tabindex", "-1");
+    form.prepend(summary);
+  }
+
+  summary.textContent = "Bitte starten Sie den Risk-Fast-Check erneut auf Seite 1.";
+  summary.classList.add("is-visible");
+  summary.focus();
+}
+
 function clearValidationSummary(form) {
   const summary = form.querySelector("[data-validation-summary]");
   if (summary) {
@@ -265,11 +330,24 @@ function hydrateHiddenUtmFields(form) {
   });
 }
 
-function downloadResults() {
+function getMissingRequiredFlowKeys(state) {
+  return REQUIRED_FLOW_KEYS.filter((key) => !state[key]);
+}
+
+function buildResultsPayload(state) {
+  const payload = {};
+  OUTPUT_KEYS.forEach((key) => {
+    payload[key] = Object.prototype.hasOwnProperty.call(state, key) ? state[key] : null;
+  });
+  return payload;
+}
+
+function downloadResults(form) {
+  saveCurrentFormValues(form);
   const state = getState();
   state.submittedAt = new Date().toISOString();
   setState(state);
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(buildResultsPayload(state), null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -326,13 +404,20 @@ function bindNavigation(form) {
     if (!validateForm(form)) {
       return;
     }
+    saveCurrentFormValues(form);
 
     if (next) {
       window.location.href = next.dataset.next;
       return;
     }
 
-    downloadResults();
+    const missingRequiredFlowKeys = getMissingRequiredFlowKeys(getState());
+    if (missingRequiredFlowKeys.length) {
+      showFlowSummary(form);
+      return;
+    }
+
+    downloadResults(form);
     const status = form.querySelector(".status");
     if (status) {
       status.classList.add("is-visible");
@@ -392,6 +477,10 @@ function init() {
   form.setAttribute("autocomplete", "off");
   if (shouldClearState(form)) {
     clearState();
+  }
+  if (shouldReturnToStart(form)) {
+    window.location.href = "step-1.html";
+    return;
   }
   renderStepVideo(form);
   initAccessibility(form);
