@@ -195,6 +195,11 @@ form {
   margin-bottom: 14px;
 }
 
+.field[data-invalid="true"] {
+  padding: 16px 18px;
+  background: #fff7c0;
+}
+
 .field label,
 .choice-group legend {
   display: block;
@@ -232,6 +237,11 @@ textarea:focus {
   outline: 2px solid rgba(255, 247, 192, 0.9);
   border-color: var(--accent);
   box-shadow: none;
+}
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--danger);
 }
 
 .choice-group {
@@ -288,6 +298,11 @@ textarea:focus {
   color: var(--danger);
 }
 
+.choice-group[data-invalid="true"] {
+  padding: 16px 18px;
+  background: #fff7c0;
+}
+
 .choice-group[data-invalid="true"] .choices {
   border-left: 3px solid var(--danger);
   padding-left: 0.85rem;
@@ -302,6 +317,30 @@ textarea:focus {
 
 .choice-group[data-invalid="true"] .error {
   display: block;
+}
+
+.field[data-invalid="true"] .error {
+  display: block;
+}
+
+.validation-summary {
+  display: none;
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  background: #f4f6fb;
+  color: var(--danger);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.validation-summary.is-visible {
+  display: block;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .nav {
@@ -366,6 +405,11 @@ textarea:focus {
 
 .status.is-visible {
   display: block;
+}
+
+.status-action {
+  display: inline-block;
+  margin-top: 12px;
 }
 
 .footer-note {

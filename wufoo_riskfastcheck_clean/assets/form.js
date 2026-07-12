@@ -1,4 +1,5 @@
 const STORAGE_KEY = "risk-fast-check-form";
+const SUBMISSION_KEY = "risk-fast-check-submitted";
 const STEP_CONFIG_PATH = "assets/steps.json";
 
 function getState() {
@@ -29,8 +30,14 @@ function bindTextFields(form) {
     if (typeof stored === "string") {
       field.value = stored;
     }
-    field.addEventListener("input", () => saveField(field.name, field.value));
-    field.addEventListener("change", () => saveField(field.name, field.value));
+    field.addEventListener("input", () => {
+      saveField(field.name, field.value);
+      clearFieldError(field);
+    });
+    field.addEventListener("change", () => {
+      saveField(field.name, field.value);
+      clearFieldError(field);
+    });
   });
 }
 
@@ -64,20 +71,163 @@ function validateRequiredGroups(form) {
   form.querySelectorAll("[data-required-group]").forEach((group) => {
     const choices = [...group.querySelectorAll("input[type='checkbox']")];
     const anyChecked = choices.some((choice) => choice.checked);
-    group.dataset.invalid = anyChecked ? "false" : "true";
+    setGroupValidity(group, anyChecked);
     valid = valid && anyChecked;
   });
   return valid;
 }
 
+function setGroupValidity(group, isValid) {
+  const error = group.querySelector(".error");
+  group.dataset.invalid = isValid ? "false" : "true";
+  group.setAttribute("aria-invalid", String(!isValid));
+  if (error) {
+    if (!error.id) {
+      error.id = `${group.dataset.requiredGroup || "choice"}-error`;
+    }
+    if (isValid) {
+      group.removeAttribute("aria-describedby");
+    } else {
+      group.setAttribute("aria-describedby", error.id);
+    }
+  }
+}
+
+function getFieldErrorMessage(field) {
+  if (field.validity.valueMissing) {
+    return "Bitte füllen Sie dieses Pflichtfeld aus.";
+  }
+  if (field.validity.typeMismatch && field.type === "email") {
+    return "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
+  }
+  if (field.validity.typeMismatch) {
+    return "Bitte prüfen Sie dieses Feld.";
+  }
+  return "Bitte prüfen Sie dieses Feld.";
+}
+
+function getOrCreateFieldError(field) {
+  const wrapper = field.closest(".field");
+  if (!wrapper) {
+    return null;
+  }
+
+  let error = wrapper.querySelector(".error");
+  if (!error) {
+    error = document.createElement("div");
+    error.className = "error";
+    wrapper.append(error);
+  }
+  if (!error.id) {
+    error.id = `${field.id || field.name}-error`;
+  }
+  return error;
+}
+
+function clearFieldError(field) {
+  const wrapper = field.closest(".field");
+  const error = wrapper ? wrapper.querySelector(".error") : null;
+
+  if (field.checkValidity()) {
+    field.removeAttribute("aria-invalid");
+    field.removeAttribute("aria-describedby");
+    if (wrapper) {
+      wrapper.dataset.invalid = "false";
+    }
+    if (error) {
+      error.textContent = "";
+    }
+  }
+}
+
 function validateNativeFields(form) {
-  let valid = true;
+  let firstInvalid = null;
+
   form.querySelectorAll("input[required], textarea[required]").forEach((field) => {
-    if (!field.reportValidity()) {
-      valid = false;
+    const isValid = field.checkValidity();
+    const wrapper = field.closest(".field");
+    const error = getOrCreateFieldError(field);
+
+    if (wrapper) {
+      wrapper.dataset.invalid = isValid ? "false" : "true";
+    }
+    field.setAttribute("aria-invalid", String(!isValid));
+
+    if (error) {
+      error.textContent = isValid ? "" : getFieldErrorMessage(field);
+      if (!isValid) {
+        field.setAttribute("aria-describedby", error.id);
+      } else {
+        field.removeAttribute("aria-describedby");
+      }
+    }
+
+    if (!isValid && !firstInvalid) {
+      firstInvalid = field;
     }
   });
-  return valid;
+
+  return firstInvalid;
+}
+
+function validateRequiredGroupFields(form) {
+  let firstInvalid = null;
+
+  form.querySelectorAll("[data-required-group]").forEach((group) => {
+    const choices = [...group.querySelectorAll("input[type='checkbox']")];
+    const anyChecked = choices.some((choice) => choice.checked);
+    setGroupValidity(group, anyChecked);
+
+    if (!anyChecked && !firstInvalid) {
+      firstInvalid = choices[0] || group;
+    }
+  });
+
+  return firstInvalid;
+}
+
+function showValidationSummary(form, firstInvalid) {
+  let summary = form.querySelector("[data-validation-summary]");
+  if (!summary) {
+    summary = document.createElement("div");
+    summary.className = "validation-summary";
+    summary.setAttribute("data-validation-summary", "");
+    summary.setAttribute("role", "alert");
+    summary.setAttribute("tabindex", "-1");
+    form.prepend(summary);
+  }
+
+  summary.textContent = "Bitte füllen Sie alle Pflichtfelder auf dieser Seite aus.";
+  summary.classList.add("is-visible");
+
+  if (firstInvalid) {
+    firstInvalid.focus({ preventScroll: true });
+    firstInvalid.scrollIntoView({ block: "center", behavior: "smooth" });
+  } else {
+    summary.focus();
+  }
+}
+
+function clearValidationSummary(form) {
+  const summary = form.querySelector("[data-validation-summary]");
+  if (summary) {
+    summary.classList.remove("is-visible");
+    summary.textContent = "";
+  }
+}
+
+function validateForm(form) {
+  const firstInvalidField = validateNativeFields(form);
+  const firstInvalidGroup = validateRequiredGroupFields(form);
+  const firstInvalid = firstInvalidField || firstInvalidGroup;
+
+  if (firstInvalid) {
+    showValidationSummary(form, firstInvalid);
+    return false;
+  }
+
+  clearValidationSummary(form);
+  return true;
 }
 
 function hydrateHiddenUtmFields(form) {
@@ -101,6 +251,7 @@ function downloadResults() {
   const state = getState();
   state.submittedAt = new Date().toISOString();
   setState(state);
+  localStorage.setItem(SUBMISSION_KEY, JSON.stringify({ submittedAt: state.submittedAt }));
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -108,6 +259,76 @@ function downloadResults() {
   anchor.download = "risk-fast-check-response.json";
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+function getSubmissionState() {
+  try {
+    return JSON.parse(localStorage.getItem(SUBMISSION_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function markAlreadySubmitted(form) {
+  const submitted = getSubmissionState();
+  if (!submitted) {
+    return;
+  }
+
+  const submit = form.querySelector("button[type='submit']:not([data-next])");
+  if (submit) {
+    submit.disabled = true;
+    submit.textContent = "Bereits übermittelt";
+  }
+
+  let status = form.querySelector(".status");
+  if (!status) {
+    status = document.createElement("div");
+    status.className = "status";
+    form.append(status);
+  }
+  status.textContent = "Dieses lokale Demo-Formular wurde bereits übermittelt.";
+  const reset = document.createElement("button");
+  reset.className = "link-button status-action";
+  reset.type = "button";
+  reset.textContent = "Neue Sitzung starten";
+  reset.addEventListener("click", () => {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(SUBMISSION_KEY);
+    window.location.href = "step-1.html";
+  });
+  status.append(reset);
+  status.classList.add("is-visible");
+}
+
+function initAccessibility(form) {
+  form.querySelectorAll("input[required], textarea[required]").forEach((field) => {
+    field.setAttribute("aria-required", "true");
+  });
+
+  form.querySelectorAll("[data-required-group]").forEach((group) => {
+    group.setAttribute("aria-required", "true");
+    setGroupValidity(group, group.dataset.invalid !== "true");
+  });
+
+  form.querySelectorAll(".error").forEach((error) => {
+    error.setAttribute("role", "alert");
+  });
+
+  const progressBar = document.querySelector(".progress-bar");
+  const progressFill = document.querySelector(".progress-fill");
+  const progressLabel = document.querySelector(".progress-meta strong");
+
+  if (progressBar && progressFill) {
+    const width = Number.parseFloat(progressFill.style.width || "0");
+    progressBar.setAttribute("role", "progressbar");
+    progressBar.setAttribute("aria-valuemin", "0");
+    progressBar.setAttribute("aria-valuemax", "100");
+    progressBar.setAttribute("aria-valuenow", String(Number.isFinite(width) ? width : 0));
+    if (progressLabel) {
+      progressBar.setAttribute("aria-label", `Fortschritt: ${progressLabel.textContent.trim()}`);
+    }
+  }
 }
 
 function bindNavigation(form) {
@@ -122,13 +343,17 @@ function bindNavigation(form) {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const valid = validateNativeFields(form) && validateRequiredGroups(form);
-    if (!valid) {
+    if (!validateForm(form)) {
       return;
     }
 
     if (next) {
       window.location.href = next.dataset.next;
+      return;
+    }
+
+    if (getSubmissionState()) {
+      markAlreadySubmitted(form);
       return;
     }
 
@@ -190,10 +415,12 @@ function init() {
     return;
   }
   renderStepVideo(form);
+  initAccessibility(form);
   bindTextFields(form);
   bindExclusiveChoices(form);
   hydrateHiddenUtmFields(form);
   bindNavigation(form);
+  markAlreadySubmitted(form);
 }
 
 document.addEventListener("DOMContentLoaded", init);
