@@ -1,4 +1,5 @@
 const STORAGE_KEY = "risk-fast-check-form";
+const STEP_CONFIG_PATH = "assets/steps.json";
 
 function getState() {
   try {
@@ -139,11 +140,54 @@ function bindNavigation(form) {
   });
 }
 
+async function renderStepVideo(form) {
+  const step = Number(form.dataset.step || 0);
+  const slot = form.querySelector("[data-video-slot]");
+
+  if (!slot || !step) {
+    return;
+  }
+
+  try {
+    const response = await fetch(STEP_CONFIG_PATH);
+    if (!response.ok) {
+      return;
+    }
+
+    const payload = await response.json();
+    const config = (payload.steps || []).find((item) => item.step === step);
+    if (!config || !config.vimeoId) {
+      return;
+    }
+
+    const source = `https://player.vimeo.com/video/${config.vimeoId}?title=0&byline=0&portrait=0`;
+
+    slot.innerHTML = `
+      <section class="video-card">
+        <div class="video-copy">
+          <p class="video-kicker">Video</p>
+          <p class="video-title">${config.videoTitle || ""}</p>
+        </div>
+        <div class="video-frame">
+          <iframe
+            src="${source}"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            title="${config.videoTitle || "Vimeo video"}"></iframe>
+        </div>
+      </section>
+    `;
+  } catch {
+    // Leave the slot empty if the JSON cannot be loaded.
+  }
+}
+
 function init() {
   const form = document.querySelector("form[data-step]");
   if (!form) {
     return;
   }
+  renderStepVideo(form);
   bindTextFields(form);
   bindExclusiveChoices(form);
   hydrateHiddenUtmFields(form);
