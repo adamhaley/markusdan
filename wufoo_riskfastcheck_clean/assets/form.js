@@ -164,10 +164,12 @@ async function renderStepVideo(form) {
 
     slot.innerHTML = `
       <section class="video-card">
+        <!--    
         <div class="video-copy">
           <p class="video-kicker">Video</p>
           <p class="video-title">${config.videoTitle || ""}</p>
         </div>
+        -->
         <div class="video-frame">
           <iframe
             src="${source}"
