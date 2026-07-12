@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Risk-Fast-Check | Edelmetalle</title>
+    <link rel="stylesheet" href="assets/form.css">
+    <script defer src="assets/form.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card">
+        <header class="hero">
+          <div class="eyebrow">Risk-Fast-Check</div>
+          <h1>Edelmetalle</h1>
+          <p class="lede">Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          <div class="progress">
+            <div class="progress-meta"><strong>Edelmetalle</strong><span>4 / 8</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 37.5%;"></div></div>
+          </div>
+        </header>
+        <form data-step="4" novalidate>
+          <section class="section-note">
+            <h3>Geheimhaltungsklausel</h3>
+            <p>Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          </section>
+          <fieldset class="choice-group" data-required-group="edelmetalle_besitz" data-invalid="false">
+            <legend>Do you have precious metals? Besitzen Sie Edelmetalle? <span class="req">*</span></legend>
+            <div class="choices">
+              <label class="choice"><input id="Field420" name="Field420" type="checkbox" data-group="edelmetalle_besitz"><span>Ja</span></label>
+              <label class="choice"><input id="Field421" name="Field421" type="checkbox" data-group="edelmetalle_besitz"><span>Nein</span></label>
+            </div>
+            <div class="error">Bitte wählen Sie Ja oder Nein.</div>
+          </fieldset>
+          <fieldset class="choice-group">
+            <legend>Optional: Wie viel haben Sie in Edelmetalle investiert? (Goldbarren, Münzen, Silber usw.)</legend>
+            <div class="choices">
+              <label class="choice"><input id="Field620" name="Field620" type="checkbox" data-group="edelmetalle_summe"><span>weniger als €10.000</span></label>
+              <label class="choice"><input id="Field621" name="Field621" type="checkbox" data-group="edelmetalle_summe"><span>€10.000 - €50.000</span></label>
+              <label class="choice"><input id="Field622" name="Field622" type="checkbox" data-group="edelmetalle_summe"><span>€50.000 - €100.000</span></label>
+              <label class="choice"><input id="Field623" name="Field623" type="checkbox" data-group="edelmetalle_summe"><span>mehr als €100.000</span></label>
+            </div>
+          </fieldset>
+          <div class="nav">
+            <button class="link-button" type="button" data-prev="step-3.html">Vorherige Seite</button>
+            <button class="button" type="submit" data-next="step-5.html">Nächste Seite</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

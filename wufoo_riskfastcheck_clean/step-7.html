@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Risk-Fast-Check | Alternative (Sach)Werte</title>
+    <link rel="stylesheet" href="assets/form.css">
+    <script defer src="assets/form.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card">
+        <header class="hero">
+          <div class="eyebrow">Risk-Fast-Check</div>
+          <h1>Alternative (Sach)Werte</h1>
+          <p class="lede">Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          <div class="progress">
+            <div class="progress-meta"><strong>Alternative (Sach)Werte</strong><span>7 / 8</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
+          </div>
+        </header>
+        <form data-step="7" novalidate>
+          <section class="section-note">
+            <h3>Geheimhaltungsklausel</h3>
+            <p>Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          </section>
+          <fieldset class="choice-group" data-required-group="alternative_besitz" data-invalid="false">
+            <legend>Do you have alternative investments? Haben Sie alternative (Sach-)Werte? <span class="req">*</span></legend>
+            <div class="choices">
+              <label class="choice"><input id="Field1125" name="Field1125" type="checkbox" data-group="alternative_besitz"><span>Ja</span></label>
+              <label class="choice"><input id="Field1126" name="Field1126" type="checkbox" data-group="alternative_besitz"><span>Nein</span></label>
+            </div>
+            <div class="error">Bitte wählen Sie Ja oder Nein.</div>
+          </fieldset>
+          <fieldset class="choice-group">
+            <legend>Optional: Wie viel haben Sie in alternative Werte investiert? (Krypto, Oldtimer, usw. - alles was bisher nicht aufgeschienen ist)</legend>
+            <div class="choices">
+              <label class="choice"><input id="Field1225" name="Field1225" type="checkbox" data-group="alternative_summe"><span>weniger als €10.000</span></label>
+              <label class="choice"><input id="Field1226" name="Field1226" type="checkbox" data-group="alternative_summe"><span>€10.000 - €50.000</span></label>
+              <label class="choice"><input id="Field1227" name="Field1227" type="checkbox" data-group="alternative_summe"><span>€50.000 - €100.000</span></label>
+              <label class="choice"><input id="Field1228" name="Field1228" type="checkbox" data-group="alternative_summe"><span>mehr als €100.000</span></label>
+            </div>
+          </fieldset>
+          <div class="nav">
+            <button class="link-button" type="button" data-prev="step-6.html">Vorherige Seite</button>
+            <button class="button" type="submit" data-next="step-8.html">Nächste Seite</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

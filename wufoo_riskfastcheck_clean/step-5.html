@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Risk-Fast-Check | Versicherung</title>
+    <link rel="stylesheet" href="assets/form.css">
+    <script defer src="assets/form.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card">
+        <header class="hero">
+          <div class="eyebrow">Risk-Fast-Check</div>
+          <h1>Versicherung</h1>
+          <p class="lede">Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          <div class="progress">
+            <div class="progress-meta"><strong>Versicherung</strong><span>5 / 8</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
+          </div>
+        </header>
+        <form data-step="5" novalidate>
+          <section class="section-note">
+            <h3>Geheimhaltungsklausel</h3>
+            <p>Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          </section>
+          <fieldset class="choice-group" data-required-group="versicherung_besitz" data-invalid="false">
+            <legend>Besitzen Sie Lebensversicherungen als Rentenvorsorge (oder Bausparverträge)? <span class="req">*</span></legend>
+            <div class="choices">
+              <label class="choice"><input id="Field520" name="Field520" type="checkbox" data-group="versicherung_besitz"><span>Ja</span></label>
+              <label class="choice"><input id="Field521" name="Field521" type="checkbox" data-group="versicherung_besitz"><span>Nein</span></label>
+            </div>
+            <div class="error">Bitte wählen Sie Ja oder Nein.</div>
+          </fieldset>
+          <fieldset class="choice-group">
+            <legend>Optional: Wie viel zahlen Sie monatlich in diese Lebensversicherung/en ein?</legend>
+            <div class="choices">
+              <label class="choice"><input id="Field821" name="Field821" type="checkbox" data-group="versicherung_summe"><span>weniger als €100</span></label>
+              <label class="choice"><input id="Field822" name="Field822" type="checkbox" data-group="versicherung_summe"><span>€100 - €200</span></label>
+              <label class="choice"><input id="Field823" name="Field823" type="checkbox" data-group="versicherung_summe"><span>mehr als €200</span></label>
+              <label class="choice"><input id="Field824" name="Field824" type="checkbox" data-group="versicherung_summe"><span>ich weiß es nicht genau</span></label>
+            </div>
+          </fieldset>
+          <div class="nav">
+            <button class="link-button" type="button" data-prev="step-4.html">Vorherige Seite</button>
+            <button class="button" type="submit" data-next="step-6.html">Nächste Seite</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Risk-Fast-Check | Immobilien</title>
+    <link rel="stylesheet" href="assets/form.css">
+    <script defer src="assets/form.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card">
+        <header class="hero">
+          <div class="eyebrow">Risk-Fast-Check</div>
+          <h1>Immobilien</h1>
+          <p class="lede">Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          <div class="progress">
+            <div class="progress-meta"><strong>Immobilien</strong><span>2 / 8</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 12.5%;"></div></div>
+          </div>
+        </header>
+        <form data-step="2" novalidate>
+          <section class="section-note">
+            <h3>Geheimhaltungsklausel</h3>
+            <p>Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          </section>
+          <fieldset class="choice-group" data-required-group="immobilien_besitz" data-invalid="false">
+            <legend>Do you own real estate? Besitzen Sie Immobilien <span class="req">*</span></legend>
+            <div class="choices">
+              <label class="choice"><input id="Field214" name="Field214" type="checkbox" data-group="immobilien_besitz"><span>Ja</span></label>
+              <label class="choice"><input id="Field215" name="Field215" type="checkbox" data-group="immobilien_besitz"><span>Nein</span></label>
+            </div>
+            <div class="error">Bitte wählen Sie Ja oder Nein.</div>
+          </fieldset>
+          <fieldset class="choice-group">
+            <legend>Optional: Wie viel haben Sie in Immobilien investiert?</legend>
+            <div class="choices">
+              <label class="choice"><input id="Field112" name="Field112" type="checkbox" data-group="immobilien_summe"><span>weniger als €100.000</span></label>
+              <label class="choice"><input id="Field113" name="Field113" type="checkbox" data-group="immobilien_summe"><span>€100.000 - €500.000</span></label>
+              <label class="choice"><input id="Field114" name="Field114" type="checkbox" data-group="immobilien_summe"><span>€500.000 - €1.000.000</span></label>
+              <label class="choice"><input id="Field115" name="Field115" type="checkbox" data-group="immobilien_summe"><span>mehr als €1.000.000</span></label>
+            </div>
+          </fieldset>
+          <div class="nav">
+            <button class="link-button" type="button" data-prev="step-1.html">Vorherige Seite</button>
+            <button class="button" type="submit" data-next="step-3.html">Nächste Seite</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
