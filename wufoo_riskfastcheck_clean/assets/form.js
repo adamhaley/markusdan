@@ -1,17 +1,17 @@
 const STORAGE_KEY = "risk-fast-check-form";
-const SUBMISSION_KEY = "risk-fast-check-submitted";
+const PRESERVE_STEP_ONE_KEY = "risk-fast-check-preserve-step-one";
 const STEP_CONFIG_PATH = "assets/steps.json";
 
 function getState() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}");
   } catch {
     return {};
   }
 }
 
 function setState(nextState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
 }
 
 function saveField(name, value) {
@@ -24,12 +24,38 @@ function readField(name) {
   return getState()[name];
 }
 
+function clearState() {
+  sessionStorage.removeItem(STORAGE_KEY);
+}
+
+function shouldClearState(form) {
+  if (isReload()) {
+    return true;
+  }
+  if (form.dataset.step !== "1") {
+    return false;
+  }
+  if (sessionStorage.getItem(PRESERVE_STEP_ONE_KEY) === "true") {
+    sessionStorage.removeItem(PRESERVE_STEP_ONE_KEY);
+    return false;
+  }
+  return true;
+}
+
+function isReload() {
+  const [navigation] = performance.getEntriesByType("navigation");
+  return navigation ? navigation.type === "reload" : performance.navigation?.type === 1;
+}
+
 function bindTextFields(form) {
   form.querySelectorAll("input[type='email'], input[type='tel'], input[type='text'], textarea").forEach((field) => {
     const stored = readField(field.name);
     if (typeof stored === "string") {
       field.value = stored;
+    } else {
+      field.value = "";
     }
+    field.setAttribute("autocomplete", "off");
     field.addEventListener("input", () => {
       saveField(field.name, field.value);
       clearFieldError(field);
@@ -44,20 +70,12 @@ function bindTextFields(form) {
 function bindExclusiveChoices(form) {
   form.querySelectorAll("input[data-group]").forEach((field) => {
     const stored = readField(field.name);
-    field.checked = Boolean(stored);
+    field.checked = stored === field.value;
 
     field.addEventListener("change", () => {
-      const groupName = field.dataset.group;
-      const siblings = form.querySelectorAll(`input[data-group="${groupName}"]`);
       if (field.checked) {
-        siblings.forEach((sibling) => {
-          if (sibling !== field) {
-            sibling.checked = false;
-            saveField(sibling.name, false);
-          }
-        });
+        saveField(field.name, field.value);
       }
-      saveField(field.name, field.checked);
       const wrapper = field.closest("[data-required-group]");
       if (wrapper) {
         wrapper.dataset.invalid = "false";
@@ -69,7 +87,7 @@ function bindExclusiveChoices(form) {
 function validateRequiredGroups(form) {
   let valid = true;
   form.querySelectorAll("[data-required-group]").forEach((group) => {
-    const choices = [...group.querySelectorAll("input[type='checkbox']")];
+    const choices = [...group.querySelectorAll("input[type='checkbox'], input[type='radio']")];
     const anyChecked = choices.some((choice) => choice.checked);
     setGroupValidity(group, anyChecked);
     valid = valid && anyChecked;
@@ -174,7 +192,7 @@ function validateRequiredGroupFields(form) {
   let firstInvalid = null;
 
   form.querySelectorAll("[data-required-group]").forEach((group) => {
-    const choices = [...group.querySelectorAll("input[type='checkbox']")];
+    const choices = [...group.querySelectorAll("input[type='checkbox'], input[type='radio']")];
     const anyChecked = choices.some((choice) => choice.checked);
     setGroupValidity(group, anyChecked);
 
@@ -251,7 +269,6 @@ function downloadResults() {
   const state = getState();
   state.submittedAt = new Date().toISOString();
   setState(state);
-  localStorage.setItem(SUBMISSION_KEY, JSON.stringify({ submittedAt: state.submittedAt }));
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -259,46 +276,6 @@ function downloadResults() {
   anchor.download = "risk-fast-check-response.json";
   anchor.click();
   URL.revokeObjectURL(url);
-}
-
-function getSubmissionState() {
-  try {
-    return JSON.parse(localStorage.getItem(SUBMISSION_KEY) || "null");
-  } catch {
-    return null;
-  }
-}
-
-function markAlreadySubmitted(form) {
-  const submitted = getSubmissionState();
-  if (!submitted) {
-    return;
-  }
-
-  const submit = form.querySelector("button[type='submit']:not([data-next])");
-  if (submit) {
-    submit.disabled = true;
-    submit.textContent = "Bereits übermittelt";
-  }
-
-  let status = form.querySelector(".status");
-  if (!status) {
-    status = document.createElement("div");
-    status.className = "status";
-    form.append(status);
-  }
-  status.textContent = "Dieses lokale Demo-Formular wurde bereits übermittelt.";
-  const reset = document.createElement("button");
-  reset.className = "link-button status-action";
-  reset.type = "button";
-  reset.textContent = "Neue Sitzung starten";
-  reset.addEventListener("click", () => {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(SUBMISSION_KEY);
-    window.location.href = "step-1.html";
-  });
-  status.append(reset);
-  status.classList.add("is-visible");
 }
 
 function initAccessibility(form) {
@@ -337,6 +314,9 @@ function bindNavigation(form) {
 
   if (prev) {
     prev.addEventListener("click", () => {
+      if (prev.dataset.prev === "step-1.html") {
+        sessionStorage.setItem(PRESERVE_STEP_ONE_KEY, "true");
+      }
       window.location.href = prev.dataset.prev;
     });
   }
@@ -349,11 +329,6 @@ function bindNavigation(form) {
 
     if (next) {
       window.location.href = next.dataset.next;
-      return;
-    }
-
-    if (getSubmissionState()) {
-      markAlreadySubmitted(form);
       return;
     }
 
@@ -414,13 +389,16 @@ function init() {
   if (!form) {
     return;
   }
+  form.setAttribute("autocomplete", "off");
+  if (shouldClearState(form)) {
+    clearState();
+  }
   renderStepVideo(form);
   initAccessibility(form);
   bindTextFields(form);
   bindExclusiveChoices(form);
   hydrateHiddenUtmFields(form);
   bindNavigation(form);
-  markAlreadySubmitted(form);
 }
 
 document.addEventListener("DOMContentLoaded", init);

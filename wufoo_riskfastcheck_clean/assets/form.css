@@ -98,7 +98,7 @@ h1 {
 
 .progress-fill {
   height: 100%;
-  background: #fff7c0;
+  background: #007faa;
   border-radius: inherit;
 }
 
@@ -405,11 +405,6 @@ button:disabled {
 
 .status.is-visible {
   display: block;
-}
-
-.status-action {
-  display: inline-block;
-  margin-top: 12px;
 }
 
 .footer-note {
