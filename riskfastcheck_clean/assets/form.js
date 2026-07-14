@@ -1,5 +1,6 @@
 const STORAGE_KEY = "risk-fast-check-form";
 const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
+const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/fe28dcfc-b0d2-4c67-b447-c5225b82f8dd";
 const START_STEP = "1";
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
@@ -336,18 +337,43 @@ function buildResultsPayload(state) {
   return payload;
 }
 
-function downloadResults(form) {
+async function submitResults(form) {
   saveCurrentFormValues(form);
   const state = getState();
   state.submittedAt = new Date().toISOString();
   setState(state);
-  const blob = new Blob([JSON.stringify(buildResultsPayload(state), null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = "risk-fast-check-response.json";
-  anchor.click();
-  URL.revokeObjectURL(url);
+  const payload = buildResultsPayload(state);
+
+  const response = await fetch(SUBMIT_WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json, text/html, text/plain, */*",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Webhook submission failed with status ${response.status}`);
+  }
+
+  return response;
+}
+
+function showSubmissionError(form) {
+  let summary = form.querySelector("[data-validation-summary]");
+  if (!summary) {
+    summary = document.createElement("div");
+    summary.className = "validation-summary";
+    summary.setAttribute("data-validation-summary", "");
+    summary.setAttribute("role", "alert");
+    summary.setAttribute("tabindex", "-1");
+    form.prepend(summary);
+  }
+
+  summary.textContent = "Die Übermittlung ist fehlgeschlagen. Bitte versuchen Sie es erneut.";
+  summary.classList.add("is-visible");
+  summary.focus();
 }
 
 function initAccessibility(form) {
@@ -390,7 +416,7 @@ function bindNavigation(form) {
     });
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!validateForm(form)) {
       return;
@@ -408,10 +434,27 @@ function bindNavigation(form) {
       return;
     }
 
-    downloadResults(form);
-    const status = form.querySelector(".status");
-    if (status) {
-      status.classList.add("is-visible");
+    const submitButton = form.querySelector("button[type='submit']");
+    const originalButtonText = submitButton ? submitButton.textContent : "";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Wird übermittelt...";
+    }
+
+    try {
+      await submitResults(form);
+      const status = form.querySelector(".status");
+      if (status) {
+        status.classList.add("is-visible");
+      }
+      clearState();
+    } catch (error) {
+      console.error(error);
+      showSubmissionError(form);
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
     }
   });
 }
