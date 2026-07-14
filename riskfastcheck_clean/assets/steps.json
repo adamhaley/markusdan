@@ -1,42 +1,42 @@
 {
   "steps": [
     {
-      "step": 2,
+      "step": 1,
       "slug": "immobilien",
       "name": "RSCL_F1_RealEstate_Immobilien",
       "vimeoId": "1206982769",
       "videoTitle": "Immobilien"
     },
     {
-      "step": 3,
+      "step": 2,
       "slug": "wertpapiere",
       "name": "RSCL_F2_Stocks_Aktien",
       "vimeoId": "1206982979",
       "videoTitle": "Wertpapiere"
     },
     {
-      "step": 4,
+      "step": 3,
       "slug": "edelmetalle",
       "name": "RSCL_F3_Preciousmetals_Edelmetalle",
       "vimeoId": "1206982890",
       "videoTitle": "Edelmetalle"
     },
     {
-      "step": 5,
+      "step": 4,
       "slug": "versicherung",
       "name": "RSCL_F4_Lifeinsurance_LV",
       "vimeoId": "1206982762",
       "videoTitle": "Versicherung"
     },
     {
-      "step": 6,
+      "step": 5,
       "slug": "bank",
       "name": "RSCL_F5_Bank",
       "vimeoId": "1206982764",
       "videoTitle": "Bank"
     },
     {
-      "step": 7,
+      "step": 6,
       "slug": "alternative-sachwerte",
       "name": "RSCL_F6_AlternativInvest",
       "vimeoId": "1206982763",

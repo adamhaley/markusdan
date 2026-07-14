@@ -1,9 +1,8 @@
 const STORAGE_KEY = "risk-fast-check-form";
-const PRESERVE_STEP_ONE_KEY = "risk-fast-check-preserve-step-one";
-const STEP_CONFIG_PATH = "assets/steps.json";
+const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
+const START_STEP = "1";
+const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
-  "email",
-  "phone",
   "real_estate_ownership",
   "securities_ownership",
   "precious_metals_ownership",
@@ -12,8 +11,6 @@ const REQUIRED_FLOW_KEYS = [
   "alternative_assets_ownership",
 ];
 const OUTPUT_KEYS = [
-  "email",
-  "phone",
   "utm_source",
   "utm_medium",
   "utm_campaign",
@@ -65,18 +62,14 @@ function shouldClearState(form) {
   if (isReload()) {
     return true;
   }
-  if (form.dataset.step !== "1") {
-    return false;
-  }
-  if (sessionStorage.getItem(PRESERVE_STEP_ONE_KEY) === "true") {
-    sessionStorage.removeItem(PRESERVE_STEP_ONE_KEY);
+  if (form.dataset.step !== START_STEP) {
     return false;
   }
   return true;
 }
 
 function shouldReturnToStart(form) {
-  return Number(form.dataset.step || 1) > 1 && !readField("email") && !readField("phone");
+  return Number(form.dataset.step || START_STEP) > Number(START_STEP) && !readField("real_estate_ownership");
 }
 
 function isReload() {
@@ -163,9 +156,6 @@ function setGroupValidity(group, isValid) {
 function getFieldErrorMessage(field) {
   if (field.validity.valueMissing) {
     return "Bitte füllen Sie dieses Pflichtfeld aus.";
-  }
-  if (field.validity.typeMismatch && field.type === "email") {
-    return "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
   }
   if (field.validity.typeMismatch) {
     return "Bitte prüfen Sie dieses Feld.";
@@ -315,12 +305,16 @@ function validateForm(form) {
 
 function hydrateHiddenUtmFields(form) {
   const params = new URLSearchParams(window.location.search);
-  ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].forEach((key) => {
+  UTM_KEYS.forEach((key) => {
+    const incoming = params.get(key);
     const field = form.querySelector(`[data-utm="${key}"]`);
+    if (!field && incoming && !readField(key)) {
+      saveField(key, incoming);
+      return;
+    }
     if (!field) {
       return;
     }
-    const incoming = params.get(key);
     if (incoming && !readField(field.name)) {
       field.value = incoming;
       saveField(field.name, incoming);
@@ -392,9 +386,6 @@ function bindNavigation(form) {
 
   if (prev) {
     prev.addEventListener("click", () => {
-      if (prev.dataset.prev === "step-1.html") {
-        sessionStorage.setItem(PRESERVE_STEP_ONE_KEY, "true");
-      }
       window.location.href = prev.dataset.prev;
     });
   }

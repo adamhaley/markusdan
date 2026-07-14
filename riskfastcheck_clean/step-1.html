@@ -3,36 +3,45 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Risk-Fast-Check | Kontaktdaten</title>
-    <link rel="stylesheet" href="assets/form.css?v=20260712c">
-    <script defer src="assets/form.js?v=20260712c"></script>
+    <title>Risk-Fast-Check | Immobilien</title>
+    <link rel="stylesheet" href="assets/form.css?v=20260713b">
+    <script defer src="assets/form.js?v=20260713b"></script>
   </head>
   <body>
     <main class="shell">
       <section class="card">
         <header class="hero">
           <div class="brand-mark"><img src="assets/md-logo-11.png" alt="Markus Dan"></div>
-          <h1>Risiko-Schnell-Check</h1>
-          <p class="lede">All data is anonymous and will not be saved. Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          <h1>Immobilien</h1>
+          <p class="lede">Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
           <div class="progress">
-            <div class="progress-meta"><strong>Kontaktdaten</strong><span>1 / 8</span></div>
+            <div class="progress-meta"><strong>Immobilien</strong><span>1 / 7</span></div>
             <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
           </div>
         </header>
         <form data-step="1" novalidate>
-          <div class="field">
-            <label for="Field6">E-Mail-Adresse <span class="req">*</span></label>
-            <input id="Field6" name="email" type="email" required>
-          </div>
-          <div class="field">
-            <label for="Field5">Telefonnummer <span class="req">*</span></label>
-            <input id="Field5" name="phone" type="tel" required>
-          </div>
-          <input type="hidden" id="Field1430" name="utm_source" data-utm="utm_source">
-          <input type="hidden" id="Field1431" name="utm_medium" data-utm="utm_medium">
-          <input type="hidden" id="Field1435" name="utm_campaign" data-utm="utm_campaign">
-          <input type="hidden" id="Field1434" name="utm_content" data-utm="utm_content">
-          <input type="hidden" id="Field1433" name="utm_term" data-utm="utm_term">
+          <div class="video-slot" data-video-slot></div>
+          <section class="section-note">
+            <h3>Geheimhaltungsklausel</h3>
+            <p>Alle Angaben sind vertraulich und werden nach der Auswertung gelöscht.</p>
+          </section>
+          <fieldset class="choice-group" data-required-group="real_estate_ownership" data-invalid="false">
+            <legend>Do you own real estate? Besitzen Sie Immobilien <span class="req">*</span></legend>
+            <div class="choices">
+              <label class="choice"><input id="Field214" name="real_estate_ownership" type="radio" value="Ja" data-group="real_estate_ownership"><span>Ja</span></label>
+              <label class="choice"><input id="Field215" name="real_estate_ownership" type="radio" value="Nein" data-group="real_estate_ownership"><span>Nein</span></label>
+            </div>
+            <div class="error">Bitte wählen Sie Ja oder Nein.</div>
+          </fieldset>
+          <fieldset class="choice-group">
+            <legend>Optional: Wie viel haben Sie in Immobilien investiert?</legend>
+            <div class="choices">
+              <label class="choice"><input id="Field112" name="real_estate_investment_amount" type="radio" value="weniger als €100.000" data-group="real_estate_investment_amount"><span>weniger als €100.000</span></label>
+              <label class="choice"><input id="Field113" name="real_estate_investment_amount" type="radio" value="€100.000 - €500.000" data-group="real_estate_investment_amount"><span>€100.000 - €500.000</span></label>
+              <label class="choice"><input id="Field114" name="real_estate_investment_amount" type="radio" value="€500.000 - €1.000.000" data-group="real_estate_investment_amount"><span>€500.000 - €1.000.000</span></label>
+              <label class="choice"><input id="Field115" name="real_estate_investment_amount" type="radio" value="mehr als €1.000.000" data-group="real_estate_investment_amount"><span>mehr als €1.000.000</span></label>
+            </div>
+          </fieldset>
           <div class="nav nav-end">
             <button class="button" type="submit" data-next="step-2.html">Nächste Seite</button>
           </div>
