@@ -479,7 +479,7 @@ async function renderStepVideo(form) {
       return;
     }
 
-    const source = `https://player.vimeo.com/video/${config.vimeoId}?title=0&byline=0&portrait=0`;
+    const source = `https://player.vimeo.com/video/${config.vimeoId}?autoplay=1&muted=1&title=0&byline=0&portrait=0`;
 
     slot.innerHTML = `
       <section class="video-card">
