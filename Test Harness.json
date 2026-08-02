@@ -1,0 +1,329 @@
+{
+  "name": "Test Harness",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -208
+      ],
+      "id": "eafdc5e8-ca5c-468d-81a1-70c0ed3e5ebb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      name: \"pitch-c-real-estate-only\",\n      input: {\n        utm_source: null,\n        utm_medium: null,\n        utm_campaign: null,\n        utm_content: null,\n        utm_term: null,\n        real_estate_ownership: \"Ja\",\n        real_estate_investment_amount: \"€100.000 - €500.000\",\n        securities_ownership: \"Nein\",\n        securities_investment_amount: \"\",\n        precious_metals_ownership: \"Nein\",\n        precious_metals_investment_amount: \"\",\n        life_insurance_ownership: \"Nein\",\n        life_insurance_monthly_payment: \"\",\n        bank_savings_ownership: \"Nein\",\n        bank_savings_amount: \"\",\n        alternative_assets_ownership: \"Nein\",\n        alternative_assets_investment_amount: \"\",\n        feedback: \"\",\n        submittedAt: \"2026-07-30T00:00:00.000Z\",\n      },\n      expected: {\n        normalizedAnswers: {\n          \"1\": \"1c\",\n          \"2\": \"2a\",\n          \"3\": \"3a\",\n          \"4\": \"4a\",\n          \"5\": \"5a\",\n          \"6\": \"6a\",\n        },\n        pitchKey: \"pitch_c_everything_else\",\n        sequenceVideoIds: [\n          \"1206983457\",\n          \"1206984659\",\n          \"1207139423\",\n          \"1207139882\",\n          \"1207146805\",\n          \"1207147081\",\n          \"1207155801\",\n        ],\n      },\n    },\n  },\n  {\n    json: {\n      name: \"pitch-a-bank-priority-over-others\",\n      input: {\n        utm_source: null,\n        utm_medium: null,\n        utm_campaign: null,\n        utm_content: null,\n        utm_term: null,\n        real_estate_ownership: \"Ja\",\n        real_estate_investment_amount: \"mehr als €1.000.000\",\n        securities_ownership: \"Ja\",\n        securities_investment_amount: \"mehr als €100.000\",\n        precious_metals_ownership: \"Ja\",\n        precious_metals_investment_amount: \"mehr als €100.000\",\n        life_insurance_ownership: \"Ja\",\n        life_insurance_monthly_payment: \"mehr als €200\",\n        bank_savings_ownership: \"Ja\",\n        bank_savings_amount: \"€10.000 - €50.000\",\n        alternative_assets_ownership: \"Ja\",\n        alternative_assets_investment_amount: \"mehr als €100.000\",\n        feedback: \"\",\n        submittedAt: \"2026-07-30T00:00:00.000Z\",\n      },\n      expected: {\n        normalizedAnswers: {\n          \"1\": \"1e\",\n          \"2\": \"2e\",\n          \"3\": \"3d\",\n          \"4\": \"4d\",\n          \"5\": \"5b\",\n          \"6\": \"6d\",\n        },\n        pitchKey: \"pitch_a_bank\",\n        sequenceVideoIds: [\n          \"1206983455\",\n          \"1206984655\",\n          \"1207139422\",\n          \"1207139879\",\n          \"1207146802\",\n          \"1207147078\",\n          \"1207147350\",\n        ],\n      },\n    },\n  },\n  {\n    json: {\n      name: \"pitch-b-life-insurance-when-no-bank\",\n      input: {\n        utm_source: null,\n        utm_medium: null,\n        utm_campaign: null,\n        utm_content: null,\n        utm_term: null,\n        real_estate_ownership: \"Nein\",\n        real_estate_investment_amount: \"\",\n        securities_ownership: \"Nein\",\n        securities_investment_amount: \"\",\n        precious_metals_ownership: \"Nein\",\n        precious_metals_investment_amount: \"\",\n        life_insurance_ownership: \"Ja\",\n        life_insurance_monthly_payment: \"ich weiß es nicht genau\",\n        bank_savings_ownership: \"Nein\",\n        bank_savings_amount: \"\",\n        alternative_assets_ownership: \"Nein\",\n        alternative_assets_investment_amount: \"\",\n        feedback: \"\",\n        submittedAt: \"2026-07-30T00:00:00.000Z\",\n      },\n      expected: {\n        normalizedAnswers: {\n          \"1\": \"1a\",\n          \"2\": \"2a\",\n          \"3\": \"3a\",\n          \"4\": \"4e\",\n          \"5\": \"5a\",\n          \"6\": \"6a\",\n        },\n        pitchKey: \"pitch_b_life_insurance\",\n        sequenceVideoIds: [\n          \"1206983454\",\n          \"1206984659\",\n          \"1207139423\",\n          \"1207139881\",\n          \"1207146805\",\n          \"1207147081\",\n          \"1207151195\",\n        ],\n      },\n    },\n  },\n  {\n    json: {\n      name: \"pitch-d-broke-fallback\",\n      input: {\n        utm_source: null,\n        utm_medium: null,\n        utm_campaign: null,\n        utm_content: null,\n        utm_term: null,\n        real_estate_ownership: \"Nein\",\n        real_estate_investment_amount: \"\",\n        securities_ownership: \"Nein\",\n        securities_investment_amount: \"\",\n        precious_metals_ownership: \"Ja\",\n        precious_metals_investment_amount: \"weniger als €10.000\",\n        life_insurance_ownership: \"Nein\",\n        life_insurance_monthly_payment: \"\",\n        bank_savings_ownership: \"Ja\",\n        bank_savings_amount: \"weniger als €10.000\",\n        alternative_assets_ownership: \"Nein\",\n        alternative_assets_investment_amount: \"\",\n        feedback: \"\",\n        submittedAt: \"2026-07-30T00:00:00.000Z\",\n      },\n      expected: {\n        normalizedAnswers: {\n          \"1\": \"1a\",\n          \"2\": \"2a\",\n          \"3\": \"3a\",\n          \"4\": \"4a\",\n          \"5\": \"5a\",\n          \"6\": \"6a\",\n        },\n        pitchKey: \"pitch_d_broke\",\n        sequenceVideoIds: [\n          \"1206983454\",\n          \"1206984659\",\n          \"1207139423\",\n          \"1207139882\",\n          \"1207146805\",\n          \"1207147081\",\n          \"1207156045\",\n        ],\n      },\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "95a046c1-3ba1-4cb3-a206-61b0d4872a61",
+      "name": "Test Cases"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ryhu6xynPYdjdgD7",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/ryhu6xynPYdjdgD7"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "real_estate_ownership": "={{ $json.input.real_estate_ownership }}",
+            "real_estate_investment_amount": "={{ $json.input.real_estate_investment_amount }}",
+            "securities_ownership": "={{ $json.input.securities_ownership }}",
+            "securities_investment_amount": "={{ $json.input.securities_investment_amount }}",
+            "precious_metals_ownership": "={{ $json.input.precious_metals_ownership }}",
+            "precious_metals_investment_amount": "={{ $json.input.precious_metals_investment_amount }}",
+            "life_insurance_ownership": "={{ $json.input.life_insurance_ownership }}",
+            "life_insurance_monthly_payment": "={{ $json.input.life_insurance_monthly_payment }}",
+            "bank_savings_ownership": "={{ $json.input.bank_savings_ownership }}",
+            "bank_savings_amount": "={{ $json.input.bank_savings_amount }}",
+            "alternative_assets_ownership": "={{ $json.input.alternative_assets_ownership }}",
+            "alternative_assets_investment_amount": "={{ $json.input.alternative_assets_investment_amount }}",
+            "feedback": "={{ $json.input.feedback }}",
+            "submittedAt": "={{ $json.input.submittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "real_estate_ownership",
+              "displayName": "real_estate_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "real_estate_investment_amount",
+              "displayName": "real_estate_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_ownership",
+              "displayName": "securities_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_investment_amount",
+              "displayName": "securities_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_ownership",
+              "displayName": "precious_metals_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_investment_amount",
+              "displayName": "precious_metals_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_ownership",
+              "displayName": "life_insurance_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_monthly_payment",
+              "displayName": "life_insurance_monthly_payment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_ownership",
+              "displayName": "bank_savings_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_amount",
+              "displayName": "bank_savings_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_ownership",
+              "displayName": "alternative_assets_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_investment_amount",
+              "displayName": "alternative_assets_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "feedback",
+              "displayName": "feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        16
+      ],
+      "id": "84df7bac-fbe1-4f03-b77d-8d3674efa932",
+      "name": "Call 'Wufoo Risk-Fast-Check Risiko-Schnell-Check'"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "4948fd2e-01b6-4860-982b-1d4a7892c4db",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const testCase = $('Test Cases').item.json;\nconst actual = $('Call \\'Wufoo Risk-Fast-Check Risiko-Schnell-Check\\'').item.json;\n\nfunction stableStringify(value) {\n  if (Array.isArray(value)) {\n    return `[${value.map(stableStringify).join(',')}]`;\n  }\n\n  if (value && typeof value === 'object') {\n    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`;\n  }\n\n  return JSON.stringify(value);\n}\n\nfunction isEqual(a, b) {\n  return stableStringify(a) === stableStringify(b);\n}\n\nconst actualSequenceVideoIds = (actual.sequence || [])\n  .map((item) => String(item.videoId || '').trim())\n  .filter(Boolean);\n\nconst checks = {\n  normalizedAnswers: {\n    expected: testCase.expected.normalizedAnswers,\n    actual: actual.normalizedAnswers,\n    passed: isEqual(actual.normalizedAnswers, testCase.expected.normalizedAnswers),\n  },\n  pitchKey: {\n    expected: testCase.expected.pitchKey,\n    actual: actual.pitchKey,\n    passed: actual.pitchKey === testCase.expected.pitchKey,\n  },\n  sequenceVideoIds: {\n    expected: testCase.expected.sequenceVideoIds,\n    actual: actualSequenceVideoIds,\n    passed: isEqual(actualSequenceVideoIds, testCase.expected.sequenceVideoIds),\n  },\n};\n\nconst failures = Object.entries(checks)\n  .filter(([, value]) => !value.passed)\n  .map(([key, value]) => ({\n    check: key,\n    expected: value.expected,\n    actual: value.actual,\n  }));\n\nreturn [\n  {\n    json: {\n      name: testCase.name,\n      passed: failures.length === 0,\n      checks,\n      failures,\n      actual: {\n        normalizedAnswers: actual.normalizedAnswers,\n        pitchKey: actual.pitchKey,\n        sequenceVideoIds: actualSequenceVideoIds,\n      },\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        256
+      ],
+      "id": "7348fcc7-a33d-4948-ad93-654bde46a093",
+      "name": "Test Assertion"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst results = items.map((item) => item.json);\nconst passed = results.filter((result) => result.passed);\nconst failed = results.filter((result) => !result.passed);\n\nreturn [\n  {\n    json: {\n      total: results.length,\n      passed: passed.length,\n      failed: failed.length,\n      allPassed: failed.length === 0,\n      passedNames: passed.map((result) => result.name),\n      failedNames: failed.map((result) => result.name),\n      failures: failed.map((result) => ({\n        name: result.name,\n        failures: result.failures,\n        actual: result.actual,\n      })),\n      results,\n      generatedAt: new Date().toISOString(),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -208
+      ],
+      "id": "56c69397-43f4-49d9-8b09-b2a2bcede322",
+      "name": "Log/Report"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Test Cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Cases": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Log/Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call 'Wufoo Risk-Fast-Check Risiko-Schnell-Check'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Wufoo Risk-Fast-Check Risiko-Schnell-Check'": {
+      "main": [
+        [
+          {
+            "node": "Test Assertion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Assertion": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f422a3d7-c710-4290-9942-a0ad56543f24",
+  "meta": {
+    "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
+  },
+  "nodeGroups": [],
+  "id": "jEAPD1ujLvAWuAVQ",
+  "tags": []
+}

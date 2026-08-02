@@ -1,16 +1,7 @@
-const resolved = $('Resolve Pitch').first().json;
+const resolved = $('Build Sequence').first().json;
 const oembed = $('Get Thumbnail URL').first().json;
 
-const sequence = [
-  ...(resolved.selections || []).map((item) => ({
-    label: item.key,
-    videoId: item.videoId,
-  })),
-  {
-    label: resolved.pitch.key,
-    videoId: resolved.pitch.videoId,
-  },
-];
+const sequence = resolved.sequence || [];
 
 const videoIds = sequence
   .map((item) => String(item.videoId || '').trim())

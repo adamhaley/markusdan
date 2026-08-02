@@ -1,0 +1,159 @@
+{
+  "name": "Wufoo Risk-Fast-Check Risiko-Schnell-Check",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const payload = $(\"When Executed by Another Workflow\").first().json;\nconst mapping = $('Vimeo Mapping').first().json;\n\nfunction normalize(value) {\n  return String(value || '').trim();\n}\n\nfunction expectValue(value, fieldName) {\n  const normalized = normalize(value);\n\n  if (!normalized) {\n    throw new Error(`Missing required field: ${fieldName}`);\n  }\n\n  return normalized;\n}\n\nfunction resolveStep1(data) {\n  const ownership = expectValue(data.real_estate_ownership, 'real_estate_ownership');\n\n  if (ownership === 'Nein') {\n    return '1a';\n  }\n\n  const amount = expectValue(data.real_estate_investment_amount, 'real_estate_investment_amount');\n\n  if (amount === 'weniger als €100.000') return '1b';\n  if (amount === '€100.000 - €500.000') return '1c';\n  if (amount === '€500.000 - €1.000.000') return '1d';\n  if (amount === 'mehr als €1.000.000') return '1e';\n\n  throw new Error(`Unexpected real_estate_investment_amount: ${amount}`);\n}\n\nfunction resolveStep2(data) {\n  const ownership = expectValue(data.securities_ownership, 'securities_ownership');\n\n  if (ownership === 'Nein') {\n    return '2a';\n  }\n\n  const amount = expectValue(data.securities_investment_amount, 'securities_investment_amount');\n\n  if (amount === 'weniger als €10.000') return '2b';\n  if (amount === '€10.000 - €50.000') return '2c';\n  if (amount === '€50.000 - €100.000') return '2d';\n  if (amount === 'mehr als €100.000') return '2e';\n\n  throw new Error(`Unexpected securities_investment_amount: ${amount}`);\n}\n\nfunction resolveStep3(data) {\n  const ownership = expectValue(data.precious_metals_ownership, 'precious_metals_ownership');\n\n  if (ownership === 'Nein') {\n    return '3a';\n  }\n\n  const amount = expectValue(data.precious_metals_investment_amount, 'precious_metals_investment_amount');\n\n  if (amount === 'weniger als €10.000') return '3a';\n  if (amount === '€10.000 - €50.000') return '3b';\n  if (amount === '€50.000 - €100.000') return '3c';\n  if (amount === 'mehr als €100.000') return '3d';\n\n  throw new Error(`Unexpected precious_metals_investment_amount: ${amount}`);\n}\n\nfunction resolveStep4(data) {\n  const ownership = expectValue(data.life_insurance_ownership, 'life_insurance_ownership');\n\n  if (ownership === 'Nein') {\n    return '4a';\n  }\n\n  const payment = expectValue(data.life_insurance_monthly_payment, 'life_insurance_monthly_payment');\n\n  if (payment === 'weniger als €100') return '4b';\n  if (payment === '€100 - €200') return '4c';\n  if (payment === 'mehr als €200') return '4d';\n  if (payment === 'ich weiß es nicht genau') return '4e';\n\n  throw new Error(`Unexpected life_insurance_monthly_payment: ${payment}`);\n}\n\nfunction resolveStep5(data) {\n  const ownership = expectValue(data.bank_savings_ownership, 'bank_savings_ownership');\n\n  if (ownership === 'Nein') {\n    return '5a';\n  }\n\n  const amount = expectValue(data.bank_savings_amount, 'bank_savings_amount');\n\n  if (amount === 'weniger als €10.000') return '5a';\n  if (amount === '€10.000 - €50.000') return '5b';\n  if (amount === '€50.000 - €100.000') return '5c';\n  if (amount === 'mehr als €100.000') return '5d';\n\n  throw new Error(`Unexpected bank_savings_amount: ${amount}`);\n}\n\nfunction resolveStep6(data) {\n  const ownership = expectValue(data.alternative_assets_ownership, 'alternative_assets_ownership');\n\n  if (ownership === 'Nein') {\n    return '6a';\n  }\n\n  const amount = expectValue(data.alternative_assets_investment_amount, 'alternative_assets_investment_amount');\n\n  if (amount === 'weniger als €10.000') return '6a';\n  if (amount === '€10.000 - €50.000') return '6b';\n  if (amount === '€50.000 - €100.000') return '6c';\n  if (amount === 'mehr als €100.000') return '6d';\n\n  throw new Error(`Unexpected alternative_assets_investment_amount: ${amount}`);\n}\n\nconst normalizedAnswers = {\n  \"1\": resolveStep1(payload),\n  \"2\": resolveStep2(payload),\n  \"3\": resolveStep3(payload),\n  \"4\": resolveStep4(payload),\n  \"5\": resolveStep5(payload),\n  \"6\": resolveStep6(payload),\n};\n\nconst selections = Object.values(normalizedAnswers).map((answerCode) => {\n  const answer = mapping.answerLookup[answerCode];\n\n  if (!answer) {\n    throw new Error(`No Vimeo mapping found for ${answerCode}`);\n  }\n\n  return {\n    stepNumber: answer.stepNumber,\n    normalizedAnswer: answerCode,\n    answerLetter: answer.answerLetter,\n    stepName: answer.stepName,\n    clipKey: answer.clipKey,\n    introVideoId: answer.introVideoId,\n    key: answer.key,\n    videoId: answer.videoId,\n  };\n});\n\nreturn [\n  {\n    json: {\n      normalizedAnswers,\n      selections,\n      feedback: normalize(payload.feedback),\n      submittedAt: payload.submittedAt || null,\n      rawPayload: payload,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "60520f0f-4b85-48ca-89af-436d84934d8b",
+      "name": "Parse Answers"
+    },
+    {
+      "parameters": {
+        "jsCode": "const steps = {\n  \"1\": {\n    name: \"real_estate\",\n    clipKey: \"RSCL_F1_RealEstate_Immobilien\",\n    introVideoId: \"1206982769\",\n    answers: {\n      a: { key: \"RSCL_A1a_no_realestate\", videoId: \"1206983454\" },\n      b: { key: \"RSCL_A1b_0-100k\", videoId: \"1206983594\" },\n      c: { key: \"RSCL_A1c_100k-500k\", videoId: \"1206983457\" },\n      d: { key: \"RSCL_A1d_500k-1m\", videoId: \"1206983456\" },\n      e: { key: \"RSCL_A1e_1m_plus\", videoId: \"1206983455\" },\n    },\n  },\n  \"2\": {\n    name: \"stocks\",\n    clipKey: \"RSCL_F2_Stocks_Aktien\",\n    introVideoId: \"1206982979\",\n    answers: {\n      a: { key: \"RSCL_A2a_no_stocks\", videoId: \"1206984659\" },\n      b: { key: \"RSCL_A2b_0-10k\", videoId: \"1206984814\" },\n      c: { key: \"RSCL_A2c_10k-50k\", videoId: \"1206984657\" },\n      d: { key: \"RSCL_A2d_50k-100k\", videoId: \"1206984656\" },\n      e: { key: \"RSCL_A2e_100k_plus\", videoId: \"1206984655\" },\n    },\n  },\n  \"3\": {\n    name: \"precious_metals\",\n    clipKey: \"RSCL_F3_Preciousmetals_Edelmetalle\",\n    introVideoId: \"1206982890\",\n    answers: {\n      a: { key: \"RSCL_A3a_none_or_less10k\", videoId: \"1207139423\" },\n      b: { key: \"RSCL_A3b_10k-50k\", videoId: \"1207139426\" },\n      c: { key: \"RSCL_A3c_50k-100k\", videoId: \"1207139424\" },\n      d: { key: \"RSCL_A3d_100k_plus\", videoId: \"1207139422\" },\n    },\n  },\n  \"4\": {\n    name: \"life_insurance\",\n    clipKey: \"RSCL_F4_Lifeinsurance_LV\",\n    introVideoId: \"1206982762\",\n    answers: {\n      a: { key: \"RSCL_A4a_no_insurance\", videoId: \"1207139882\" },\n      b: { key: \"RSCL_A4b_up_to_100\", videoId: \"1207139888\" },\n      c: { key: \"RSCL_A4c_100-200\", videoId: \"1207139880\" },\n      d: { key: \"RSCL_A4d_200plus\", videoId: \"1207139879\" },\n      e: { key: \"RSCL_A4e_dont_know\", videoId: \"1207139881\" },\n    },\n  },\n  \"5\": {\n    name: \"bank\",\n    clipKey: \"RSCL_F5_Bank\",\n    introVideoId: \"1206982764\",\n    answers: {\n      a: { key: \"RSCL_A5a_none_or_less10k\", videoId: \"1207146805\" },\n      b: { key: \"RSCL_A5b_10k-50k\", videoId: \"1207146802\" },\n      c: { key: \"RSCL_A5c_50k-100k\", videoId: \"1207146803\" },\n      d: { key: \"RSCL_A5d_100k_plus\", videoId: \"1207146804\" },\n    },\n  },\n  \"6\": {\n    name: \"alternative_investments\",\n    clipKey: \"RSCL_F6_AlternativInvest\",\n    introVideoId: \"1206982763\",\n    answers: {\n      a: { key: \"RSCL_A6a_none_or_less10k\", videoId: \"1207147081\" },\n      b: { key: \"RSCL_A6b_10k-50k\", videoId: \"1207147079\" },\n      c: { key: \"RSCL_A6c_50k-100k\", videoId: \"1207147080\" },\n      d: { key: \"RSCL_A6d_100k_plus\", videoId: \"1207147078\" },\n    },\n  },\n};\n\nconst pitches = {\n  pitch_a_bank: {\n    key: \"RSCL_Pitch_A_Bank\",\n    videoId: \"1207147350\",\n    rule: \"Priority 1: only if user has any money in the bank bucket above none/less10k.\",\n  },\n  pitch_b_life_insurance: {\n    key: \"RSCL_Pitch_B_LifeInsurance\",\n    videoId: \"1207151195\",\n    rule: \"Priority 2: if not pitch A, and user pays any amount to life insurance or does not know.\",\n  },\n  pitch_c_everything_else: {\n    key: \"RSCL_Pitch_C_Everything_Else\",\n    videoId: \"1207155801\",\n    rule: \"Priority 3: if not pitch A or B, and user has any qualifying assets in real estate, stocks, metals, or alternatives.\",\n  },\n  pitch_d_broke: {\n    key: \"RSCL_Pitch_D_broke\",\n    videoId: \"1207156045\",\n    rule: \"Fallback: only if user effectively has no qualifying assets and no life insurance contribution.\",\n  },\n};\n\nconst answerLookup = {};\n\nfor (const [stepNumber, step] of Object.entries(steps)) {\n  for (const [answerLetter, answer] of Object.entries(step.answers)) {\n    answerLookup[`${stepNumber}${answerLetter}`] = {\n      ...answer,\n      stepNumber,\n      answerLetter,\n      stepName: step.name,\n      clipKey: step.clipKey,\n      introVideoId: step.introVideoId,\n    };\n  }\n}\n\nreturn [\n  {\n    json: {\n      steps,\n      pitches,\n      answerLookup,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "fa9c59bf-c79f-4835-af5f-09b097f249ed",
+      "name": "Vimeo Mapping"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $('Parse Answers').first().json;\nconst mapping = $('Vimeo Mapping').first().json;\n\nconst normalizedAnswers = parsed.normalizedAnswers || {};\n\nfunction hasAnswer(stepNumber, allowedAnswers) {\n  return allowedAnswers.includes(normalizedAnswers[String(stepNumber)]);\n}\n\nfunction resolvePitch() {\n  if (hasAnswer(5, ['5b', '5c', '5d'])) {\n    return {\n      pitchKey: 'pitch_a_bank',\n      pitch: mapping.pitches.pitch_a_bank,\n      pitchReason: 'Priority 1: user has any bank savings above the none/less-than-10k bucket.',\n    };\n  }\n\n  if (hasAnswer(4, ['4b', '4c', '4d', '4e'])) {\n    return {\n      pitchKey: 'pitch_b_life_insurance',\n      pitch: mapping.pitches.pitch_b_life_insurance,\n      pitchReason: 'Priority 2: user pays any life insurance amount or does not know the amount.',\n    };\n  }\n\n  if (\n    hasAnswer(1, ['1b', '1c', '1d', '1e']) ||\n    hasAnswer(2, ['2c', '2d', '2e']) ||\n    hasAnswer(3, ['3b', '3c', '3d']) ||\n    hasAnswer(6, ['6b', '6c', '6d'])\n  ) {\n    return {\n      pitchKey: 'pitch_c_everything_else',\n      pitch: mapping.pitches.pitch_c_everything_else,\n      pitchReason: 'Priority 3: user has qualifying real estate, stocks 10k+, metals 10k+, or alternative assets 10k+.',\n    };\n  }\n\n  return {\n    pitchKey: 'pitch_d_broke',\n    pitch: mapping.pitches.pitch_d_broke,\n    pitchReason: 'Fallback: user did not trigger bank, life insurance, or other qualifying asset pitches.',\n  };\n}\n\nconst resolved = resolvePitch();\n\nreturn [\n  {\n    json: {\n      ...parsed,\n      ...resolved,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "39765481-2064-4e9a-9825-6340751ecc64",
+      "name": "Resolve Pitch"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "  {\n    \"real_estate_ownership\": \"Ja|Nein\",\n    \"real_estate_investment_amount\": \"...\",\n    \"securities_ownership\": \"Ja|Nein\",\n    \"securities_investment_amount\": \"...\",\n    \"precious_metals_ownership\": \"Ja|Nein\",\n    \"precious_metals_investment_amount\": \"...\",\n    \"life_insurance_ownership\": \"Ja|Nein\",\n    \"life_insurance_monthly_payment\": \"...\",\n    \"bank_savings_ownership\": \"Ja|Nein\",\n    \"bank_savings_amount\": \"...\",\n    \"alternative_assets_ownership\": \"Ja|Nein\",\n    \"alternative_assets_investment_amount\": \"...\",\n    \"feedback\": \"...\",\n    \"submittedAt\": \"...\"\n  }"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "12e8aed5-0868-4894-ae36-3d0b5f5ff0cd",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resolved = $('Resolve Pitch').first().json;\n\nconst selectionSequence = (resolved.selections || []).map((item, index) => ({\n  type: 'answer',\n  order: index + 1,\n  stepNumber: item.stepNumber,\n  stepName: item.stepName,\n  label: item.key,\n  videoId: String(item.videoId || '').trim(),\n}));\n\nconst pitchSequenceItem = {\n  type: 'pitch',\n  order: selectionSequence.length + 1,\n  label: resolved.pitch.key,\n  videoId: String(resolved.pitch.videoId || '').trim(),\n};\n\nconst sequence = [...selectionSequence, pitchSequenceItem];\n\nconst missingVideo = sequence.find((item) => !item.videoId);\n\nif (missingVideo) {\n  throw new Error(`Sequence item is missing a videoId: ${missingVideo.label}`);\n}\n\nreturn [\n  {\n    json: {\n      ...resolved,\n      sequence,\n      sequenceVideoIds: sequence.map((item) => item.videoId),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "2d3b4567-4cff-494f-a107-a8862fdd4fdf",
+      "name": "Build Sequence"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "real_estate_ownership": "Ja",
+          "real_estate_investment_amount": "€100.000 - €500.000",
+          "securities_ownership": "Nein",
+          "securities_investment_amount": "€50.000 - €100.000",
+          "precious_metals_ownership": "Ja",
+          "precious_metals_investment_amount": "weniger als €10.000",
+          "life_insurance_ownership": "Nein",
+          "life_insurance_monthly_payment": "mehr als €200",
+          "bank_savings_ownership": "Ja",
+          "bank_savings_amount": "weniger als €10.000",
+          "alternative_assets_ownership": "Nein",
+          "alternative_assets_investment_amount": "€50.000 - €100.000",
+          "feedback": "lorem ipsum ",
+          "submittedAt": "2026-07-30T19:39:15.271Z"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Parse Answers": {
+      "main": [
+        [
+          {
+            "node": "Resolve Pitch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vimeo Mapping": {
+      "main": [
+        [
+          {
+            "node": "Parse Answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Pitch": {
+      "main": [
+        [
+          {
+            "node": "Build Sequence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Vimeo Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "WbISMAIlclQfzorG",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "f2b4cae4-5cf7-4aea-b92f-668471ba4128",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
+  },
+  "nodeGroups": [],
+  "id": "ryhu6xynPYdjdgD7",
+  "tags": []
+}

@@ -1,0 +1,371 @@
+{
+  "name": "Webhook Wrapper",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fe28dcfc-b0d2-4c67-b447-c5225b82f8dd",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        -16
+      ],
+      "id": "2b5dadb2-b89e-4043-bd27-21fce09dfa00",
+      "name": "Webhook",
+      "webhookId": "fe28dcfc-b0d2-4c67-b447-c5225b82f8dd"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        720,
+        -16
+      ],
+      "id": "a616a3cd-5358-4afc-adb9-0ed5c67520e6",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resolved = $('Build Sequence').first().json;\nconst oembed = $('Get Thumbnail URL').first().json;\n\nconst sequence = resolved.sequence || [];\n\nconst videoIds = sequence\n  .map((item) => String(item.videoId || '').trim())\n  .filter(Boolean);\n\nconst thumbnailUrl = String(oembed.thumbnail_url_with_play_button || '').trim();\n\nif (!videoIds.length) {\n  throw new Error('No videos provided');\n}\n\nconst embedUrls = videoIds.map((videoId) =>\n  `https://player.vimeo.com/video/${videoId}?autoplay=1&autopause=0&title=0&byline=0&portrait=0`\n);\n\nconst html = `<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Video Sequence</title>\n  <style>\n    :root {\n      --bg: #050505;\n      --text: #f5f1e8;\n      --muted: #b8b1a3;\n      --accent: #d7a84a;\n      --accent-hover: #e6bb67;\n    }\n\n    * {\n      box-sizing: border-box;\n    }\n\n    body {\n      margin: 0;\n      min-height: 100vh;\n      display: grid;\n      place-items: center;\n      background:\n        radial-gradient(circle at top, rgba(215, 168, 74, 0.16), transparent 32rem),\n        linear-gradient(180deg, #0a0a0a 0%, #000 100%);\n      color: var(--text);\n      font-family: Georgia, \"Times New Roman\", serif;\n    }\n\n    .shell {\n      width: min(96vw, 960px);\n      display: grid;\n      gap: 1rem;\n    }\n\n    .frame {\n      position: relative;\n      width: 100%;\n      aspect-ratio: 16 / 9;\n      background: #000;\n      border: 1px solid rgba(255, 255, 255, 0.08);\n      border-radius: 18px;\n      overflow: hidden;\n      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);\n    }\n\n    .poster {\n      position: absolute;\n      inset: 0;\n      background-color: #000;\n      background-image: url('${thumbnailUrl}');\n      background-size: cover;\n      background-position: center;\n      z-index: 2;\n      cursor: pointer;\n    }\n\n    #player {\n      position: relative;\n      width: 100%;\n      height: 100%;\n      z-index: 1;\n    }\n\n    #player iframe {\n      position: absolute;\n      inset: 0;\n      width: 100%;\n      height: 100%;\n      border: 0;\n      pointer-events: auto;\n    }\n\n    .controls {\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      min-height: 3rem;\n    }\n\n    .replay-button {\n      appearance: none;\n      border: 0;\n      border-radius: 999px;\n      padding: 0.85rem 1.4rem;\n      background: var(--accent);\n      color: #1b1408;\n      font: inherit;\n      font-size: 1rem;\n      cursor: pointer;\n      transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;\n      display: none;\n    }\n\n    .replay-button:hover {\n      background: var(--accent-hover);\n      transform: translateY(-1px);\n    }\n\n    .replay-button:active {\n      transform: translateY(0);\n    }\n\n    .status {\n      color: var(--muted);\n      font-size: 0.95rem;\n      text-align: center;\n      letter-spacing: 0.02em;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"shell\">\n    <div class=\"frame\">\n      <div id=\"poster\" class=\"poster\"></div>\n      <div id=\"player\"></div>\n    </div>\n\n    <div class=\"controls\">\n      <button id=\"replayButton\" class=\"replay-button\" type=\"button\">Replay sequence</button>\n    </div>\n\n    <div id=\"status\" class=\"status\"></div>\n  </div>\n\n  <script src=\"https://player.vimeo.com/api/player.js\"></script>\n  <script>\n    const embedUrls = ${JSON.stringify(embedUrls)};\n    let index = 0;\n    let player;\n\n    const replayButton = document.getElementById('replayButton');\n    const status = document.getElementById('status');\n    const poster = document.getElementById('poster');\n\n    function updateStatus() {\n      status.textContent = 'Clip ' + (index + 1) + ' of ' + embedUrls.length;\n    }\n\n    function showReplay() {\n      status.textContent = 'Sequence complete';\n      replayButton.style.display = 'inline-block';\n    }\n\n    function hideReplay() {\n      replayButton.style.display = 'none';\n    }\n\n    function hidePoster() {\n      poster.style.display = 'none';\n    }\n\n    function showPoster() {\n      poster.style.display = 'block';\n    }\n\n    function destroyPlayer() {\n      if (!player) {\n        return Promise.resolve();\n      }\n\n      return player.destroy().catch(() => {});\n    }\n\n    function mountPlayer() {\n      updateStatus();\n\n      player = new Vimeo.Player('player', {\n        url: embedUrls[index],\n        autoplay: true,\n        muted: true,\n        byline: false,\n        title: false,\n        portrait: false\n      });\n\n      player.on('ended', () => {\n        index += 1;\n\n        if (index < embedUrls.length) {\n          destroyPlayer().then(() => {\n            mountPlayer();\n            player.play().catch(() => {});\n          });\n        } else {\n          destroyPlayer().then(() => {\n            showReplay();\n          });\n        }\n      });\n    }\n\n    function startSequence() {\n      index = 0;\n      hideReplay();\n      hidePoster();\n      destroyPlayer().then(() => {\n        mountPlayer();\n        player.play().catch((error) => {\n          status.textContent = 'Tap play again to start audio';\n          showPoster();\n          console.error(error);\n        });\n      });\n    }\n\n    poster.addEventListener('click', () => {\n      startSequence();\n    });\n\n    replayButton.addEventListener('click', () => {\n      startSequence();\n    });\n\n    hidePoster();\n    startSequence();\n    status.textContent = 'Ready to play';\n  </script>\n</body>\n</html>`;\n\nreturn [{ json: { html } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -16
+      ],
+      "id": "2464ae73-c7d4-43f4-b080-6cc0fb718cb5",
+      "name": "Generate Answer Page"
+    },
+    {
+      "parameters": {
+        "url": "=https://vimeo.com/api/oembed.json?url={{ encodeURIComponent('https://vimeo.com/' +  $json.sequence[0].videoId ) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        -16
+      ],
+      "id": "3e8ed93e-c113-4b6a-a3a3-68e84f685d48",
+      "name": "Get Thumbnail URL"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ryhu6xynPYdjdgD7",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/ryhu6xynPYdjdgD7"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "real_estate_ownership": "={{ $json.body.real_estate_ownership }}",
+            "real_estate_investment_amount": "={{ $json.body.real_estate_investment_amount }}",
+            "securities_ownership": "={{ $json.body.securities_ownership }}",
+            "securities_investment_amount": "={{ $json.body.securities_investment_amount }}",
+            "precious_metals_ownership": "={{ $json.body.precious_metals_ownership }}",
+            "precious_metals_investment_amount": "={{ $json.body.precious_metals_investment_amount }}",
+            "life_insurance_ownership": "={{ $json.body.life_insurance_ownership }}",
+            "life_insurance_monthly_payment": "={{ $json.body.life_insurance_monthly_payment }}",
+            "bank_savings_ownership": "={{ $json.body.bank_savings_ownership }}",
+            "bank_savings_amount": "={{ $json.body.bank_savings_amount }}",
+            "alternative_assets_ownership": "={{ $json.body.alternative_assets_ownership }}",
+            "alternative_assets_investment_amount": "={{ $json.body.alternative_assets_investment_amount }}",
+            "feedback": "={{ $json.body.feedback }}",
+            "submittedAt": "={{ $json.body.submittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "real_estate_ownership",
+              "displayName": "real_estate_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "real_estate_investment_amount",
+              "displayName": "real_estate_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_ownership",
+              "displayName": "securities_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_investment_amount",
+              "displayName": "securities_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_ownership",
+              "displayName": "precious_metals_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_investment_amount",
+              "displayName": "precious_metals_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_ownership",
+              "displayName": "life_insurance_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_monthly_payment",
+              "displayName": "life_insurance_monthly_payment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_ownership",
+              "displayName": "bank_savings_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_amount",
+              "displayName": "bank_savings_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_ownership",
+              "displayName": "alternative_assets_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_investment_amount",
+              "displayName": "alternative_assets_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "feedback",
+              "displayName": "feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        -16
+      ],
+      "id": "9f0079ae-ae0b-43d7-9634-9b9ab0fc8476",
+      "name": "Call"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.megyk.com",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+            "content-length": "688",
+            "accept": "application/json, text/html, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9,nb;q=0.8,de;q=0.7",
+            "content-type": "application/json",
+            "dnt": "1",
+            "origin": "https://risiko-schnell-check.pages.dev",
+            "priority": "u=1, i",
+            "referer": "https://risiko-schnell-check.pages.dev/",
+            "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "98.153.119.146",
+            "x-forwarded-host": "n8n.megyk.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "utm_source": null,
+            "utm_medium": null,
+            "utm_campaign": null,
+            "utm_content": null,
+            "utm_term": null,
+            "real_estate_ownership": "Ja",
+            "real_estate_investment_amount": "€100.000 - €500.000",
+            "securities_ownership": "Nein",
+            "securities_investment_amount": "€50.000 - €100.000",
+            "precious_metals_ownership": "Ja",
+            "precious_metals_investment_amount": "weniger als €10.000",
+            "life_insurance_ownership": "Nein",
+            "life_insurance_monthly_payment": "mehr als €200",
+            "bank_savings_ownership": "Ja",
+            "bank_savings_amount": "weniger als €10.000",
+            "alternative_assets_ownership": "Nein",
+            "alternative_assets_investment_amount": "€50.000 - €100.000",
+            "feedback": "lorem ipsum ",
+            "submittedAt": "2026-07-30T19:39:15.271Z"
+          },
+          "webhookUrl": "https://n8n.megyk.com/webhook/fe28dcfc-b0d2-4c67-b447-c5225b82f8dd",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Answer Page": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Thumbnail URL": {
+      "main": [
+        [
+          {
+            "node": "Generate Answer Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call": {
+      "main": [
+        [
+          {
+            "node": "Get Thumbnail URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9130cbc7-287f-459a-a1a3-1952f6e39e51",
+  "meta": {
+    "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
+  },
+  "nodeGroups": [],
+  "id": "YrH2B4FIWMbjzq5I",
+  "tags": []
+}

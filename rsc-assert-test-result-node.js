@@ -17,10 +17,9 @@ function isEqual(a, b) {
   return stableStringify(a) === stableStringify(b);
 }
 
-const actualSequenceVideoIds = [
-  ...(actual.selections || []).map((item) => String(item.videoId || '')),
-  String(actual.pitch?.videoId || ''),
-].filter(Boolean);
+const actualSequenceVideoIds = (actual.sequence || [])
+  .map((item) => String(item.videoId || '').trim())
+  .filter(Boolean);
 
 const checks = {
   normalizedAnswers: {
