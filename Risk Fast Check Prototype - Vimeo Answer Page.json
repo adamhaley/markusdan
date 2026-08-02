@@ -1,0 +1,271 @@
+{
+  "name": "Wufoo to Vimeo Q&A Response",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "\n// HTML Generator Code node\n// Input: { selections: [{ questionNumber, rawAnswer, answerKey, video }] }\nconst selections = $('Parse Answers').first().json.selections;\nconst oembed = $('Get Thumbnail URL').first().json;\n\nconst videoPaths = (selections || [])\n  .map((item) => String(item.video || '').trim())\n  .filter(Boolean);\nconst thumbnailUrl = String(oembed.thumbnail_url_with_play_button || '').trim();\n\nif (!videoPaths.length) {\n  throw new Error('No videos provided');\n}\n\nconst embedUrls = videoPaths.map((path) => {\n  const [videoId, hash] = path.split('/');\n\n  if (!videoId || !hash) {\n    throw new Error(`Invalid Vimeo mapping value: ${path}`);\n  }\n\n  return `https://player.vimeo.com/video/${videoId}?h=${hash}&autoplay=1&autopause=0&title=0&byline=0&portrait=0`;\n});\n\nconst html = `<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Video Sequence</title>\n  <style>\n    :root {\n      --bg: #050505;\n      --text: #f5f1e8;\n      --muted: #b8b1a3;\n      --accent: #d7a84a;\n      --accent-hover: #e6bb67;\n    }\n\n    * {\n      box-sizing: border-box;\n    }\n\n    body {\n      margin: 0;\n      min-height: 100vh;\n      display: grid;\n      place-items: center;\n      background:\n        radial-gradient(circle at top, rgba(215, 168, 74, 0.16), transparent 32rem),\n        linear-gradient(180deg, #0a0a0a 0%, #000 100%);\n      color: var(--text);\n      font-family: Georgia, \"Times New Roman\", serif;\n    }\n\n    .shell {\n      width: min(96vw, 960px);\n      display: grid;\n      gap: 1rem;\n    }\n\n    .frame {\n      position: relative;\n      width: 100%;\n      aspect-ratio: 16 / 9;\n      background: #000;\n      border: 1px solid rgba(255, 255, 255, 0.08);\n      border-radius: 18px;\n      overflow: hidden;\n      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);\n    }\n\n    .poster {\n      position: absolute;\n      inset: 0;\n      background-color: #000;\n      background-image: url('${thumbnailUrl}');\n      background-size: cover;\n      background-position: center;\n      z-index: 2;\n      cursor: pointer;\n    }\n\n    #player {\n      position: relative;\n      width: 100%;\n      height: 100%;\n      z-index: 1;\n    }\n\n    #player iframe {\n      position: absolute;\n      inset: 0;\n      width: 100%;\n      height: 100%;\n      border: 0;\n      pointer-events: auto;\n    }\n\n    .controls {\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      min-height: 3rem;\n    }\n\n    .replay-button {\n      appearance: none;\n      border: 0;\n      border-radius: 999px;\n      padding: 0.85rem 1.4rem;\n      background: var(--accent);\n      color: #1b1408;\n      font: inherit;\n      font-size: 1rem;\n      cursor: pointer;\n      transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;\n      display: none;\n    }\n\n    .replay-button:hover {\n      background: var(--accent-hover);\n      transform: translateY(-1px);\n    }\n\n    .replay-button:active {\n      transform: translateY(0);\n    }\n\n    .status {\n      color: var(--muted);\n      font-size: 0.95rem;\n      text-align: center;\n      letter-spacing: 0.02em;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"shell\">\n    <div class=\"frame\">\n      <div id=\"poster\" class=\"poster\"></div>\n      <div id=\"player\"></div>\n    </div>\n\n    <div class=\"controls\">\n      <button id=\"replayButton\" class=\"replay-button\" type=\"button\">Replay sequence</button>\n    </div>\n\n    <div id=\"status\" class=\"status\"></div>\n  </div>\n\n  <script src=\"https://player.vimeo.com/api/player.js\"></script>\n  <script>\n    const embedUrls = ${JSON.stringify(embedUrls)};\n    let index = 0;\n    let player;\n\n    const replayButton = document.getElementById('replayButton');\n    const status = document.getElementById('status');\n    const poster = document.getElementById('poster');\n\n    function updateStatus() {\n      status.textContent = 'Clip ' + (index + 1) + ' of ' + embedUrls.length;\n    }\n\n    function showReplay() {\n      status.textContent = 'Sequence complete';\n      replayButton.style.display = 'inline-block';\n    }\n\n    function hideReplay() {\n      replayButton.style.display = 'none';\n    }\n\n    function hideStart() {\n      return;\n    }\n\n    function hidePoster() {\n      poster.style.display = 'none';\n    }\n\n    function showPoster() {\n      poster.style.display = 'block';\n    }\n\n    function destroyPlayer() {\n      if (!player) {\n        return Promise.resolve();\n      }\n\n      return player.destroy().catch(() => {});\n    }\n\n    function mountPlayer() {\n      updateStatus();\n\n      player = new Vimeo.Player('player', {\n        url: embedUrls[index],\n        autoplay: true,\n        muted: true,\n        byline: false,\n        title: false,\n        portrait: false\n      });\n\n      player.on('ended', () => {\n        index += 1;\n\n        if (index < embedUrls.length) {\n          destroyPlayer().then(() => {\n            mountPlayer();\n            player.play().catch(() => {});\n          });\n        } else {\n          destroyPlayer().then(() => {\n            showReplay();\n          });\n        }\n      });\n    }\n\n    function startSequence() {\n      index = 0;\n      hideStart();\n      hideReplay();\n      hidePoster();\n      destroyPlayer().then(() => {\n        mountPlayer();\n        player.play().catch((error) => {\n          status.textContent = 'Tap play again to start audio';\n          showPoster();\n          console.error(error);\n        });\n      });\n    }\n\n    poster.addEventListener('click', () => {\n      startSequence();\n    });\n\n    replayButton.addEventListener('click', () => {\n      startSequence();\n    });\n    hidePoster();\n    startSequence();\n    status.textContent = 'Ready to play';\n  </script>\n</body>\n</html>`;\n\nreturn [{ json: { html } }];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        0
+      ],
+      "id": "12fc528c-9d2a-4a96-aa90-6a5408924d10",
+      "name": "Generate Answer Page"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fa0766d7-f961-4863-9107-cd3959368d95",
+              "name": "answer-1a",
+              "value": "1187688137/ca3c675a45",
+              "type": "string"
+            },
+            {
+              "id": "db138de3-6d0c-495d-af4a-8b1da751ed8b",
+              "name": "answer-1b",
+              "value": "1187688108/341065560a",
+              "type": "string"
+            },
+            {
+              "id": "4bf2111f-b72b-4baf-982e-4aea45b3d9d9",
+              "name": "answer-1c",
+              "value": "1187688088/71e091b522",
+              "type": "string"
+            },
+            {
+              "id": "5e57b16e-0942-4ce2-91c7-463929ee3cb7",
+              "name": "answer-2a",
+              "value": "1187688062/9fe865ddac",
+              "type": "string"
+            },
+            {
+              "id": "07469852-de8a-4de5-b968-0786034c87a6",
+              "name": "answer-2b",
+              "value": "1187688036/27d9b092a9",
+              "type": "string"
+            },
+            {
+              "id": "9fef7c0e-2415-45aa-a8a7-4e7b4b02ad9f",
+              "name": "answer-2c",
+              "value": "1187688020/f36eaac481",
+              "type": "string"
+            },
+            {
+              "id": "c4e66e20-91d6-4f15-98c0-275a214c81b1",
+              "name": "answer-3a",
+              "value": "1187687995/ea995d2dd1",
+              "type": "string"
+            },
+            {
+              "id": "39644d8e-7cc4-4e9e-ac50-97a4ab86f344",
+              "name": "answer-3b",
+              "value": "1187687969/26bd902981",
+              "type": "string"
+            },
+            {
+              "id": "18dd7b9d-0cd2-4fc3-8b77-0d185112efde",
+              "name": "answer-3c",
+              "value": "1187687922/9d55538550",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        0
+      ],
+      "id": "5e21ac69-5ba9-4be7-9e31-bad25ebbd43a",
+      "name": "vimeo-mapping"
+    },
+    {
+      "parameters": {
+        "jsCode": "  const answers = $('Webhook').first().json.query;\n  const vimeoMap = $('vimeo-mapping').first().json;\n\n\nfunction toAnswerKey(value) {\n    const normalized = String(value || '').trim().toLowerCase();\n    const match = normalized.match(/^(\\d+)([a-z])$/);\n\n    if (!match) {\n      throw new Error(`Invalid answer format: ${value}`);\n    }\n\n    return `answer-${match[1]}${match[2]}`;\n  }\n\n  const selections = [1, 2, 3].map((questionNumber) => {\n    const rawAnswer = answers[`q${questionNumber}`];\n    const answerKey = toAnswerKey(rawAnswer);\n    const video = vimeoMap[answerKey];\n\n    if (!video) {\n      throw new Error(`No Vimeo mapping found for ${answerKey}`);\n    }\n\n    return {\n      questionNumber,\n      rawAnswer,\n      answerKey,\n      video,\n    };\n  });\n\n  return [\n    {\n      json: {\n        selections,\n        video1: selections[0].video,\n        video2: selections[1].video,\n        video3: selections[2].video,\n      },\n    },\n  ];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9dd21b65-169f-44e9-a5f2-890fa813cc32",
+      "name": "Parse Answers"
+    },
+    {
+      "parameters": {
+        "path": "4a86636e-b66a-4355-887c-624c745b2d74",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "64ea54cf-cdad-48b2-b7e8-e3da83ec650d",
+      "name": "Webhook",
+      "webhookId": "4a86636e-b66a-4355-887c-624c745b2d74"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "1ac81cdc-3b0e-4695-b50c-51b063387634",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "url": "=https://vimeo.com/api/oembed.json?url={{ encodeURIComponent('https://vimeo.com/' + $('Parse Answers').first().json.selections[0].video) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "e19bf460-f870-4bd1-aedc-6ec192882e65",
+      "name": "Get Thumbnail URL"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.megyk.com",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9,nb;q=0.8,de;q=0.7",
+            "cache-control": "max-age=0",
+            "cookie": {
+              "__redacted": true,
+              "reason": "node_defined_field",
+              "canReveal": false
+            },
+            "dnt": "1",
+            "priority": "u=0, i",
+            "referer": "https://longdragon.wufoo.com/",
+            "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "98.153.119.146",
+            "x-forwarded-host": "n8n.megyk.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {
+            "q1": "1C",
+            "q2": "2B",
+            "q3": "3A"
+          },
+          "body": {},
+          "webhookUrl": "https://n8n.megyk.com/webhook/4a86636e-b66a-4355-887c-624c745b2d74",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Generate Answer Page": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vimeo-mapping": {
+      "main": [
+        [
+          {
+            "node": "Parse Answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Answers": {
+      "main": [
+        [
+          {
+            "node": "Get Thumbnail URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "vimeo-mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Thumbnail URL": {
+      "main": [
+        [
+          {
+            "node": "Generate Answer Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6fbd48a9-bd17-4d61-badc-9290ab9136fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
+  },
+  "nodeGroups": [],
+  "id": "czDoAjc1DOymBUQT",
+  "tags": []
+}
