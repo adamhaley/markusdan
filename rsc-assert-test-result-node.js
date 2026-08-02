@@ -3,11 +3,14 @@ const actual = $('Call \'Wufoo Risk-Fast-Check Risiko-Schnell-Check\'').item.jso
 
 function stableStringify(value) {
   if (Array.isArray(value)) {
-    return `[${value.map(stableStringify).join(',')}]`;
+    return `[${value.map(stableStringify).join(",")}]`;
   }
 
-  if (value && typeof value === 'object') {
-    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(",")}}`;
   }
 
   return JSON.stringify(value);
@@ -17,9 +20,14 @@ function isEqual(a, b) {
   return stableStringify(a) === stableStringify(b);
 }
 
-const actualSequenceVideoIds = (actual.sequence || [])
-  .map((item) => String(item.videoId || '').trim())
+const actualSequence = Array.isArray(actual.sequence) ? actual.sequence : [];
+const actualSequenceVideoIds = actualSequence
+  .map((item) => String(item.videoId || "").trim())
   .filter(Boolean);
+
+const expectedStepNumbers = ["1", "2", "3", "4", "5", "6"];
+const actualStepNumbers = (actual.selections || []).map((item) => String(item.stepNumber || ""));
+const actualSequenceTypes = actualSequence.map((item) => item.type);
 
 const checks = {
   normalizedAnswers: {
@@ -37,6 +45,31 @@ const checks = {
     actual: actualSequenceVideoIds,
     passed: isEqual(actualSequenceVideoIds, testCase.expected.sequenceVideoIds),
   },
+  selectionsLength: {
+    expected: 6,
+    actual: Array.isArray(actual.selections) ? actual.selections.length : null,
+    passed: Array.isArray(actual.selections) && actual.selections.length === 6,
+  },
+  sequenceLength: {
+    expected: 7,
+    actual: actualSequence.length,
+    passed: actualSequence.length === 7,
+  },
+  selectionStepNumbers: {
+    expected: expectedStepNumbers,
+    actual: actualStepNumbers,
+    passed: isEqual(actualStepNumbers, expectedStepNumbers),
+  },
+  sequenceTypes: {
+    expected: ["answer", "answer", "answer", "answer", "answer", "answer", "pitch"],
+    actual: actualSequenceTypes,
+    passed: isEqual(actualSequenceTypes, ["answer", "answer", "answer", "answer", "answer", "answer", "pitch"]),
+  },
+  pitchConsistency: {
+    expected: actual.pitch?.videoId || null,
+    actual: actualSequence[6]?.videoId || null,
+    passed: Boolean(actual.pitch?.videoId) && actual.pitch.videoId === actualSequence[6]?.videoId,
+  },
 };
 
 const failures = Object.entries(checks)
@@ -50,7 +83,9 @@ const failures = Object.entries(checks)
 return [
   {
     json: {
+      suite: testCase.suite || "unknown",
       name: testCase.name,
+      notes: testCase.notes || "",
       passed: failures.length === 0,
       checks,
       failures,
@@ -58,6 +93,8 @@ return [
         normalizedAnswers: actual.normalizedAnswers,
         pitchKey: actual.pitchKey,
         sequenceVideoIds: actualSequenceVideoIds,
+        sequenceTypes: actualSequenceTypes,
+        selectionStepNumbers: actualStepNumbers,
       },
     },
   },
