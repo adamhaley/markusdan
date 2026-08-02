@@ -1,6 +1,7 @@
 const STORAGE_KEY = "risk-fast-check-form";
 const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
 const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/fe28dcfc-b0d2-4c67-b447-c5225b82f8dd";
+const VIDEO_AUDIO_PREFERENCE_KEY = "rsc-video-audio-enabled";
 const START_STEP = "1";
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
@@ -59,6 +60,22 @@ function clearState() {
   sessionStorage.removeItem(STORAGE_KEY);
 }
 
+function shouldPlayStepVideoWithAudio() {
+  try {
+    return sessionStorage.getItem(VIDEO_AUDIO_PREFERENCE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function setStepVideoAudioPreference(enabled) {
+  try {
+    sessionStorage.setItem(VIDEO_AUDIO_PREFERENCE_KEY, enabled ? "true" : "false");
+  } catch {
+    // Ignore storage failures and fall back to default muted behavior.
+  }
+}
+
 function shouldClearState(form) {
   if (isReload()) {
     return true;
@@ -76,6 +93,38 @@ function shouldReturnToStart(form) {
 function isReload() {
   const [navigation] = performance.getEntriesByType("navigation");
   return navigation ? navigation.type === "reload" : performance.navigation?.type === 1;
+}
+
+let vimeoPlayerApiPromise;
+
+function loadVimeoPlayerApi() {
+  if (window.Vimeo?.Player) {
+    return Promise.resolve(window.Vimeo);
+  }
+
+  if (vimeoPlayerApiPromise) {
+    return vimeoPlayerApiPromise;
+  }
+
+  vimeoPlayerApiPromise = new Promise((resolve, reject) => {
+    const existingScript = document.querySelector("script[data-vimeo-player-api]");
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve(window.Vimeo), { once: true });
+      existingScript.addEventListener("error", reject, { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://player.vimeo.com/api/player.js";
+    script.async = true;
+    script.dataset.vimeoPlayerApi = "true";
+    script.addEventListener("load", () => resolve(window.Vimeo), { once: true });
+    script.addEventListener("error", reject, { once: true });
+    document.head.appendChild(script);
+  });
+
+  return vimeoPlayerApiPromise;
 }
 
 function bindTextFields(form) {
@@ -478,7 +527,8 @@ async function renderStepVideo(form) {
       return;
     }
 
-    const source = `https://player.vimeo.com/video/${config.vimeoId}?autoplay=1&muted=1&title=0&byline=0&portrait=0`;
+    const shouldPlayWithAudio = shouldPlayStepVideoWithAudio();
+    const source = `https://player.vimeo.com/video/${config.vimeoId}?autoplay=1&muted=${shouldPlayWithAudio ? 0 : 1}&title=0&byline=0&portrait=0`;
 
     slot.innerHTML = `
       <section class="video-card">
@@ -497,6 +547,31 @@ async function renderStepVideo(form) {
         </div>
       </section>
     `;
+
+    try {
+      await loadVimeoPlayerApi();
+      const iframe = slot.querySelector("iframe");
+
+      if (!iframe || !window.Vimeo?.Player) {
+        return;
+      }
+
+      const player = new window.Vimeo.Player(iframe);
+
+      player.on("volumechange", (event) => {
+        if (event && event.muted === false && Number(event.volume || 0) > 0) {
+          setStepVideoAudioPreference(true);
+        }
+      });
+
+      if (shouldPlayWithAudio) {
+        player.play().catch(() => {
+          setStepVideoAudioPreference(false);
+        });
+      }
+    } catch {
+      // Leave the iframe in place even if the Player API fails to load.
+    }
   } catch {
     // Leave the slot empty if the JSON cannot be loaded.
   }

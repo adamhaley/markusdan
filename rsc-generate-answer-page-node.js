@@ -149,6 +149,7 @@ const html = `<!doctype html>
     const embedUrls = ${JSON.stringify(embedUrls)};
     let index = 0;
     let player;
+    let shouldPlayWithAudio = false;
 
     const replayButton = document.getElementById('replayButton');
     const status = document.getElementById('status');
@@ -175,6 +176,16 @@ const html = `<!doctype html>
       poster.style.display = 'block';
     }
 
+    function rememberAudioPreference(data) {
+      if (!data) {
+        return;
+      }
+
+      if (data.muted === false && Number(data.volume || 0) > 0) {
+        shouldPlayWithAudio = true;
+      }
+    }
+
     function destroyPlayer() {
       if (!player) {
         return Promise.resolve();
@@ -189,10 +200,14 @@ const html = `<!doctype html>
       player = new Vimeo.Player('player', {
         url: embedUrls[index],
         autoplay: true,
-        muted: true,
+        muted: !shouldPlayWithAudio,
         byline: false,
         title: false,
         portrait: false
+      });
+
+      player.on('volumechange', (data) => {
+        rememberAudioPreference(data);
       });
 
       player.on('ended', () => {
@@ -201,7 +216,13 @@ const html = `<!doctype html>
         if (index < embedUrls.length) {
           destroyPlayer().then(() => {
             mountPlayer();
-            player.play().catch(() => {});
+            player.play().catch((error) => {
+              if (shouldPlayWithAudio) {
+                status.textContent = 'Tap play again to continue with audio';
+                showPoster();
+              }
+              console.error(error);
+            });
           });
         } else {
           destroyPlayer().then(() => {
@@ -218,7 +239,9 @@ const html = `<!doctype html>
       destroyPlayer().then(() => {
         mountPlayer();
         player.play().catch((error) => {
-          status.textContent = 'Tap play again to start audio';
+          status.textContent = shouldPlayWithAudio
+            ? 'Tap play again to continue with audio'
+            : 'Tap play again to start audio';
           showPoster();
           console.error(error);
         });
