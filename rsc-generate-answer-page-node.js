@@ -1,4 +1,4 @@
-const resolved = $('Build Sequence').first().json;
+const resolved = $('Call').first().json;
 const oembed = $('Get Thumbnail URL').first().json;
 
 const sequence = resolved.sequence || [];
@@ -149,7 +149,14 @@ const html = `<!doctype html>
     const embedUrls = ${JSON.stringify(embedUrls)};
     let index = 0;
     let player;
+    const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';
     let shouldPlayWithAudio = false;
+
+    try {
+      shouldPlayWithAudio = window.sessionStorage.getItem(AUDIO_PREFERENCE_KEY) === 'true';
+    } catch {
+      shouldPlayWithAudio = false;
+    }
 
     const replayButton = document.getElementById('replayButton');
     const status = document.getElementById('status');
@@ -183,6 +190,9 @@ const html = `<!doctype html>
 
       if (data.muted === false && Number(data.volume || 0) > 0) {
         shouldPlayWithAudio = true;
+        try {
+          window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'true');
+        } catch {}
       }
     }
 
@@ -220,6 +230,10 @@ const html = `<!doctype html>
               if (shouldPlayWithAudio) {
                 status.textContent = 'Tap play again to continue with audio';
                 showPoster();
+                try {
+                  window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'false');
+                } catch {}
+                shouldPlayWithAudio = false;
               }
               console.error(error);
             });
@@ -242,6 +256,12 @@ const html = `<!doctype html>
           status.textContent = shouldPlayWithAudio
             ? 'Tap play again to continue with audio'
             : 'Tap play again to start audio';
+          if (shouldPlayWithAudio) {
+            try {
+              window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'false');
+            } catch {}
+            shouldPlayWithAudio = false;
+          }
           showPoster();
           console.error(error);
         });
