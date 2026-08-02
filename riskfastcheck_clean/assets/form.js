@@ -357,7 +357,7 @@ async function submitResults(form) {
     throw new Error(`Webhook submission failed with status ${response.status}`);
   }
 
-  return response;
+  return response.text();
 }
 
 function showSubmissionError(form) {
@@ -442,12 +442,11 @@ function bindNavigation(form) {
     }
 
     try {
-      await submitResults(form);
-      const status = form.querySelector(".status");
-      if (status) {
-        status.classList.add("is-visible");
-      }
+      const html = await submitResults(form);
       clearState();
+      document.open();
+      document.write(html);
+      document.close();
     } catch (error) {
       console.error(error);
       showSubmissionError(form);
