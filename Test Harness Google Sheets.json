@@ -1,0 +1,677 @@
+{
+  "name": "Test Harness Google Sheets",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -208
+      ],
+      "id": "e35583b8-3142-414e-82b7-dedb49eb063a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ryhu6xynPYdjdgD7",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/ryhu6xynPYdjdgD7"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "real_estate_ownership": "={{ $json.input.real_estate_ownership }}",
+            "real_estate_investment_amount": "={{ $json.input.real_estate_investment_amount }}",
+            "securities_ownership": "={{ $json.input.securities_ownership }}",
+            "securities_investment_amount": "={{ $json.input.securities_investment_amount }}",
+            "precious_metals_ownership": "={{ $json.input.precious_metals_ownership }}",
+            "precious_metals_investment_amount": "={{ $json.input.precious_metals_investment_amount }}",
+            "life_insurance_ownership": "={{ $json.input.life_insurance_ownership }}",
+            "life_insurance_monthly_payment": "={{ $json.input.life_insurance_monthly_payment }}",
+            "bank_savings_ownership": "={{ $json.input.bank_savings_ownership }}",
+            "bank_savings_amount": "={{ $json.input.bank_savings_amount }}",
+            "alternative_assets_ownership": "={{ $json.input.alternative_assets_ownership }}",
+            "alternative_assets_investment_amount": "={{ $json.input.alternative_assets_investment_amount }}",
+            "feedback": "={{ $json.input.feedback }}",
+            "submittedAt": "={{ $json.input.submittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "real_estate_ownership",
+              "displayName": "real_estate_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "real_estate_investment_amount",
+              "displayName": "real_estate_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_ownership",
+              "displayName": "securities_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_investment_amount",
+              "displayName": "securities_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_ownership",
+              "displayName": "precious_metals_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_investment_amount",
+              "displayName": "precious_metals_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_ownership",
+              "displayName": "life_insurance_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_monthly_payment",
+              "displayName": "life_insurance_monthly_payment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_ownership",
+              "displayName": "bank_savings_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_amount",
+              "displayName": "bank_savings_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_ownership",
+              "displayName": "alternative_assets_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_investment_amount",
+              "displayName": "alternative_assets_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "feedback",
+              "displayName": "feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        16
+      ],
+      "id": "2d974791-a53a-4111-9954-fd2c294ed556",
+      "name": "Call 'Wufoo Risk-Fast-Check Risiko-Schnell-Check'"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "2b774616-4a8a-47a8-a88b-c8feb6328fd7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const testCase = $('Test Cases').item.json;\nconst actual = $('Call \\'Wufoo Risk-Fast-Check Risiko-Schnell-Check\\'').item.json;\n\nfunction stableStringify(value) {\n  if (Array.isArray(value)) {\n    return `[${value.map(stableStringify).join(\",\")}]`;\n  }\n\n  if (value && typeof value === \"object\") {\n    return `{${Object.keys(value)\n      .sort()\n      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)\n      .join(\",\")}}`;\n  }\n\n  return JSON.stringify(value);\n}\n\nfunction isEqual(a, b) {\n  return stableStringify(a) === stableStringify(b);\n}\n\nconst actualSequence = Array.isArray(actual.sequence) ? actual.sequence : [];\nconst actualSequenceVideoIds = actualSequence\n  .map((item) => String(item.videoId || \"\").trim())\n  .filter(Boolean);\n\nconst expectedStepNumbers = [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\"];\nconst actualStepNumbers = (actual.selections || []).map((item) => String(item.stepNumber || \"\"));\nconst actualSequenceTypes = actualSequence.map((item) => item.type);\n\nconst checks = {\n  normalizedAnswers: {\n    expected: testCase.expected.normalizedAnswers,\n    actual: actual.normalizedAnswers,\n    passed: isEqual(actual.normalizedAnswers, testCase.expected.normalizedAnswers),\n  },\n  pitchKey: {\n    expected: testCase.expected.pitchKey,\n    actual: actual.pitchKey,\n    passed: actual.pitchKey === testCase.expected.pitchKey,\n  },\n  sequenceVideoIds: {\n    expected: testCase.expected.sequenceVideoIds,\n    actual: actualSequenceVideoIds,\n    passed: isEqual(actualSequenceVideoIds, testCase.expected.sequenceVideoIds),\n  },\n  selectionsLength: {\n    expected: 6,\n    actual: Array.isArray(actual.selections) ? actual.selections.length : null,\n    passed: Array.isArray(actual.selections) && actual.selections.length === 6,\n  },\n  sequenceLength: {\n    expected: 7,\n    actual: actualSequence.length,\n    passed: actualSequence.length === 7,\n  },\n  selectionStepNumbers: {\n    expected: expectedStepNumbers,\n    actual: actualStepNumbers,\n    passed: isEqual(actualStepNumbers, expectedStepNumbers),\n  },\n  sequenceTypes: {\n    expected: [\"answer\", \"answer\", \"answer\", \"answer\", \"answer\", \"answer\", \"pitch\"],\n    actual: actualSequenceTypes,\n    passed: isEqual(actualSequenceTypes, [\"answer\", \"answer\", \"answer\", \"answer\", \"answer\", \"answer\", \"pitch\"]),\n  },\n  pitchConsistency: {\n    expected: actual.pitch?.videoId || null,\n    actual: actualSequence[6]?.videoId || null,\n    passed: Boolean(actual.pitch?.videoId) && actual.pitch.videoId === actualSequence[6]?.videoId,\n  },\n};\n\nconst failures = Object.entries(checks)\n  .filter(([, value]) => !value.passed)\n  .map(([key, value]) => ({\n    check: key,\n    expected: value.expected,\n    actual: value.actual,\n  }));\n\nreturn [\n  {\n    json: {\n      suite: testCase.suite || \"unknown\",\n      name: testCase.name,\n      notes: testCase.notes || \"\",\n      passed: failures.length === 0,\n      checks,\n      failures,\n      actual: {\n        normalizedAnswers: actual.normalizedAnswers,\n        pitchKey: actual.pitchKey,\n        sequenceVideoIds: actualSequenceVideoIds,\n        sequenceTypes: actualSequenceTypes,\n        selectionStepNumbers: actualStepNumbers,\n      },\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        256
+      ],
+      "id": "c731b906-8b0a-47ab-8f6d-15c7be64b6b8",
+      "name": "Test Assertion"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst results = items.map((item) => item.json);\nconst passed = results.filter((result) => result.passed);\nconst failed = results.filter((result) => !result.passed);\n\nconst suiteSummary = Object.values(\n  results.reduce((accumulator, result) => {\n    const suite = result.suite || \"unknown\";\n\n    if (!accumulator[suite]) {\n      accumulator[suite] = {\n        suite,\n        total: 0,\n        passed: 0,\n        failed: 0,\n        failedNames: [],\n      };\n    }\n\n    accumulator[suite].total += 1;\n\n    if (result.passed) {\n      accumulator[suite].passed += 1;\n    } else {\n      accumulator[suite].failed += 1;\n      accumulator[suite].failedNames.push(result.name);\n    }\n\n    return accumulator;\n  }, {})\n);\n\nreturn [\n  {\n    json: {\n      total: results.length,\n      passed: passed.length,\n      failed: failed.length,\n      allPassed: failed.length === 0,\n      passedNames: passed.map((result) => result.name),\n      failedNames: failed.map((result) => result.name),\n      suiteSummary,\n      failures: failed.map((result) => ({\n        suite: result.suite,\n        name: result.name,\n        notes: result.notes,\n        failures: result.failures,\n        actual: result.actual,\n      })),\n      results,\n      generatedAt: new Date().toISOString(),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -208
+      ],
+      "id": "402f8ae1-ccfc-4158-9d0f-bf3b0cd0d34e",
+      "name": "Log/Report"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1cVMd_rHAzRZA1y9RSWGVWczqQGmoRIJwuzsYg-VGFG8",
+          "mode": "list",
+          "cachedResultName": "RSC Test Suite",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cVMd_rHAzRZA1y9RSWGVWczqQGmoRIJwuzsYg-VGFG8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cVMd_rHAzRZA1y9RSWGVWczqQGmoRIJwuzsYg-VGFG8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        -208
+      ],
+      "id": "32b22d12-75a0-462b-a9a8-64496c3e0176",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qJ5ck4AVx9Jx37Fr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const testCase = $('Test Cases').item.json;\nconst assertion = $input.first().json;\n\nconst actualPitch = String(assertion.actual?.pitchKey || \"\").trim();\nconst actualSequence = (assertion.actual?.sequenceVideoIds || []).join(\"|\");\nconst failureReason = (assertion.failures || [])\n  .map((failure) => {\n    const expected = JSON.stringify(failure.expected);\n    const actual = JSON.stringify(failure.actual);\n    return `${failure.check}: expected ${expected}, actual ${actual}`;\n  })\n  .join(\" || \");\n\nreturn [\n  {\n    json: {\n      case_id: testCase.case_id,\n      actual_pitch: actualPitch,\n      actual_sequence: actualSequence,\n      pass: assertion.passed ? \"TRUE\" : \"FALSE\",\n      last_run_at: new Date().toISOString(),\n      failure_reason: failureReason,\n\n      // Keep summary-friendly fields on the item in case you want this branch\n      // to feed a report later.\n      suite: assertion.suite,\n      name: assertion.name,\n      passed: assertion.passed,\n      failures: assertion.failures,\n      actual: assertion.actual,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        256
+      ],
+      "id": "515817b5-f082-4af9-950b-8aa2486b96fa",
+      "name": "Prepare Sheet Update"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1cVMd_rHAzRZA1y9RSWGVWczqQGmoRIJwuzsYg-VGFG8",
+          "mode": "list",
+          "cachedResultName": "RSC Test Suite",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cVMd_rHAzRZA1y9RSWGVWczqQGmoRIJwuzsYg-VGFG8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cVMd_rHAzRZA1y9RSWGVWczqQGmoRIJwuzsYg-VGFG8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "case_id": "={{ $json.case_id }}",
+            "actual_pitch": "={{ $json.actual_pitch }}",
+            "actual_sequence": "={{ $json.actual_sequence }}",
+            "pass": "={{ $json.pass }}",
+            "last_run_at": "={{ $json.last_run_at }}",
+            "failure_reason": "={{ $json.failure_reason }}"
+          },
+          "matchingColumns": [
+            "case_id"
+          ],
+          "schema": [
+            {
+              "id": "case_id",
+              "displayName": "case_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "enabled",
+              "displayName": "enabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "suite",
+              "displayName": "suite",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "test_name",
+              "displayName": "test_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "step_1_answer",
+              "displayName": "step_1_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "step_2_answer",
+              "displayName": "step_2_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "step_3_answer",
+              "displayName": "step_3_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "step_4_answer",
+              "displayName": "step_4_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "step_5_answer",
+              "displayName": "step_5_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "step_6_answer",
+              "displayName": "step_6_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "step_7_feedback",
+              "displayName": "step_7_feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "expected_pitch",
+              "displayName": "expected_pitch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "actual_pitch",
+              "displayName": "actual_pitch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "expected_sequence",
+              "displayName": "expected_sequence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "actual_sequence",
+              "displayName": "actual_sequence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pass",
+              "displayName": "pass",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_run_at",
+              "displayName": "last_run_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "failure_reason",
+              "displayName": "failure_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Column 1",
+              "displayName": "Column 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Column 2",
+              "displayName": "Column 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        256
+      ],
+      "id": "aafa4658-647d-48a7-8461-7179e613bc84",
+      "name": "Write Test REsult",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qJ5ck4AVx9Jx37Fr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const ACTIVE_SUITES = [];\n\nconst ANSWER_TO_PAYLOAD = {\n  \"1a\": {\n    real_estate_ownership: \"Nein\",\n    real_estate_investment_amount: \"\",\n  },\n  \"1b\": {\n    real_estate_ownership: \"Ja\",\n    real_estate_investment_amount: \"weniger als €100.000\",\n  },\n  \"1c\": {\n    real_estate_ownership: \"Ja\",\n    real_estate_investment_amount: \"€100.000 - €500.000\",\n  },\n  \"1d\": {\n    real_estate_ownership: \"Ja\",\n    real_estate_investment_amount: \"€500.000 - €1.000.000\",\n  },\n  \"1e\": {\n    real_estate_ownership: \"Ja\",\n    real_estate_investment_amount: \"mehr als €1.000.000\",\n  },\n  \"2a\": {\n    securities_ownership: \"Nein\",\n    securities_investment_amount: \"\",\n  },\n  \"2b\": {\n    securities_ownership: \"Ja\",\n    securities_investment_amount: \"weniger als €10.000\",\n  },\n  \"2c\": {\n    securities_ownership: \"Ja\",\n    securities_investment_amount: \"€10.000 - €50.000\",\n  },\n  \"2d\": {\n    securities_ownership: \"Ja\",\n    securities_investment_amount: \"€50.000 - €100.000\",\n  },\n  \"2e\": {\n    securities_ownership: \"Ja\",\n    securities_investment_amount: \"mehr als €100.000\",\n  },\n  \"3a\": {\n    precious_metals_ownership: \"Nein\",\n    precious_metals_investment_amount: \"\",\n  },\n  \"3b\": {\n    precious_metals_ownership: \"Ja\",\n    precious_metals_investment_amount: \"€10.000 - €50.000\",\n  },\n  \"3c\": {\n    precious_metals_ownership: \"Ja\",\n    precious_metals_investment_amount: \"€50.000 - €100.000\",\n  },\n  \"3d\": {\n    precious_metals_ownership: \"Ja\",\n    precious_metals_investment_amount: \"mehr als €100.000\",\n  },\n  \"4a\": {\n    life_insurance_ownership: \"Nein\",\n    life_insurance_monthly_payment: \"\",\n  },\n  \"4b\": {\n    life_insurance_ownership: \"Ja\",\n    life_insurance_monthly_payment: \"weniger als €100\",\n  },\n  \"4c\": {\n    life_insurance_ownership: \"Ja\",\n    life_insurance_monthly_payment: \"€100 - €200\",\n  },\n  \"4d\": {\n    life_insurance_ownership: \"Ja\",\n    life_insurance_monthly_payment: \"mehr als €200\",\n  },\n  \"4e\": {\n    life_insurance_ownership: \"Ja\",\n    life_insurance_monthly_payment: \"ich weiß es nicht genau\",\n  },\n  \"5a\": {\n    bank_savings_ownership: \"Nein\",\n    bank_savings_amount: \"\",\n  },\n  \"5b\": {\n    bank_savings_ownership: \"Ja\",\n    bank_savings_amount: \"€10.000 - €50.000\",\n  },\n  \"5c\": {\n    bank_savings_ownership: \"Ja\",\n    bank_savings_amount: \"€50.000 - €100.000\",\n  },\n  \"5d\": {\n    bank_savings_ownership: \"Ja\",\n    bank_savings_amount: \"mehr als €100.000\",\n  },\n  \"6a\": {\n    alternative_assets_ownership: \"Nein\",\n    alternative_assets_investment_amount: \"\",\n  },\n  \"6b\": {\n    alternative_assets_ownership: \"Ja\",\n    alternative_assets_investment_amount: \"€10.000 - €50.000\",\n  },\n  \"6c\": {\n    alternative_assets_ownership: \"Ja\",\n    alternative_assets_investment_amount: \"€50.000 - €100.000\",\n  },\n  \"6d\": {\n    alternative_assets_ownership: \"Ja\",\n    alternative_assets_investment_amount: \"mehr als €100.000\",\n  },\n};\n\nconst BASE_PAYLOAD = {\n  utm_source: null,\n  utm_medium: null,\n  utm_campaign: null,\n  utm_content: null,\n  utm_term: null,\n  real_estate_ownership: \"Nein\",\n  real_estate_investment_amount: \"\",\n  securities_ownership: \"Nein\",\n  securities_investment_amount: \"\",\n  precious_metals_ownership: \"Nein\",\n  precious_metals_investment_amount: \"\",\n  life_insurance_ownership: \"Nein\",\n  life_insurance_monthly_payment: \"\",\n  bank_savings_ownership: \"Nein\",\n  bank_savings_amount: \"\",\n  alternative_assets_ownership: \"Nein\",\n  alternative_assets_investment_amount: \"\",\n  feedback: \"\",\n  submittedAt: \"2026-07-30T00:00:00.000Z\",\n};\n\nfunction isEnabled(value) {\n  return [\"true\", \"1\", \"yes\", \"y\"].includes(String(value || \"\").trim().toLowerCase());\n}\n\nfunction parseSequence(value) {\n  return String(value || \"\")\n    .split(\"|\")\n    .map((part) => part.trim())\n    .filter(Boolean);\n}\n\nfunction normalizeAnswerCode(value, fieldName) {\n  const normalized = String(value || \"\").trim().toLowerCase();\n\n  if (!/^[1-6][a-e]$/.test(normalized)) {\n    throw new Error(`Invalid ${fieldName}: ${value}`);\n  }\n\n  return normalized;\n}\n\nconst items = $input.all();\n\nreturn items\n  .map((item, originalIndex) => ({ item, originalIndex }))\n  .filter(({ item }) => {\n    const row = item.json;\n    const suite = String(row.suite || \"\").trim();\n\n    return isEnabled(row.enabled) && (!ACTIVE_SUITES.length || ACTIVE_SUITES.includes(suite));\n  })\n  .map(({ item, originalIndex }) => {\n    const row = item.json;\n    const normalizedAnswers = {\n      \"1\": normalizeAnswerCode(row.step_1_answer, \"step_1_answer\"),\n      \"2\": normalizeAnswerCode(row.step_2_answer, \"step_2_answer\"),\n      \"3\": normalizeAnswerCode(row.step_3_answer, \"step_3_answer\"),\n      \"4\": normalizeAnswerCode(row.step_4_answer, \"step_4_answer\"),\n      \"5\": normalizeAnswerCode(row.step_5_answer, \"step_5_answer\"),\n      \"6\": normalizeAnswerCode(row.step_6_answer, \"step_6_answer\"),\n    };\n\n    const payload = { ...BASE_PAYLOAD };\n\n    for (const answerCode of Object.values(normalizedAnswers)) {\n      const patch = ANSWER_TO_PAYLOAD[answerCode];\n\n      if (!patch) {\n        throw new Error(`No payload mapping found for ${answerCode}`);\n      }\n\n      Object.assign(payload, patch);\n    }\n\n    payload.feedback = String(row.step_7_feedback || \"\").trim();\n    payload.submittedAt = new Date().toISOString();\n\n    return {\n      json: {\n        case_id: String(row.case_id || row.test_name || \"\").trim(),\n        suite: String(row.suite || \"\").trim(),\n        name: String(row.test_name || row.case_id || \"\").trim(),\n        notes: String(row.notes || \"\").trim(),\n        input: payload,\n        expected: {\n          normalizedAnswers,\n          pitchKey: String(row.expected_pitch || \"\").trim(),\n          sequenceVideoIds: parseSequence(row.expected_sequence),\n        },\n      },\n      pairedItem: {\n        item: originalIndex,\n      },\n    };\n  });\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "4d43f92c-749e-49ef-8fdd-90de5c285543",
+      "name": "Test Cases"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Log/Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call 'Wufoo Risk-Fast-Check Risiko-Schnell-Check'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Wufoo Risk-Fast-Check Risiko-Schnell-Check'": {
+      "main": [
+        [
+          {
+            "node": "Test Assertion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Assertion": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sheet Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Test Cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Sheet Update": {
+      "main": [
+        [
+          {
+            "node": "Write Test REsult",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Test REsult": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Cases": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b3b46def-2151-4ff4-8ee8-35c83af4c7aa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
+  },
+  "nodeGroups": [],
+  "id": "BIc466nIxSF0bC4a",
+  "tags": []
+}
