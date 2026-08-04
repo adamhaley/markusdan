@@ -1,0 +1,74 @@
+n8n.megyk.com {
+    reverse_proxy n8n:5678 {
+        flush_interval -1
+    }
+}
+
+renders.megyk.com {
+    reverse_proxy rsc-render-service:3400 {
+        flush_interval -1
+    }
+}
+
+# Supabase main
+supabase.megyk.com {
+    @studio path /studio/*
+    reverse_proxy @studio supabase-studio:3000 {
+        header_up Host {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Real-IP {remote_host}
+    }
+
+    @kong not path /studio/*
+    reverse_proxy @kong supabase-kong:8000 {
+        header_up Host {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+# Supabase REST API
+supabase-rest.megyk.com {
+    reverse_proxy supabase-rest:3000
+}
+
+# Supabase Kong (main API gateway, optional)
+api.megyk.com {
+    reverse_proxy supabase-kong:8000
+}
+
+# Next.js Marketing  Campaign Dashboard
+dashboard.megyk.com {
+    reverse_proxy megyk-dashboard:3100
+}
+
+pdf.megyk.com {
+    reverse_proxy html2pdf:8000
+}
+
+app.megyk.com {
+    reverse_proxy megyk-books:3200
+}
+
+staging.megyk.com {
+   reverse_proxy megyk-books-staging:3200
+}
+
+megyk.com {
+   reverse_proxy wordpress:8080
+}
+
+# Ollama
+ollama.megyk.com {
+    reverse_proxy 172.17.0.1:11434 {
+	transport http {
+            # These extend the default timeouts for long-running requests
+            dial_timeout 30s
+            response_header_timeout 900s
+            read_timeout 900s
+            write_timeout 900s
+        }
+    }
+}

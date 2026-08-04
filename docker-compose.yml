@@ -39,7 +39,7 @@ services:
       - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
       - N8N_PAYLOAD_SIZE_MAX=256
       - N8N_TRUST_PROXY=true
-
+      - N8N_INSECURE_DISABLE_WEBHOOK_IFRAME_SANDBOX=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
@@ -48,6 +48,24 @@ services:
     networks:
       - default
       - supabase_default
+
+  rsc-render-service:
+    build:
+      context: ./render-service
+    restart: unless-stopped
+    environment:
+      PORT: 3400
+      PUBLIC_BASE_URL: https://renders.megyk.com
+      VIMEO_ACCESS_TOKEN: ${RSC_VIMEO_ACCESS_TOKEN}
+      RENDER_API_KEY: ${RSC_RENDER_API_KEY}
+      RENDER_OUTPUT_DIR: /data/renders
+      RENDER_TEMP_DIR: /data/tmp
+      TRANSITION_DURATION: ${RSC_TRANSITION_DURATION:-0.35}
+    volumes:
+      - rsc_render_data:/data
+    networks:
+      - default
+
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -71,8 +89,8 @@ services:
 
       # Admin bootstrap (only used on first run)
       WORDPRESS_USERNAME: admin
-      WORDPRESS_PASSWORD: adminpassword
-      WORDPRESS_EMAIL: adamhaley@gmail.com
+      WORDPRESS_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD}
+      WORDPRESS_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
 
       # Redis
       WORDPRESS_ENABLE_REDIS: "yes"
@@ -93,7 +111,7 @@ services:
     container_name: wordpress-db
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MARIADB_DATABASE: wordpress
       MARIADB_USER: wordpress
       MARIADB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
@@ -217,6 +235,7 @@ volumes:
   redis-data:
   ollama-data:
     driver: local
+  rsc_render_data:
 
 # --------------------------
 # Networks
