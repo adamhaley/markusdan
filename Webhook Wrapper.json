@@ -33,7 +33,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        720,
+        944,
         -16
       ],
       "id": "a616a3cd-5358-4afc-adb9-0ed5c67520e6",
@@ -41,12 +41,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const resolved = $('Call').first().json;\nconst oembed = $('Get Thumbnail URL').first().json;\n\nconst sequence = resolved.sequence || [];\n\nconst videoIds = sequence\n  .map((item) => String(item.videoId || '').trim())\n  .filter(Boolean);\n\nconst thumbnailUrl = String(oembed.thumbnail_url_with_play_button || '').trim();\n\nif (!videoIds.length) {\n  throw new Error('No videos provided');\n}\n\nconst embedUrls = videoIds.map((videoId) =>\n  `https://player.vimeo.com/video/${videoId}?autoplay=1&autopause=0&title=0&byline=0&portrait=0`\n);\n\nconst html = `<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Video Sequence</title>\n  <style>\n    :root {\n      --bg: #050505;\n      --text: #f5f1e8;\n      --muted: #b8b1a3;\n      --accent: #d7a84a;\n      --accent-hover: #e6bb67;\n    }\n\n    * {\n      box-sizing: border-box;\n    }\n\n    body {\n      margin: 0;\n      min-height: 100vh;\n      display: grid;\n      place-items: center;\n      background:\n        radial-gradient(circle at top, rgba(215, 168, 74, 0.16), transparent 32rem),\n        linear-gradient(180deg, #0a0a0a 0%, #000 100%);\n      color: var(--text);\n      font-family: Georgia, \"Times New Roman\", serif;\n    }\n\n    .shell {\n      width: min(96vw, 960px);\n      display: grid;\n      gap: 1rem;\n    }\n\n    .frame {\n      position: relative;\n      width: 100%;\n      aspect-ratio: 16 / 9;\n      background: #000;\n      border: 1px solid rgba(255, 255, 255, 0.08);\n      border-radius: 18px;\n      overflow: hidden;\n      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);\n    }\n\n    .poster {\n      position: absolute;\n      inset: 0;\n      background-color: #000;\n      background-image: url('${thumbnailUrl}');\n      background-size: cover;\n      background-position: center;\n      z-index: 2;\n      cursor: pointer;\n    }\n\n    #player {\n      position: relative;\n      width: 100%;\n      height: 100%;\n      z-index: 1;\n    }\n\n    #player iframe {\n      position: absolute;\n      inset: 0;\n      width: 100%;\n      height: 100%;\n      border: 0;\n      pointer-events: auto;\n    }\n\n    .controls {\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      min-height: 3rem;\n    }\n\n    .replay-button {\n      appearance: none;\n      border: 0;\n      border-radius: 999px;\n      padding: 0.85rem 1.4rem;\n      background: var(--accent);\n      color: #1b1408;\n      font: inherit;\n      font-size: 1rem;\n      cursor: pointer;\n      transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;\n      display: none;\n    }\n\n    .replay-button:hover {\n      background: var(--accent-hover);\n      transform: translateY(-1px);\n    }\n\n    .replay-button:active {\n      transform: translateY(0);\n    }\n\n    .status {\n      color: var(--muted);\n      font-size: 0.95rem;\n      text-align: center;\n      letter-spacing: 0.02em;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"shell\">\n    <div class=\"frame\">\n      <div id=\"poster\" class=\"poster\"></div>\n      <div id=\"player\"></div>\n    </div>\n\n    <div class=\"controls\">\n      <button id=\"replayButton\" class=\"replay-button\" type=\"button\">Replay sequence</button>\n    </div>\n\n    <div id=\"status\" class=\"status\"></div>\n  </div>\n\n  <script src=\"https://player.vimeo.com/api/player.js\"></script>\n  <script>\n    const embedUrls = ${JSON.stringify(embedUrls)};\n    let index = 0;\n    let player;\n    const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';\n    let shouldPlayWithAudio = false;\n\n    try {\n      shouldPlayWithAudio = window.sessionStorage.getItem(AUDIO_PREFERENCE_KEY) === 'true';\n    } catch {\n      shouldPlayWithAudio = false;\n    }\n\n    const replayButton = document.getElementById('replayButton');\n    const status = document.getElementById('status');\n    const poster = document.getElementById('poster');\n\n    function updateStatus() {\n      status.textContent = 'Clip ' + (index + 1) + ' of ' + embedUrls.length;\n    }\n\n    function showReplay() {\n      status.textContent = 'Sequence complete';\n      replayButton.style.display = 'inline-block';\n    }\n\n    function hideReplay() {\n      replayButton.style.display = 'none';\n    }\n\n    function hidePoster() {\n      poster.style.display = 'none';\n    }\n\n    function showPoster() {\n      poster.style.display = 'block';\n    }\n\n    function rememberAudioPreference(data) {\n      if (!data) {\n        return;\n      }\n\n      if (data.muted === false && Number(data.volume || 0) > 0) {\n        shouldPlayWithAudio = true;\n        try {\n          window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'true');\n        } catch {}\n      }\n    }\n\n    function destroyPlayer() {\n      if (!player) {\n        return Promise.resolve();\n      }\n\n      return player.destroy().catch(() => {});\n    }\n\n    function mountPlayer() {\n      updateStatus();\n\n      player = new Vimeo.Player('player', {\n        url: embedUrls[index],\n        autoplay: true,\n        muted: !shouldPlayWithAudio,\n        byline: false,\n        title: false,\n        portrait: false\n      });\n\n      player.on('volumechange', (data) => {\n        rememberAudioPreference(data);\n      });\n\n      player.on('ended', () => {\n        index += 1;\n\n        if (index < embedUrls.length) {\n          destroyPlayer().then(() => {\n            mountPlayer();\n            player.play().catch((error) => {\n              if (shouldPlayWithAudio) {\n                status.textContent = 'Tap play again to continue with audio';\n                showPoster();\n                try {\n                  window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'false');\n                } catch {}\n                shouldPlayWithAudio = false;\n              }\n              console.error(error);\n            });\n          });\n        } else {\n          destroyPlayer().then(() => {\n            showReplay();\n          });\n        }\n      });\n    }\n\n    function startSequence() {\n      index = 0;\n      hideReplay();\n      hidePoster();\n      destroyPlayer().then(() => {\n        mountPlayer();\n        player.play().catch((error) => {\n          status.textContent = shouldPlayWithAudio\n            ? 'Tap play again to continue with audio'\n            : 'Tap play again to start audio';\n          if (shouldPlayWithAudio) {\n            try {\n              window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'false');\n            } catch {}\n            shouldPlayWithAudio = false;\n          }\n          showPoster();\n          console.error(error);\n        });\n      });\n    }\n\n    poster.addEventListener('click', () => {\n      startSequence();\n    });\n\n    replayButton.addEventListener('click', () => {\n      startSequence();\n    });\n\n    hidePoster();\n    startSequence();\n    status.textContent = 'Ready to play';\n  </script>\n</body>\n</html>`;\n\nreturn [{ json: { html } }];\n"
+        "jsCode": "// HTML Generator Code node\n// Supported delivery modes: \"vimeo\" and \"rendered\".\nconst DELIVERY_MODE = 'rendered';\nconst RENDER_NODE_NAME = 'Render Video';\n\nconst resolved = $('Call').first().json;\nconst oembed = $('Get Thumbnail URL').first().json;\nconst isRendered = DELIVERY_MODE === 'rendered';\n\nconst sequence = resolved.sequence || [];\nconst videoIds = sequence\n  .map((item) => String(item.videoId || '').trim())\n  .filter(Boolean);\nconst thumbnailUrl = String(oembed.thumbnail_url_with_play_button || '').trim();\n\nlet renderedVideoUrl = '';\n\nif (isRendered) {\n  const renderResult = $(RENDER_NODE_NAME).first().json;\n  renderedVideoUrl = String(renderResult.videoUrl || '').trim();\n\n  if (!renderedVideoUrl) {\n    throw new Error(`No videoUrl returned by ${RENDER_NODE_NAME}`);\n  }\n} else if (!videoIds.length) {\n  throw new Error('No videos provided');\n}\n\nconst embedUrls = videoIds.map((videoId) =>\n  `https://player.vimeo.com/video/${videoId}?autoplay=1&autopause=0&title=0&byline=0&portrait=0`\n);\n\nconst mediaMarkup = isRendered\n  ? '<video id=\"video\" playsinline controls preload=\"metadata\"></video>'\n  : '<div id=\"player\"></div>';\n\nconst vimeoApiScript = isRendered\n  ? ''\n  : '<script src=\"https://player.vimeo.com/api/player.js\"></script>';\n\nconst clientScript = `\n    const deliveryMode = ${JSON.stringify(DELIVERY_MODE)};\n    const embedUrls = ${JSON.stringify(embedUrls)};\n    const renderedVideoUrl = ${JSON.stringify(renderedVideoUrl)};\n    const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';\n\n    let index = 0;\n    let player;\n    let shouldPlayWithAudio = false;\n\n    try {\n      shouldPlayWithAudio = window.sessionStorage.getItem(AUDIO_PREFERENCE_KEY) === 'true';\n    } catch {\n      shouldPlayWithAudio = false;\n    }\n\n    const replayButton = document.getElementById('replayButton');\n    const status = document.getElementById('status');\n    const poster = document.getElementById('poster');\n    const videoElement = document.getElementById('video');\n\n    function rememberAudioPreference(muted, volume) {\n      if (muted === false && Number(volume || 0) > 0) {\n        shouldPlayWithAudio = true;\n        try {\n          window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'true');\n        } catch {}\n      }\n    }\n\n    function updateStatus() {\n      status.textContent = deliveryMode === 'rendered'\n        ? 'Final video'\n        : 'Clip ' + (index + 1) + ' of ' + embedUrls.length;\n    }\n\n    function showReplay() {\n      status.textContent = 'Sequence complete';\n      replayButton.style.display = 'inline-block';\n    }\n\n    function hideReplay() {\n      replayButton.style.display = 'none';\n    }\n\n    function hidePoster() {\n      poster.style.display = 'none';\n    }\n\n    function showPoster() {\n      poster.style.display = 'block';\n    }\n\n    function destroyPlayer() {\n      if (!player) {\n        return Promise.resolve();\n      }\n\n      return player.destroy().catch(() => {});\n    }\n\n    function handlePlayFailure(error) {\n      status.textContent = shouldPlayWithAudio\n        ? 'Tap play again to continue with audio'\n        : 'Tap play again to start audio';\n      showPoster();\n      console.error(error);\n    }\n\n    function mountVimeoPlayer() {\n      updateStatus();\n\n      player = new Vimeo.Player('player', {\n        url: embedUrls[index],\n        autoplay: true,\n        muted: !shouldPlayWithAudio,\n        byline: false,\n        title: false,\n        portrait: false\n      });\n\n      player.on('volumechange', (data) => {\n        rememberAudioPreference(data.muted, data.volume);\n      });\n\n      player.on('ended', () => {\n        index += 1;\n\n        if (index < embedUrls.length) {\n          destroyPlayer().then(() => {\n            mountVimeoPlayer();\n            player.play().catch(handlePlayFailure);\n          });\n        } else {\n          destroyPlayer().then(showReplay);\n        }\n      });\n    }\n\n    function startRenderedVideo() {\n      updateStatus();\n      videoElement.src = renderedVideoUrl;\n      videoElement.muted = !shouldPlayWithAudio;\n      videoElement.load();\n      videoElement.play().catch(handlePlayFailure);\n    }\n\n    function startSequence() {\n      index = 0;\n      hideReplay();\n      hidePoster();\n\n      if (deliveryMode === 'rendered') {\n        startRenderedVideo();\n        return;\n      }\n\n      destroyPlayer().then(() => {\n        mountVimeoPlayer();\n        player.play().catch(handlePlayFailure);\n      });\n    }\n\n    if (videoElement) {\n      videoElement.addEventListener('volumechange', () => {\n        rememberAudioPreference(videoElement.muted, videoElement.volume);\n      });\n\n      videoElement.addEventListener('ended', showReplay);\n    }\n\n    poster.addEventListener('click', startSequence);\n    replayButton.addEventListener('click', startSequence);\n\n    startSequence();\n    status.textContent = 'Ready to play';\n`;\n\nconst html = `<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Video Sequence</title>\n  <style>\n    :root {\n      --text: #f5f1e8;\n      --muted: #b8b1a3;\n      --accent: #d7a84a;\n      --accent-hover: #e6bb67;\n    }\n\n    * {\n      box-sizing: border-box;\n    }\n\n    body {\n      margin: 0;\n      min-height: 100vh;\n      display: grid;\n      place-items: center;\n      background:\n        radial-gradient(circle at top, rgba(215, 168, 74, 0.16), transparent 32rem),\n        linear-gradient(180deg, #0a0a0a 0%, #000 100%);\n      color: var(--text);\n      font-family: Georgia, \"Times New Roman\", serif;\n    }\n\n    .shell {\n      width: min(96vw, 960px);\n      display: grid;\n      gap: 1rem;\n    }\n\n    .frame {\n      position: relative;\n      width: 100%;\n      aspect-ratio: 16 / 9;\n      background: #000;\n      border: 1px solid rgba(255, 255, 255, 0.08);\n      border-radius: 18px;\n      overflow: hidden;\n      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);\n    }\n\n    .poster {\n      position: absolute;\n      inset: 0;\n      background-color: #000;\n      background-image: url('${thumbnailUrl}');\n      background-size: cover;\n      background-position: center;\n      z-index: 2;\n      cursor: pointer;\n    }\n\n    #player,\n    #video {\n      position: absolute;\n      inset: 0;\n      width: 100%;\n      height: 100%;\n      z-index: 1;\n    }\n\n    #player iframe {\n      width: 100%;\n      height: 100%;\n      border: 0;\n    }\n\n    #video {\n      object-fit: contain;\n      background: #000;\n    }\n\n    .controls {\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      min-height: 3rem;\n    }\n\n    .replay-button {\n      appearance: none;\n      border: 0;\n      border-radius: 999px;\n      padding: 0.85rem 1.4rem;\n      background: var(--accent);\n      color: #1b1408;\n      font: inherit;\n      font-size: 1rem;\n      cursor: pointer;\n      transition: transform 120ms ease, background 120ms ease;\n      display: none;\n    }\n\n    .replay-button:hover {\n      background: var(--accent-hover);\n      transform: translateY(-1px);\n    }\n\n    .replay-button:active {\n      transform: translateY(0);\n    }\n\n    .status {\n      color: var(--muted);\n      font-size: 0.95rem;\n      text-align: center;\n      letter-spacing: 0.02em;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"shell\">\n    <div class=\"frame\">\n      <div id=\"poster\" class=\"poster\"></div>\n      ${mediaMarkup}\n    </div>\n\n    <div class=\"controls\">\n      <button id=\"replayButton\" class=\"replay-button\" type=\"button\">Replay sequence</button>\n    </div>\n\n    <div id=\"status\" class=\"status\"></div>\n  </div>\n\n  ${vimeoApiScript}\n  <script>\n${clientScript}\n  </script>\n</body>\n</html>`;\n\nreturn [\n  {\n    json: {\n      html,\n      deliveryMode: DELIVERY_MODE,\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        496,
+        720,
         -16
       ],
       "id": "2464ae73-c7d4-43f4-b080-6cc0fb718cb5",
@@ -54,13 +54,13 @@
     },
     {
       "parameters": {
-        "url": "=https://vimeo.com/api/oembed.json?url={{ encodeURIComponent('https://vimeo.com/' +  $json.sequence[0].videoId ) }}",
+        "url": "=https://vimeo.com/api/oembed.json?url={{ encodeURIComponent('https://vimeo.com/' + $('Call').first().json.sequence[0].videoId) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        272,
+        496,
         -16
       ],
       "id": "3e8ed93e-c113-4b6a-a3a3-68e84f685d48",
@@ -248,6 +248,41 @@
       ],
       "id": "9f0079ae-ae0b-43d7-9634-9b9ab0fc8476",
       "name": "Call"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://renders.megyk.com/render",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "sequence",
+              "value": "={{ $('Call').first().json.sequence }}"
+            },
+            {}
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        -16
+      ],
+      "id": "db717b97-1102-4024-bb14-82e8ed858b6e",
+      "name": "Render Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rMR0d9ZbSHYFYvIU",
+          "name": "RSC Video Render API Key"
+        }
+      }
     }
   ],
   "pinData": {
@@ -349,6 +384,17 @@
       "main": [
         [
           {
+            "node": "Render Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Video": {
+      "main": [
+        [
+          {
             "node": "Get Thumbnail URL",
             "type": "main",
             "index": 0
@@ -363,7 +409,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "1afb054c-ab75-47ee-b5fa-dbb591f7d661",
+  "versionId": "933cfb9c-0b61-4c6a-89a0-76e5836563a2",
   "meta": {
     "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
   },

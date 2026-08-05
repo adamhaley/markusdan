@@ -1,21 +1,180 @@
+// HTML Generator Code node
+// Supported delivery modes: "vimeo" and "rendered".
+const DELIVERY_MODE = 'vimeo';
+const RENDER_NODE_NAME = 'Render Video';
+
 const resolved = $('Call').first().json;
 const oembed = $('Get Thumbnail URL').first().json;
+const isRendered = DELIVERY_MODE === 'rendered';
 
 const sequence = resolved.sequence || [];
-
 const videoIds = sequence
   .map((item) => String(item.videoId || '').trim())
   .filter(Boolean);
-
 const thumbnailUrl = String(oembed.thumbnail_url_with_play_button || '').trim();
 
-if (!videoIds.length) {
+let renderedVideoUrl = '';
+
+if (isRendered) {
+  const renderResult = $(RENDER_NODE_NAME).first().json;
+  renderedVideoUrl = String(renderResult.videoUrl || '').trim();
+
+  if (!renderedVideoUrl) {
+    throw new Error(`No videoUrl returned by ${RENDER_NODE_NAME}`);
+  }
+} else if (!videoIds.length) {
   throw new Error('No videos provided');
 }
 
 const embedUrls = videoIds.map((videoId) =>
   `https://player.vimeo.com/video/${videoId}?autoplay=1&autopause=0&title=0&byline=0&portrait=0`
 );
+
+const mediaMarkup = isRendered
+  ? '<video id="video" playsinline controls preload="metadata"></video>'
+  : '<div id="player"></div>';
+
+const vimeoApiScript = isRendered
+  ? ''
+  : '<script src="https://player.vimeo.com/api/player.js"></script>';
+
+const clientScript = `
+    const deliveryMode = ${JSON.stringify(DELIVERY_MODE)};
+    const embedUrls = ${JSON.stringify(embedUrls)};
+    const renderedVideoUrl = ${JSON.stringify(renderedVideoUrl)};
+    const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';
+
+    let index = 0;
+    let player;
+    let shouldPlayWithAudio = false;
+
+    try {
+      shouldPlayWithAudio = window.sessionStorage.getItem(AUDIO_PREFERENCE_KEY) === 'true';
+    } catch {
+      shouldPlayWithAudio = false;
+    }
+
+    const replayButton = document.getElementById('replayButton');
+    const status = document.getElementById('status');
+    const poster = document.getElementById('poster');
+    const videoElement = document.getElementById('video');
+
+    function rememberAudioPreference(muted, volume) {
+      if (muted === false && Number(volume || 0) > 0) {
+        shouldPlayWithAudio = true;
+        try {
+          window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'true');
+        } catch {}
+      }
+    }
+
+    function updateStatus() {
+      status.textContent = deliveryMode === 'rendered'
+        ? 'Final video'
+        : 'Clip ' + (index + 1) + ' of ' + embedUrls.length;
+    }
+
+    function showReplay() {
+      status.textContent = 'Sequence complete';
+      replayButton.style.display = 'inline-block';
+    }
+
+    function hideReplay() {
+      replayButton.style.display = 'none';
+    }
+
+    function hidePoster() {
+      poster.style.display = 'none';
+    }
+
+    function showPoster() {
+      poster.style.display = 'block';
+    }
+
+    function destroyPlayer() {
+      if (!player) {
+        return Promise.resolve();
+      }
+
+      return player.destroy().catch(() => {});
+    }
+
+    function handlePlayFailure(error) {
+      status.textContent = shouldPlayWithAudio
+        ? 'Tap play again to continue with audio'
+        : 'Tap play again to start audio';
+      showPoster();
+      console.error(error);
+    }
+
+    function mountVimeoPlayer() {
+      updateStatus();
+
+      player = new Vimeo.Player('player', {
+        url: embedUrls[index],
+        autoplay: true,
+        muted: !shouldPlayWithAudio,
+        byline: false,
+        title: false,
+        portrait: false
+      });
+
+      player.on('volumechange', (data) => {
+        rememberAudioPreference(data.muted, data.volume);
+      });
+
+      player.on('ended', () => {
+        index += 1;
+
+        if (index < embedUrls.length) {
+          destroyPlayer().then(() => {
+            mountVimeoPlayer();
+            player.play().catch(handlePlayFailure);
+          });
+        } else {
+          destroyPlayer().then(showReplay);
+        }
+      });
+    }
+
+    function startRenderedVideo() {
+      updateStatus();
+      videoElement.src = renderedVideoUrl;
+      videoElement.muted = !shouldPlayWithAudio;
+      videoElement.load();
+      videoElement.play().catch(handlePlayFailure);
+    }
+
+    function startSequence() {
+      index = 0;
+      hideReplay();
+      hidePoster();
+
+      if (deliveryMode === 'rendered') {
+        startRenderedVideo();
+        return;
+      }
+
+      destroyPlayer().then(() => {
+        mountVimeoPlayer();
+        player.play().catch(handlePlayFailure);
+      });
+    }
+
+    if (videoElement) {
+      videoElement.addEventListener('volumechange', () => {
+        rememberAudioPreference(videoElement.muted, videoElement.volume);
+      });
+
+      videoElement.addEventListener('ended', showReplay);
+    }
+
+    poster.addEventListener('click', startSequence);
+    replayButton.addEventListener('click', startSequence);
+
+    startSequence();
+    status.textContent = 'Ready to play';
+`;
 
 const html = `<!doctype html>
 <html lang="en">
@@ -25,7 +184,6 @@ const html = `<!doctype html>
   <title>Video Sequence</title>
   <style>
     :root {
-      --bg: #050505;
       --text: #f5f1e8;
       --muted: #b8b1a3;
       --accent: #d7a84a;
@@ -76,20 +234,24 @@ const html = `<!doctype html>
       cursor: pointer;
     }
 
-    #player {
-      position: relative;
+    #player,
+    #video {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       z-index: 1;
     }
 
     #player iframe {
-      position: absolute;
-      inset: 0;
       width: 100%;
       height: 100%;
       border: 0;
-      pointer-events: auto;
+    }
+
+    #video {
+      object-fit: contain;
+      background: #000;
     }
 
     .controls {
@@ -109,7 +271,7 @@ const html = `<!doctype html>
       font: inherit;
       font-size: 1rem;
       cursor: pointer;
-      transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+      transition: transform 120ms ease, background 120ms ease;
       display: none;
     }
 
@@ -134,7 +296,7 @@ const html = `<!doctype html>
   <div class="shell">
     <div class="frame">
       <div id="poster" class="poster"></div>
-      <div id="player"></div>
+      ${mediaMarkup}
     </div>
 
     <div class="controls">
@@ -144,143 +306,18 @@ const html = `<!doctype html>
     <div id="status" class="status"></div>
   </div>
 
-  <script src="https://player.vimeo.com/api/player.js"></script>
+  ${vimeoApiScript}
   <script>
-    const embedUrls = ${JSON.stringify(embedUrls)};
-    let index = 0;
-    let player;
-    const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';
-    let shouldPlayWithAudio = false;
-
-    try {
-      shouldPlayWithAudio = window.sessionStorage.getItem(AUDIO_PREFERENCE_KEY) === 'true';
-    } catch {
-      shouldPlayWithAudio = false;
-    }
-
-    const replayButton = document.getElementById('replayButton');
-    const status = document.getElementById('status');
-    const poster = document.getElementById('poster');
-
-    function updateStatus() {
-      status.textContent = 'Clip ' + (index + 1) + ' of ' + embedUrls.length;
-    }
-
-    function showReplay() {
-      status.textContent = 'Sequence complete';
-      replayButton.style.display = 'inline-block';
-    }
-
-    function hideReplay() {
-      replayButton.style.display = 'none';
-    }
-
-    function hidePoster() {
-      poster.style.display = 'none';
-    }
-
-    function showPoster() {
-      poster.style.display = 'block';
-    }
-
-    function rememberAudioPreference(data) {
-      if (!data) {
-        return;
-      }
-
-      if (data.muted === false && Number(data.volume || 0) > 0) {
-        shouldPlayWithAudio = true;
-        try {
-          window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'true');
-        } catch {}
-      }
-    }
-
-    function destroyPlayer() {
-      if (!player) {
-        return Promise.resolve();
-      }
-
-      return player.destroy().catch(() => {});
-    }
-
-    function mountPlayer() {
-      updateStatus();
-
-      player = new Vimeo.Player('player', {
-        url: embedUrls[index],
-        autoplay: true,
-        muted: !shouldPlayWithAudio,
-        byline: false,
-        title: false,
-        portrait: false
-      });
-
-      player.on('volumechange', (data) => {
-        rememberAudioPreference(data);
-      });
-
-      player.on('ended', () => {
-        index += 1;
-
-        if (index < embedUrls.length) {
-          destroyPlayer().then(() => {
-            mountPlayer();
-            player.play().catch((error) => {
-              if (shouldPlayWithAudio) {
-                status.textContent = 'Tap play again to continue with audio';
-                showPoster();
-                try {
-                  window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'false');
-                } catch {}
-                shouldPlayWithAudio = false;
-              }
-              console.error(error);
-            });
-          });
-        } else {
-          destroyPlayer().then(() => {
-            showReplay();
-          });
-        }
-      });
-    }
-
-    function startSequence() {
-      index = 0;
-      hideReplay();
-      hidePoster();
-      destroyPlayer().then(() => {
-        mountPlayer();
-        player.play().catch((error) => {
-          status.textContent = shouldPlayWithAudio
-            ? 'Tap play again to continue with audio'
-            : 'Tap play again to start audio';
-          if (shouldPlayWithAudio) {
-            try {
-              window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'false');
-            } catch {}
-            shouldPlayWithAudio = false;
-          }
-          showPoster();
-          console.error(error);
-        });
-      });
-    }
-
-    poster.addEventListener('click', () => {
-      startSequence();
-    });
-
-    replayButton.addEventListener('click', () => {
-      startSequence();
-    });
-
-    hidePoster();
-    startSequence();
-    status.textContent = 'Ready to play';
+${clientScript}
   </script>
 </body>
 </html>`;
 
-return [{ json: { html } }];
+return [
+  {
+    json: {
+      html,
+      deliveryMode: DELIVERY_MODE,
+    },
+  },
+];
