@@ -425,6 +425,18 @@ function showSubmissionError(form) {
   summary.focus();
 }
 
+function setSubmissionLoading(form, isLoading) {
+  const overlay = form.querySelector("[data-submission-overlay]");
+
+  if (!overlay) {
+    return;
+  }
+
+  overlay.hidden = !isLoading;
+  overlay.setAttribute("aria-hidden", String(!isLoading));
+  form.setAttribute("aria-busy", String(isLoading));
+}
+
 function initAccessibility(form) {
   form.querySelectorAll("input[required], textarea[required]").forEach((field) => {
     field.setAttribute("aria-required", "true");
@@ -489,6 +501,7 @@ function bindNavigation(form) {
       submitButton.disabled = true;
       submitButton.textContent = "Wird übermittelt...";
     }
+    setSubmissionLoading(form, true);
 
     try {
       const html = await submitResults(form);
@@ -498,6 +511,7 @@ function bindNavigation(form) {
       document.close();
     } catch (error) {
       console.error(error);
+      setSubmissionLoading(form, false);
       showSubmissionError(form);
       if (submitButton) {
         submitButton.disabled = false;

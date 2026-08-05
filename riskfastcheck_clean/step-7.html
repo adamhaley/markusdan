@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Risk-Fast-Check | Ende</title>
-    <link rel="stylesheet" href="assets/form.css?v=20260713b">
-    <script defer src="assets/form.js?v=20260713c"></script>
+    <link rel="stylesheet" href="assets/form.css?v=20260805a">
+    <script defer src="assets/form.js?v=20260805a"></script>
   </head>
   <body>
     <main class="shell">
@@ -31,6 +31,13 @@
             <button class="button" type="submit">Übermitteln</button>
           </div>
           <div class="status">Vielen Dank. Ihre Angaben wurden erfolgreich übermittelt.</div>
+          <div class="submission-overlay" data-submission-overlay hidden aria-hidden="true">
+            <div class="submission-panel" role="status" aria-live="polite">
+              <span class="submission-spinner" aria-hidden="true"></span>
+              <strong>Ihre Auswertung wird erstellt...</strong>
+              <span>Dies kann bis zu einer Minute dauern.</span>
+            </div>
+          </div>
         </form>
       </section>
     </main>

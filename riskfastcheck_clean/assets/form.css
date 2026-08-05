@@ -343,6 +343,53 @@ button:disabled {
   opacity: 0.65;
 }
 
+.submission-overlay[hidden] {
+  display: none;
+}
+
+.submission-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(40, 40, 40, 0.62);
+}
+
+.submission-panel {
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+  width: min(100%, 360px);
+  padding: 2rem 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  text-align: center;
+}
+
+.submission-panel span:last-child {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.submission-spinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid #d9dde5;
+  border-top-color: #007faa;
+  border-radius: 50%;
+  animation: submission-spin 800ms linear infinite;
+}
+
+@keyframes submission-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .nav {
   display: flex;
   justify-content: space-between;
