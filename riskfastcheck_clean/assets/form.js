@@ -12,6 +12,14 @@ const REQUIRED_FLOW_KEYS = [
   "bank_savings_ownership",
   "alternative_assets_ownership",
 ];
+const DETAIL_FIELD_BY_OWNERSHIP_FIELD = {
+  real_estate_ownership: "real_estate_investment_amount",
+  securities_ownership: "securities_investment_amount",
+  precious_metals_ownership: "precious_metals_investment_amount",
+  life_insurance_ownership: "life_insurance_monthly_payment",
+  bank_savings_ownership: "bank_savings_amount",
+  alternative_assets_ownership: "alternative_assets_investment_amount",
+};
 const OUTPUT_KEYS = [
   "utm_source",
   "utm_medium",
@@ -157,12 +165,68 @@ function bindExclusiveChoices(form) {
     field.addEventListener("change", () => {
       if (field.checked) {
         saveField(field.name, field.value);
+        syncOwnershipAndDetailChoice(form, field);
       }
       const wrapper = field.closest("[data-required-group]");
       if (wrapper) {
         wrapper.dataset.invalid = "false";
       }
     });
+  });
+}
+
+function clearDetailChoice(form, detailFieldName) {
+  form.querySelectorAll(`input[data-group="${detailFieldName}"]`).forEach((field) => {
+    field.checked = false;
+  });
+  saveField(detailFieldName, "");
+}
+
+function syncOwnershipAndDetailChoice(form, field) {
+  const detailFieldName = DETAIL_FIELD_BY_OWNERSHIP_FIELD[field.name];
+
+  if (detailFieldName) {
+    if (field.value === "Nein") {
+      clearDetailChoice(form, detailFieldName);
+    }
+    return;
+  }
+
+  const ownershipFieldName = Object.keys(DETAIL_FIELD_BY_OWNERSHIP_FIELD)
+    .find((name) => DETAIL_FIELD_BY_OWNERSHIP_FIELD[name] === field.name);
+
+  if (ownershipFieldName) {
+    const ownershipField = form.querySelector(
+      `input[data-group="${ownershipFieldName}"][value="Ja"]`
+    );
+
+    if (ownershipField) {
+      ownershipField.checked = true;
+    }
+    saveField(ownershipFieldName, "Ja");
+  }
+}
+
+function normalizeOwnershipAndDetailChoice(form) {
+  Object.entries(DETAIL_FIELD_BY_OWNERSHIP_FIELD).forEach(([ownershipFieldName, detailFieldName]) => {
+    const ownershipValue = readField(ownershipFieldName);
+    const detailValue = readField(detailFieldName);
+
+    if (ownershipValue === "Nein") {
+      clearDetailChoice(form, detailFieldName);
+      return;
+    }
+
+    if (detailValue) {
+      const ownershipField = form.querySelector(
+        `input[data-group="${ownershipFieldName}"][value="Ja"]`
+      );
+
+      if (ownershipField) {
+        ownershipField.checked = true;
+      }
+      saveField(ownershipFieldName, "Ja");
+    }
   });
 }
 
@@ -608,6 +672,7 @@ function init() {
   initAccessibility(form);
   bindTextFields(form);
   bindExclusiveChoices(form);
+  normalizeOwnershipAndDetailChoice(form);
   hydrateHiddenUtmFields(form);
   bindNavigation(form);
 }

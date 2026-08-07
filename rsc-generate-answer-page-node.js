@@ -1,6 +1,6 @@
 // HTML Generator Code node
 // Supported delivery modes: "vimeo" and "rendered".
-const DELIVERY_MODE = 'vimeo';
+const DELIVERY_MODE = 'rendered';
 const RENDER_NODE_NAME = 'Render Video';
 
 const resolved = $('Call').first().json;
@@ -27,12 +27,13 @@ if (isRendered) {
 }
 
 const embedUrls = videoIds.map((videoId) =>
-  `https://player.vimeo.com/video/${videoId}?autoplay=1&autopause=0&title=0&byline=0&portrait=0`
+  `https://player.vimeo.com/video/${videoId}?autoplay=1&autopause=0&controls=0&keyboard=0&title=0&byline=0&portrait=0`
 );
 
 const mediaMarkup = isRendered
-  ? '<video id="video" playsinline controls preload="metadata"></video>'
+  ? '<video id="video" playsinline preload="metadata"></video>'
   : '<div id="player"></div>';
+const videoToggleMarkup = '<button id="videoToggle" class="video-toggle" type="button" aria-label="Pause video" hidden></button>';
 
 const vimeoApiScript = isRendered
   ? ''
@@ -58,6 +59,7 @@ const clientScript = `
     const status = document.getElementById('status');
     const poster = document.getElementById('poster');
     const videoElement = document.getElementById('video');
+    const videoToggle = document.getElementById('videoToggle');
 
     function rememberAudioPreference(muted, volume) {
       if (muted === false && Number(volume || 0) > 0) {
@@ -77,6 +79,7 @@ const clientScript = `
     function showReplay() {
       status.textContent = 'Sequence complete';
       replayButton.style.display = 'inline-block';
+      hideVideoToggle();
     }
 
     function hideReplay() {
@@ -91,12 +94,35 @@ const clientScript = `
       poster.style.display = 'block';
     }
 
+    function showVideoToggle() {
+      if (videoToggle) {
+        videoToggle.hidden = false;
+      }
+    }
+
+    function hideVideoToggle() {
+      if (videoToggle) {
+        videoToggle.hidden = true;
+      }
+    }
+
+    function updateVideoToggle(isPlaying) {
+      if (!videoToggle) {
+        return;
+      }
+
+      videoToggle.setAttribute('aria-label', isPlaying ? 'Pause video' : 'Play video');
+    }
+
     function destroyPlayer() {
       if (!player) {
         return Promise.resolve();
       }
 
-      return player.destroy().catch(() => {});
+      const activePlayer = player;
+      player = null;
+      hideVideoToggle();
+      return activePlayer.destroy().catch(() => {});
     }
 
     function handlePlayFailure(error) {
@@ -118,6 +144,11 @@ const clientScript = `
         title: false,
         portrait: false
       });
+      showVideoToggle();
+      updateVideoToggle(false);
+
+      player.on('play', () => updateVideoToggle(true));
+      player.on('pause', () => updateVideoToggle(false));
 
       player.on('volumechange', (data) => {
         rememberAudioPreference(data.muted, data.volume);
@@ -142,6 +173,8 @@ const clientScript = `
       videoElement.src = renderedVideoUrl;
       videoElement.muted = !shouldPlayWithAudio;
       videoElement.load();
+      showVideoToggle();
+      updateVideoToggle(false);
       videoElement.play().catch(handlePlayFailure);
     }
 
@@ -149,6 +182,7 @@ const clientScript = `
       index = 0;
       hideReplay();
       hidePoster();
+      hideVideoToggle();
 
       if (deliveryMode === 'rendered') {
         startRenderedVideo();
@@ -162,6 +196,9 @@ const clientScript = `
     }
 
     if (videoElement) {
+      videoElement.addEventListener('play', () => updateVideoToggle(true));
+      videoElement.addEventListener('pause', () => updateVideoToggle(false));
+
       videoElement.addEventListener('volumechange', () => {
         rememberAudioPreference(videoElement.muted, videoElement.volume);
       });
@@ -171,6 +208,29 @@ const clientScript = `
 
     poster.addEventListener('click', startSequence);
     replayButton.addEventListener('click', startSequence);
+
+    if (videoToggle) {
+      videoToggle.addEventListener('click', () => {
+        if (deliveryMode === 'rendered') {
+          const playback = videoElement.paused
+            ? videoElement.play()
+            : videoElement.pause();
+          playback?.catch(handlePlayFailure);
+          return;
+        }
+
+        const activePlayer = player;
+
+        if (!activePlayer) {
+          return;
+        }
+
+        activePlayer.getPaused().then((isPaused) => {
+          const playback = isPaused ? activePlayer.play() : activePlayer.pause();
+          return playback.catch(handlePlayFailure);
+        }).catch(handlePlayFailure);
+      });
+    }
 
     startSequence();
     status.textContent = 'Ready to play';
@@ -254,6 +314,23 @@ const html = `<!doctype html>
       background: #000;
     }
 
+    .video-toggle {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .video-toggle:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: -6px;
+    }
+
     .controls {
       display: flex;
       justify-content: center;
@@ -297,6 +374,7 @@ const html = `<!doctype html>
     <div class="frame">
       <div id="poster" class="poster"></div>
       ${mediaMarkup}
+      ${videoToggleMarkup}
     </div>
 
     <div class="controls">
