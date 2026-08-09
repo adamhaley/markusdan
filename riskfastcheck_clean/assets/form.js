@@ -267,6 +267,30 @@ function setGroupValidity(group, isValid) {
   }
 }
 
+function getDetailChoiceGroup(form, detailFieldName) {
+  const choice = form.querySelector(`input[data-group="${detailFieldName}"]`);
+  return choice ? choice.closest("fieldset") : null;
+}
+
+function setDetailGroupValidity(group, isValid, detailFieldName) {
+  if (!group) {
+    return;
+  }
+
+  let error = group.querySelector(".error");
+  if (!error) {
+    error = document.createElement("div");
+    error.className = "error";
+    error.textContent = "Bitte wählen Sie eine Option.";
+    group.append(error);
+  }
+  if (!error.id) {
+    error.id = `${detailFieldName}-error`;
+  }
+
+  setGroupValidity(group, isValid);
+}
+
 function getFieldErrorMessage(field) {
   if (field.validity.valueMissing) {
     return "Bitte füllen Sie dieses Pflichtfeld aus.";
@@ -351,6 +375,25 @@ function validateRequiredGroupFields(form) {
 
     if (!anyChecked && !firstInvalid) {
       firstInvalid = choices[0] || group;
+    }
+  });
+
+  Object.entries(DETAIL_FIELD_BY_OWNERSHIP_FIELD).forEach(([ownershipFieldName, detailFieldName]) => {
+    const ownershipChoice = form.querySelector(
+      `input[data-group="${ownershipFieldName}"]:checked`
+    );
+    const detailGroup = getDetailChoiceGroup(form, detailFieldName);
+
+    if (!ownershipChoice || !detailGroup) {
+      return;
+    }
+
+    const detailChoices = [...detailGroup.querySelectorAll("input[type='checkbox'], input[type='radio']")];
+    const detailIsValid = ownershipChoice.value !== "Ja" || detailChoices.some((choice) => choice.checked);
+    setDetailGroupValidity(detailGroup, detailIsValid, detailFieldName);
+
+    if (!detailIsValid && !firstInvalid) {
+      firstInvalid = detailChoices[0] || detailGroup;
     }
   });
 
@@ -606,7 +649,8 @@ async function renderStepVideo(form) {
     }
 
     const shouldPlayWithAudio = shouldPlayStepVideoWithAudio();
-    const source = `https://player.vimeo.com/video/${config.vimeoId}?autoplay=1&muted=${shouldPlayWithAudio ? 0 : 1}&title=0&byline=0&portrait=0`;
+    const requiresFirstPlay = step === 1 && !shouldPlayWithAudio;
+    const source = `https://player.vimeo.com/video/${config.vimeoId}?autoplay=${requiresFirstPlay ? 0 : 1}&muted=${shouldPlayWithAudio ? 0 : 1}&title=0&byline=0&portrait=0`;
 
     slot.innerHTML = `
       <section class="video-card">
@@ -622,6 +666,7 @@ async function renderStepVideo(form) {
             allow="autoplay; fullscreen; picture-in-picture"
             allowfullscreen
             title="${config.videoTitle || "Vimeo video"}"></iframe>
+          ${requiresFirstPlay ? '<button class="video-start-overlay" type="button">Video mit Ton starten</button>' : ""}
         </div>
       </section>
     `;
@@ -635,6 +680,25 @@ async function renderStepVideo(form) {
       }
 
       const player = new window.Vimeo.Player(iframe);
+
+      const startOverlay = slot.querySelector(".video-start-overlay");
+
+      if (startOverlay) {
+        startOverlay.addEventListener("click", async () => {
+          startOverlay.disabled = true;
+
+          try {
+            await player.setMuted(false);
+            await player.setVolume(1);
+            setStepVideoAudioPreference(true);
+            await player.play();
+            startOverlay.remove();
+          } catch {
+            startOverlay.disabled = false;
+            startOverlay.textContent = "Erneut versuchen";
+          }
+        });
+      }
 
       player.on("volumechange", (event) => {
         if (event && event.muted === false && Number(event.volume || 0) > 0) {

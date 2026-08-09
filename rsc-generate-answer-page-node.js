@@ -55,8 +55,6 @@ const clientScript = `
       shouldPlayWithAudio = false;
     }
 
-    const replayButton = document.getElementById('replayButton');
-    const status = document.getElementById('status');
     const poster = document.getElementById('poster');
     const videoElement = document.getElementById('video');
     const videoToggle = document.getElementById('videoToggle');
@@ -70,20 +68,8 @@ const clientScript = `
       }
     }
 
-    function updateStatus() {
-      status.textContent = deliveryMode === 'rendered'
-        ? 'Final video'
-        : 'Clip ' + (index + 1) + ' of ' + embedUrls.length;
-    }
-
     function showReplay() {
-      status.textContent = 'Sequence complete';
-      replayButton.style.display = 'inline-block';
       hideVideoToggle();
-    }
-
-    function hideReplay() {
-      replayButton.style.display = 'none';
     }
 
     function hidePoster() {
@@ -126,16 +112,11 @@ const clientScript = `
     }
 
     function handlePlayFailure(error) {
-      status.textContent = shouldPlayWithAudio
-        ? 'Tap play again to continue with audio'
-        : 'Tap play again to start audio';
       showPoster();
       console.error(error);
     }
 
     function mountVimeoPlayer() {
-      updateStatus();
-
       player = new Vimeo.Player('player', {
         url: embedUrls[index],
         autoplay: true,
@@ -169,7 +150,6 @@ const clientScript = `
     }
 
     function startRenderedVideo() {
-      updateStatus();
       videoElement.src = renderedVideoUrl;
       videoElement.muted = !shouldPlayWithAudio;
       videoElement.load();
@@ -180,7 +160,6 @@ const clientScript = `
 
     function startSequence() {
       index = 0;
-      hideReplay();
       hidePoster();
       hideVideoToggle();
 
@@ -207,7 +186,6 @@ const clientScript = `
     }
 
     poster.addEventListener('click', startSequence);
-    replayButton.addEventListener('click', startSequence);
 
     if (videoToggle) {
       videoToggle.addEventListener('click', () => {
@@ -233,7 +211,6 @@ const clientScript = `
     }
 
     startSequence();
-    status.textContent = 'Ready to play';
 `;
 
 const html = `<!doctype html>
@@ -331,42 +308,6 @@ const html = `<!doctype html>
       outline-offset: -6px;
     }
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 3rem;
-    }
-
-    .replay-button {
-      appearance: none;
-      border: 0;
-      border-radius: 999px;
-      padding: 0.85rem 1.4rem;
-      background: var(--accent);
-      color: #1b1408;
-      font: inherit;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: transform 120ms ease, background 120ms ease;
-      display: none;
-    }
-
-    .replay-button:hover {
-      background: var(--accent-hover);
-      transform: translateY(-1px);
-    }
-
-    .replay-button:active {
-      transform: translateY(0);
-    }
-
-    .status {
-      color: var(--muted);
-      font-size: 0.95rem;
-      text-align: center;
-      letter-spacing: 0.02em;
-    }
   </style>
 </head>
 <body>
@@ -377,11 +318,6 @@ const html = `<!doctype html>
       ${videoToggleMarkup}
     </div>
 
-    <div class="controls">
-      <button id="replayButton" class="replay-button" type="button">Replay sequence</button>
-    </div>
-
-    <div id="status" class="status"></div>
   </div>
 
   ${vimeoApiScript}

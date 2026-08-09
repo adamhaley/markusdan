@@ -191,6 +191,26 @@ form {
   border: 0;
 }
 
+.video-start-overlay {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  background: #d7a84a;
+  color: #1b1408;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.video-start-overlay:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .field {
   margin-bottom: 14px;
 }

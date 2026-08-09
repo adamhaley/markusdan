@@ -15,6 +15,10 @@ function expectValue(value, fieldName) {
   return normalized;
 }
 
+function valueOrDefault(value, fallback) {
+  return normalize(value) || fallback;
+}
+
 function resolveStep1(data) {
   const ownership = expectValue(data.real_estate_ownership, 'real_estate_ownership');
 
@@ -22,7 +26,7 @@ function resolveStep1(data) {
     return '1a';
   }
 
-  const amount = expectValue(data.real_estate_investment_amount, 'real_estate_investment_amount');
+  const amount = valueOrDefault(data.real_estate_investment_amount, 'weniger als €100.000');
 
   if (amount === 'weniger als €100.000') return '1b';
   if (amount === '€100.000 - €500.000') return '1c';
@@ -39,7 +43,7 @@ function resolveStep2(data) {
     return '2a';
   }
 
-  const amount = expectValue(data.securities_investment_amount, 'securities_investment_amount');
+  const amount = valueOrDefault(data.securities_investment_amount, 'weniger als €10.000');
 
   if (amount === 'weniger als €10.000') return '2b';
   if (amount === '€10.000 - €50.000') return '2c';
@@ -56,7 +60,7 @@ function resolveStep3(data) {
     return '3a';
   }
 
-  const amount = expectValue(data.precious_metals_investment_amount, 'precious_metals_investment_amount');
+  const amount = valueOrDefault(data.precious_metals_investment_amount, 'weniger als €10.000');
 
   if (amount === 'weniger als €10.000') return '3a';
   if (amount === '€10.000 - €50.000') return '3b';
@@ -73,7 +77,7 @@ function resolveStep4(data) {
     return '4a';
   }
 
-  const payment = expectValue(data.life_insurance_monthly_payment, 'life_insurance_monthly_payment');
+  const payment = valueOrDefault(data.life_insurance_monthly_payment, 'weniger als €100');
 
   if (payment === 'weniger als €100') return '4b';
   if (payment === '€100 - €200') return '4c';
@@ -90,7 +94,7 @@ function resolveStep5(data) {
     return '5a';
   }
 
-  const amount = expectValue(data.bank_savings_amount, 'bank_savings_amount');
+  const amount = valueOrDefault(data.bank_savings_amount, 'weniger als €10.000');
 
   if (amount === 'weniger als €10.000') return '5a';
   if (amount === '€10.000 - €50.000') return '5b';
@@ -107,7 +111,7 @@ function resolveStep6(data) {
     return '6a';
   }
 
-  const amount = expectValue(data.alternative_assets_investment_amount, 'alternative_assets_investment_amount');
+  const amount = valueOrDefault(data.alternative_assets_investment_amount, 'weniger als €10.000');
 
   if (amount === 'weniger als €10.000') return '6a';
   if (amount === '€10.000 - €50.000') return '6b';
