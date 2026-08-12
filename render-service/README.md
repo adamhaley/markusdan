@@ -48,3 +48,16 @@ node server.js
 ```
 
 The service requires `ffmpeg` and `ffprobe` on the host. The included Dockerfile installs both.
+
+## Production deploy
+
+The Git checkout is not the final Compose home on the server. After pulling changes
+into `~/markusdan`, copy the updated Compose file and render service source into:
+
+```bash
+/opt/megyk/n8n-docker-caddy
+```
+
+Run `docker compose` from `/opt/megyk/n8n-docker-caddy`, where the production
+`.env` file lives. The render service build context is `./render-service`, so that
+directory must be updated there before rebuilding `rsc-render-service`.
