@@ -20,6 +20,8 @@ const VIDEO_WIDTH = Number(process.env.VIDEO_WIDTH || 1280);
 const VIDEO_HEIGHT = Number(process.env.VIDEO_HEIGHT || 720);
 const VIDEO_FPS = Number(process.env.VIDEO_FPS || 30);
 const MAX_SEQUENCE_ITEMS = 20;
+const jobs = new Map();
+const activeJobsByRenderId = new Map();
 
 function assertConfig() {
   if (!VIMEO_ACCESS_TOKEN) {
@@ -81,6 +83,43 @@ async function run(command, args) {
   return { stdout, stderr };
 }
 
+async function runWithProgress(command, args, onProgress) {
+  const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+  let stderr = '';
+  let stdoutBuffer = '';
+  let progress = {};
+
+  child.stdout.on('data', (chunk) => {
+    stdoutBuffer += chunk.toString();
+    const lines = stdoutBuffer.split(/\r?\n/);
+    stdoutBuffer = lines.pop() || '';
+
+    for (const line of lines) {
+      const separator = line.indexOf('=');
+      if (separator < 1) {
+        continue;
+      }
+
+      const key = line.slice(0, separator);
+      const value = line.slice(separator + 1);
+      progress[key] = value;
+
+      if (key === 'progress') {
+        onProgress(progress);
+        progress = {};
+      }
+    }
+  });
+
+  child.stderr.on('data', (chunk) => { stderr += chunk; });
+
+  const [code] = await once(child, 'close');
+
+  if (code !== 0) {
+    throw new Error(`${command} failed (${code}): ${stderr.slice(-4000)}`);
+  }
+}
+
 async function getVimeoFile(videoId) {
   const response = await fetch(`https://api.vimeo.com/videos/${videoId}?fields=name,files` , {
     headers: {
@@ -107,7 +146,7 @@ async function getVimeoFile(videoId) {
   return file.link;
 }
 
-async function downloadFile(url, destination) {
+async function downloadFile(url, destination, onProgress) {
   const response = await fetch(url);
 
   if (!response.ok || !response.body) {
@@ -115,9 +154,14 @@ async function downloadFile(url, destination) {
   }
 
   const output = createWriteStream(destination);
+  const totalBytes = Number(response.headers.get('content-length') || 0);
+  let downloadedBytes = 0;
 
   for await (const chunk of response.body) {
-    if (!output.write(Buffer.from(chunk))) {
+    const buffer = Buffer.from(chunk);
+    downloadedBytes += buffer.length;
+    onProgress?.(downloadedBytes, totalBytes);
+    if (!output.write(buffer)) {
       await once(output, 'drain');
     }
   }
@@ -183,7 +227,14 @@ function buildFilterGraph(count, durations) {
   return filters.join(';');
 }
 
-async function render(sequence, renderId) {
+function updateJob(job, updates) {
+  if (!job) {
+    return;
+  }
+  Object.assign(job, updates, { updatedAt: new Date().toISOString() });
+}
+
+async function render(sequence, renderId, job) {
   const workDir = path.join(TEMP_DIR, renderId);
   const outputPath = path.join(OUTPUT_DIR, `${renderId}.mp4`);
 
@@ -196,15 +247,31 @@ async function render(sequence, renderId) {
     for (const [index, item] of sequence.entries()) {
       const sourceUrl = await getVimeoFile(item.videoId);
       const destination = path.join(workDir, `${String(index + 1).padStart(2, '0')}-${item.videoId}.mp4`);
-      await downloadFile(sourceUrl, destination);
+      const downloadStart = (index / sequence.length) * 60;
+      const downloadSpan = 60 / sequence.length;
+      updateJob(job, {
+        stage: `Downloading video ${index + 1} of ${sequence.length}`,
+        percentage: Math.round(downloadStart),
+      });
+      await downloadFile(sourceUrl, destination, (downloadedBytes, totalBytes) => {
+        const fraction = totalBytes > 0 ? Math.min(downloadedBytes / totalBytes, 1) : 0;
+        updateJob(job, {
+          stage: `Downloading video ${index + 1} of ${sequence.length}`,
+          percentage: Math.round(downloadStart + fraction * downloadSpan),
+        });
+      });
       inputPaths.push(destination);
     }
 
+    updateJob(job, { stage: 'Preparing videos', percentage: 62 });
     const durations = await Promise.all(inputPaths.map(getDuration));
     const filterGraph = buildFilterGraph(inputPaths.length, durations);
     const args = inputPaths.flatMap((filePath) => ['-i', filePath]);
+    const outputDuration = durations.reduce((total, value) => total + value, 0) - TRANSITION_DURATION * (sequence.length - 1);
 
     args.push(
+      '-progress', 'pipe:1',
+      '-stats_period', '0.5',
       '-filter_complex', filterGraph,
       '-map', '[vout]',
       '-map', '[aout]',
@@ -218,12 +285,21 @@ async function render(sequence, renderId) {
       '-y', outputPath,
     );
 
-    await run('ffmpeg', args);
+    updateJob(job, { stage: 'Rendering video', percentage: 64 });
+    await runWithProgress('ffmpeg', args, (progress) => {
+      const outputTime = Number(progress.out_time_us || progress.out_time_ms || 0) / 1_000_000;
+      const fraction = outputDuration > 0 ? Math.min(outputTime / outputDuration, 1) : 0;
+      updateJob(job, {
+        stage: 'Rendering video',
+        percentage: Math.min(99, Math.round(64 + fraction * 35)),
+      });
+    });
 
+    updateJob(job, { stage: 'Finalizing video', percentage: 99 });
     return {
       renderId,
       videoUrl: `${PUBLIC_BASE_URL}/renders/${renderId}.mp4`,
-      duration: durations.reduce((total, value) => total + value, 0) - TRANSITION_DURATION * (sequence.length - 1),
+      duration: outputDuration,
     };
   } finally {
     await rm(workDir, { recursive: true, force: true });
@@ -234,7 +310,120 @@ app.get('/healthz', (_request, response) => {
   response.json({ ok: true });
 });
 
+app.use((request, response, next) => {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Render-Api-Key');
+  if (request.method === 'OPTIONS') {
+    return response.sendStatus(204);
+  }
+  next();
+});
+
 app.use('/renders', express.static(OUTPUT_DIR, { maxAge: '1d', immutable: true }));
+
+function authorizeRequest(request, response) {
+  if (RENDER_API_KEY && request.get('x-render-api-key') !== RENDER_API_KEY) {
+    response.status(401).json({ ok: false, error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+}
+
+function getJobResponse(job) {
+  return {
+    ok: job.status !== 'error',
+    jobId: job.jobId,
+    renderId: job.renderId,
+    status: job.status,
+    percentage: job.percentage,
+    stage: job.stage,
+    cached: job.cached,
+    videoUrl: job.videoUrl || null,
+    error: job.error || null,
+  };
+}
+
+function startRenderJob(job, sequence) {
+  render(sequence, job.renderId, job)
+    .then((result) => {
+      updateJob(job, {
+        ...result,
+        status: 'complete',
+        percentage: 100,
+        stage: 'Complete',
+        cached: false,
+      });
+      activeJobsByRenderId.delete(job.renderId);
+    })
+    .catch((error) => {
+      console.error(error);
+      updateJob(job, { status: 'error', stage: 'Render failed', error: error.message });
+      activeJobsByRenderId.delete(job.renderId);
+    });
+}
+
+app.post('/render/jobs', async (request, response) => {
+  try {
+    if (!authorizeRequest(request, response)) return;
+
+    assertConfig();
+    const sequence = validateSequence(request.body?.sequence);
+    const renderId = getRenderId(sequence);
+    const outputPath = path.join(OUTPUT_DIR, `${renderId}.mp4`);
+
+    try {
+      await stat(outputPath);
+      const jobId = crypto.randomUUID();
+      const job = {
+        jobId,
+        renderId,
+        status: 'complete',
+        percentage: 100,
+        stage: 'Complete',
+        cached: true,
+        videoUrl: `${PUBLIC_BASE_URL}/renders/${renderId}.mp4`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      jobs.set(jobId, job);
+      return response.status(202).json(getJobResponse(job));
+    } catch {
+      const existingJob = activeJobsByRenderId.get(renderId);
+      if (existingJob) {
+        return response.status(202).json(getJobResponse(existingJob));
+      }
+
+      const jobId = crypto.randomUUID();
+      const job = {
+        jobId,
+        renderId,
+        status: 'queued',
+        percentage: 0,
+        stage: 'Queued',
+        cached: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      jobs.set(jobId, job);
+      activeJobsByRenderId.set(renderId, job);
+      startRenderJob(job, sequence);
+
+      return response.status(202).json(getJobResponse(job));
+    }
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+app.get('/render/jobs/:jobId', (request, response) => {
+  const job = jobs.get(request.params.jobId);
+  if (!job) {
+    return response.status(404).json({ ok: false, error: 'Render job not found' });
+  }
+  return response.json(getJobResponse(job));
+});
 
 app.post('/render', async (request, response) => {
   try {

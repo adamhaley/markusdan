@@ -4,7 +4,7 @@ Small HTTP service for rendering the resolver's canonical video sequence with Vi
 
 ## Request
 
-`POST /render`
+`POST /render/jobs`
 
 ```json
 {
@@ -19,16 +19,23 @@ Small HTTP service for rendering the resolver's canonical video sequence with Vi
 }
 ```
 
-The service downloads the Vimeo files, normalizes them to a common 1280x720/30fps format, and joins them using a short `xfade`/`acrossfade` transition. The response contains a deterministic cached URL:
+The service starts an asynchronous job, downloads the Vimeo files, normalizes them to a common 1280x720/30fps format, and joins them using a short `xfade`/`acrossfade` transition. The response immediately contains an opaque job ID:
 
 ```json
 {
   "ok": true,
+  "jobId": "...",
   "renderId": "...",
-  "videoUrl": "https://renders.megyk.com/renders/....mp4",
-  "cached": false
+  "status": "queued",
+  "percentage": 0,
+  "stage": "Queued",
+  "videoUrl": null
 }
 ```
+
+Poll `GET /render/jobs/:jobId` for progress. The response reports download and FFmpeg rendering progress and includes `videoUrl` when `status` becomes `complete`.
+
+The synchronous `POST /render` endpoint remains available for compatibility.
 
 Set `RENDER_API_KEY` in production and send it as `x-render-api-key`. Set `VIMEO_ACCESS_TOKEN` to a Vimeo personal access token with permission to read the source videos and their downloadable files.
 
