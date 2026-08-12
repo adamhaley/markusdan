@@ -3,6 +3,7 @@
 const DELIVERY_MODE = 'rendered';
 const RENDER_NODE_NAME = 'Render Video';
 const RENDER_STATUS_BASE_URL = 'https://renders.megyk.com';
+const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt. Bitte um einen Moment Geduld. Es zahlt sich aus.';
 
 const resolved = $('Call').first().json;
 const oembed = $('Get Thumbnail URL').first().json;
@@ -88,7 +89,7 @@ const clientScript = `
       const percentage = Math.max(0, Math.min(100, Number(data.percentage || 0)));
       progressBar.value = percentage;
       progressLabel.textContent = percentage + '%';
-      progressStage.textContent = data.stage || 'Preparing video';
+      progressStage.textContent = ${JSON.stringify(PROGRESS_MESSAGE)};
     }
 
     async function pollRenderJob() {
@@ -250,7 +251,7 @@ const clientScript = `
     }
 
     if (deliveryMode === 'rendered') {
-      updateProgress({ percentage: 0, stage: 'Preparing video' });
+      updateProgress({ percentage: 0 });
       pollRenderJob().catch(handlePlayFailure);
     } else {
       startSequence();
@@ -382,7 +383,7 @@ const html = `<!doctype html>
       ${mediaMarkup}
       ${videoToggleMarkup}
       <div id="progressPanel" class="render-progress" role="status" aria-live="polite">
-        <strong id="progressStage">Preparing video</strong>
+        <strong id="progressStage">${PROGRESS_MESSAGE}</strong>
         <progress id="progressBar" max="100" value="0"></progress>
         <span id="progressLabel">0%</span>
       </div>
