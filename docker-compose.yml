@@ -212,16 +212,6 @@ services:
       - /opt/megyk/book-summaries-megyk-staging/.env.local
     restart: unless-stopped
 
-  faq-email-daemon:
-    build: ../webinar-faqs
-    container_name: faq-email-daemon
-    restart: unless-stopped
-    env_file:
-      - ../webinar-faqs/.env
-    networks:
-      - default
-      - supabase_default
-
 # --------------------------
 # Volumes
 # --------------------------
