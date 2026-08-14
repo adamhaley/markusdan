@@ -1,5 +1,5 @@
-const payload = $input.first().json;
-const mapping = $('vimeo-mapping').first().json;
+const payload = $("When Executed by Another Workflow").first().json;
+const mapping = $('Vimeo Mapping').first().json;
 
 function normalize(value) {
   return String(value || '').trim();
