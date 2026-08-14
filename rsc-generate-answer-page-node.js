@@ -332,7 +332,7 @@ const html = `<!doctype html>
         radial-gradient(circle at top, rgba(215, 168, 74, 0.16), transparent 32rem),
         linear-gradient(180deg, #0a0a0a 0%, #000 100%);
       color: var(--text);
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     .shell {
@@ -452,7 +452,7 @@ const html = `<!doctype html>
       border-radius: 999px;
       background: var(--accent);
       color: #1a1305;
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       text-decoration: none;
       font-weight: bold;
       transition: background 0.15s ease;
