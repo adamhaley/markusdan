@@ -3,7 +3,7 @@
 const DELIVERY_MODE = 'rendered';
 const RENDER_NODE_NAME = 'Render Video';
 const RENDER_STATUS_BASE_URL = 'https://renders.megyk.com';
-const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt. Bitte um einen Moment Geduld. Es zahlt sich aus.';
+const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt.\nBitte um einen Moment Geduld. Es zahlt sich aus.';
 
 const ctaConfig = $('CTA Config').first().json;
 
@@ -407,6 +407,12 @@ const html = `<!doctype html>
       transform: translateY(-50%);
       color: #f5f1e8;
       text-align: center;
+    }
+
+    .render-progress strong {
+      display: block;
+      white-space: pre-line;
+      text-wrap: balance;
     }
 
     .render-progress[hidden] {
