@@ -5,9 +5,43 @@ const RENDER_NODE_NAME = 'Render Video';
 const RENDER_STATUS_BASE_URL = 'https://renders.megyk.com';
 const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt. Bitte um einen Moment Geduld. Es zahlt sich aus.';
 
+const CTA_CONFIG = {
+  pitch_a_bank: {
+    heading: 'Mehr aus Ihren Bankeinlagen herausholen',
+    buttons: [
+      { label: 'Beratungstermin vereinbaren', href: '#' },
+      { label: 'Mehr erfahren', href: '#' },
+    ],
+  },
+  pitch_b_life_insurance: {
+    heading: 'Ihre Lebensversicherung optimieren',
+    buttons: [
+      { label: 'Beratungstermin vereinbaren', href: '#' },
+      { label: 'Mehr erfahren', href: '#' },
+    ],
+  },
+  pitch_c_everything_else: {
+    heading: 'Ihr Portfolio absichern',
+    buttons: [
+      { label: 'Beratungstermin vereinbaren', href: '#' },
+      { label: 'Mehr erfahren', href: '#' },
+    ],
+  },
+  pitch_d_broke: {
+    heading: 'Jetzt mit dem Vermögensaufbau starten',
+    buttons: [
+      { label: 'Beratungstermin vereinbaren', href: '#' },
+      { label: 'Mehr erfahren', href: '#' },
+    ],
+  },
+};
+
 const resolved = $('Call').first().json;
 const oembed = $('Get Thumbnail URL').first().json;
 const isRendered = DELIVERY_MODE === 'rendered';
+
+const pitchKey = String(resolved.pitchKey || '').trim();
+const cta = CTA_CONFIG[pitchKey] || null;
 
 const sequence = resolved.sequence || [];
 const videoIds = sequence
@@ -43,6 +77,15 @@ const posterMarkup = isRendered
   : '<div id="poster" class="poster"></div>';
 const videoToggleMarkup = '<button id="videoToggle" class="video-toggle" type="button" aria-label="Pause video" hidden></button>';
 
+const ctaMarkup = cta
+  ? `<div id="ctaPanel" class="cta-panel" hidden>
+      <p class="cta-heading">${cta.heading}</p>
+      <div class="cta-buttons">
+        ${cta.buttons.map((button) => `<a class="cta-button" href="${button.href}">${button.label}</a>`).join('\n        ')}
+      </div>
+    </div>`
+  : '';
+
 const vimeoApiScript = isRendered
   ? ''
   : '<script src="https://player.vimeo.com/api/player.js"></script>';
@@ -57,6 +100,33 @@ const clientScript = `
     let index = 0;
     let player;
     let shouldPlayWithAudio = false;
+    let pitchStartTime = null;
+
+    const ctaPanel = document.getElementById('ctaPanel');
+
+    function showCta() {
+      if (ctaPanel) {
+        ctaPanel.hidden = false;
+      }
+    }
+
+    function hideCta() {
+      if (ctaPanel) {
+        ctaPanel.hidden = true;
+      }
+    }
+
+    function handleVideoTimeUpdate() {
+      if (pitchStartTime === null || !ctaPanel) {
+        return;
+      }
+
+      if (videoElement.currentTime >= pitchStartTime) {
+        showCta();
+      } else {
+        hideCta();
+      }
+    }
 
     try {
       shouldPlayWithAudio = window.sessionStorage.getItem(AUDIO_PREFERENCE_KEY) === 'true';
@@ -104,6 +174,11 @@ const clientScript = `
 
         if (data.status === 'complete' && data.videoUrl) {
           progressPanel.hidden = true;
+
+          const pitchSegment = (data.segments || []).find((segment) => segment.type === 'pitch');
+          pitchStartTime = pitchSegment ? Number(pitchSegment.startTime) : null;
+          hideCta();
+
           videoElement.src = data.videoUrl;
           videoElement.muted = !shouldPlayWithAudio;
           videoElement.load();
@@ -223,6 +298,7 @@ const clientScript = `
       });
 
       videoElement.addEventListener('ended', showReplay);
+      videoElement.addEventListener('timeupdate', handleVideoTimeUpdate);
     }
 
     poster.addEventListener('click', startSequence);
@@ -374,6 +450,47 @@ const html = `<!doctype html>
       accent-color: #d7a84a;
     }
 
+    .cta-panel {
+      display: grid;
+      gap: 0.75rem;
+      justify-items: center;
+      text-align: center;
+      padding: 0.5rem 0 0;
+    }
+
+    .cta-panel[hidden] {
+      display: none;
+    }
+
+    .cta-heading {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    .cta-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 0.6rem 1.4rem;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #1a1305;
+      font-family: Georgia, "Times New Roman", serif;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.15s ease;
+    }
+
+    .cta-button:hover {
+      background: var(--accent-hover);
+    }
+
   </style>
 </head>
 <body>
@@ -389,6 +506,7 @@ const html = `<!doctype html>
       </div>
     </div>
 
+    ${ctaMarkup}
   </div>
 
   ${vimeoApiScript}

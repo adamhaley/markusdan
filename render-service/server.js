@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { once } from 'node:events';
-import { mkdir, rm, stat } from 'node:fs/promises';
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { createWriteStream } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -187,9 +187,25 @@ async function getDuration(filePath) {
   return duration;
 }
 
-function buildFilterGraph(count, durations) {
+function computeSegmentTimeline(durations, transitionDuration) {
+  const transition = Math.max(0.05, transitionDuration);
+  const startTimes = [0];
+  const crossfadeDurations = [0];
+  let currentDuration = durations[0];
+
+  for (let index = 1; index < durations.length; index += 1) {
+    const duration = Math.min(transition, currentDuration / 2, durations[index] / 2);
+    const offset = Math.max(0, currentDuration - duration);
+    startTimes.push(offset);
+    crossfadeDurations.push(duration);
+    currentDuration += durations[index] - duration;
+  }
+
+  return { startTimes, crossfadeDurations, totalDuration: currentDuration };
+}
+
+function buildFilterGraph(count, timeline) {
   const filters = [];
-  const transition = Math.max(0.05, TRANSITION_DURATION);
 
   for (let index = 0; index < count; index += 1) {
     filters.push(
@@ -205,26 +221,37 @@ function buildFilterGraph(count, durations) {
 
   let videoLabel = 'v0';
   let audioLabel = 'a0';
-  let currentDuration = durations[0];
 
   for (let index = 1; index < count; index += 1) {
-    const duration = Math.min(transition, currentDuration / 2, durations[index] / 2);
+    const offset = timeline.startTimes[index];
+    const duration = timeline.crossfadeDurations[index];
     const nextVideo = `vx${index}`;
     const nextAudio = `ax${index}`;
-    const offset = Math.max(0, currentDuration - duration);
 
     filters.push(`[${videoLabel}][v${index}]xfade=transition=fade:duration=${duration}:offset=${offset}[${nextVideo}]`);
     filters.push(`[${audioLabel}][a${index}]acrossfade=d=${duration}:c1=tri:c2=tri[${nextAudio}]`);
 
     videoLabel = nextVideo;
     audioLabel = nextAudio;
-    currentDuration += durations[index] - duration;
   }
 
   filters.push(`[${videoLabel}]format=yuv420p[vout]`);
   filters.push(`[${audioLabel}]aresample=48000[aout]`);
 
   return filters.join(';');
+}
+
+function getMetadataPath(renderId) {
+  return path.join(OUTPUT_DIR, `${renderId}.json`);
+}
+
+async function readRenderMetadata(renderId) {
+  try {
+    const raw = await readFile(getMetadataPath(renderId), 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return { duration: null, segments: [] };
+  }
 }
 
 function updateJob(job, updates) {
@@ -265,9 +292,15 @@ async function render(sequence, renderId, job) {
 
     updateJob(job, { stage: 'Preparing videos', percentage: 62 });
     const durations = await Promise.all(inputPaths.map(getDuration));
-    const filterGraph = buildFilterGraph(inputPaths.length, durations);
+    const timeline = computeSegmentTimeline(durations, TRANSITION_DURATION);
+    const filterGraph = buildFilterGraph(inputPaths.length, timeline);
     const args = inputPaths.flatMap((filePath) => ['-i', filePath]);
-    const outputDuration = durations.reduce((total, value) => total + value, 0) - TRANSITION_DURATION * (sequence.length - 1);
+    const outputDuration = timeline.totalDuration;
+    const segments = sequence.map((item, index) => ({
+      type: item.type,
+      label: item.label,
+      startTime: Math.round(timeline.startTimes[index] * 100) / 100,
+    }));
 
     args.push(
       '-progress', 'pipe:1',
@@ -296,10 +329,13 @@ async function render(sequence, renderId, job) {
     });
 
     updateJob(job, { stage: 'Finalizing video', percentage: 99 });
+    await writeFile(getMetadataPath(renderId), JSON.stringify({ duration: outputDuration, segments }));
+
     return {
       renderId,
       videoUrl: `${PUBLIC_BASE_URL}/renders/${renderId}.mp4`,
       duration: outputDuration,
+      segments,
     };
   } finally {
     await rm(workDir, { recursive: true, force: true });
@@ -340,6 +376,8 @@ function getJobResponse(job) {
     stage: job.stage,
     cached: job.cached,
     videoUrl: job.videoUrl || null,
+    duration: job.duration ?? null,
+    segments: job.segments || [],
     error: job.error || null,
   };
 }
@@ -374,6 +412,7 @@ app.post('/render/jobs', async (request, response) => {
 
     try {
       await stat(outputPath);
+      const metadata = await readRenderMetadata(renderId);
       const jobId = crypto.randomUUID();
       const job = {
         jobId,
@@ -383,6 +422,8 @@ app.post('/render/jobs', async (request, response) => {
         stage: 'Complete',
         cached: true,
         videoUrl: `${PUBLIC_BASE_URL}/renders/${renderId}.mp4`,
+        duration: metadata.duration,
+        segments: metadata.segments,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -438,10 +479,13 @@ app.post('/render', async (request, response) => {
 
     try {
       await stat(outputPath);
+      const metadata = await readRenderMetadata(renderId);
       return response.json({
         ok: true,
         renderId,
         videoUrl: `${PUBLIC_BASE_URL}/renders/${renderId}.mp4`,
+        duration: metadata.duration,
+        segments: metadata.segments,
         cached: true,
       });
     } catch {
