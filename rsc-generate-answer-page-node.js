@@ -5,43 +5,14 @@ const RENDER_NODE_NAME = 'Render Video';
 const RENDER_STATUS_BASE_URL = 'https://renders.megyk.com';
 const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt. Bitte um einen Moment Geduld. Es zahlt sich aus.';
 
-const CTA_CONFIG = {
-  pitch_a_bank: {
-    heading: 'Mehr aus Ihren Bankeinlagen herausholen',
-    buttons: [
-      { label: 'Beratungstermin vereinbaren', href: '#' },
-      { label: 'Mehr erfahren', href: '#' },
-    ],
-  },
-  pitch_b_life_insurance: {
-    heading: 'Ihre Lebensversicherung optimieren',
-    buttons: [
-      { label: 'Beratungstermin vereinbaren', href: '#' },
-      { label: 'Mehr erfahren', href: '#' },
-    ],
-  },
-  pitch_c_everything_else: {
-    heading: 'Ihr Portfolio absichern',
-    buttons: [
-      { label: 'Beratungstermin vereinbaren', href: '#' },
-      { label: 'Mehr erfahren', href: '#' },
-    ],
-  },
-  pitch_d_broke: {
-    heading: 'Jetzt mit dem Vermögensaufbau starten',
-    buttons: [
-      { label: 'Beratungstermin vereinbaren', href: '#' },
-      { label: 'Mehr erfahren', href: '#' },
-    ],
-  },
-};
+const ctaConfig = $('CTA Config').first().json;
 
 const resolved = $('Call').first().json;
 const oembed = $('Get Thumbnail URL').first().json;
 const isRendered = DELIVERY_MODE === 'rendered';
 
 const pitchKey = String(resolved.pitchKey || '').trim();
-const cta = CTA_CONFIG[pitchKey] || null;
+const cta = ctaConfig[pitchKey] || null;
 
 const sequence = resolved.sequence || [];
 const videoIds = sequence
