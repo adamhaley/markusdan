@@ -455,7 +455,7 @@ const html = `<!doctype html>
     .cta-button {
       display: inline-block;
       padding: 0.6rem 1.4rem;
-      border-radius: 999px;
+      border-radius: 0;
       background: var(--accent);
       color: #1a1305;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
