@@ -1,3 +1,4 @@
+(() => {
 const STORAGE_KEY = "risk-fast-check-form";
 const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
 const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/fe28dcfc-b0d2-4c67-b447-c5225b82f8dd";
@@ -728,3 +729,4 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+})();
