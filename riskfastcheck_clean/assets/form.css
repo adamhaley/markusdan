@@ -103,20 +103,6 @@ h1 {
 }
 
 
-.brand-mark {
-  display: block;
-  padding: 0;
-  background: #ffffff;
-  border-bottom: 1px solid var(--line);
-}
-
-.brand-mark img {
-  display: block;
-  width: 538px;
-  max-width: 100%;
-  height: auto;
-}
-
 form {
   padding: 18px 22px 20px;
 }
@@ -526,11 +512,6 @@ button:disabled {
 
   .hero {
     padding: 0 0 24px;
-  }
-
-  .brand-mark img {
-    width: 100%;
-    height: auto;
   }
 
   h1 {
