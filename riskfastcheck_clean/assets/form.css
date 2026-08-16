@@ -433,6 +433,64 @@ button:disabled {
   font-size: 0.92rem;
 }
 
+.site-footer {
+  width: 100%;
+  margin-top: 2rem;
+  background: rgb(34, 57, 68);
+  padding: 20px 40px;
+}
+
+.site-footer__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.site-footer__logo-link {
+  display: inline-block;
+  line-height: 0;
+}
+
+.site-footer__logo {
+  display: block;
+  width: 250px;
+  max-width: 100%;
+  height: auto;
+}
+
+.site-footer__copyright {
+  margin: 13px 0 0;
+  color: rgb(255, 255, 255);
+  font-family: "Gothic A1", sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem 2rem;
+}
+
+.site-footer__nav a {
+  color: rgba(255, 255, 255, 0.79);
+  font-family: "Gothic A1", sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.site-footer__nav a:hover {
+  color: rgb(190, 159, 87);
+}
+
 @media (max-width: 640px) {
   .shell {
     width: min(100%, calc(100% - 12px));
