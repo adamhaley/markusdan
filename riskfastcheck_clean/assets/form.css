@@ -183,7 +183,7 @@ form {
   z-index: 1;
   transform: translate(-50%, -50%);
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.85rem 1.25rem;
   background: #d7a84a;
   color: #1b1408;
@@ -367,7 +367,7 @@ button:disabled {
 .link-button {
   appearance: none;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   font: inherit;
   cursor: pointer;
   text-decoration: none;
