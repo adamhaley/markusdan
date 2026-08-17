@@ -1,0 +1,36 @@
+Subject: DNS change needed for rsc.markusdan.com
+
+Hi,
+
+We need a new DNS record added for markusdan.com so a subdomain points to our
+Cloudflare Pages deployment.
+
+Please add:
+
+    Type:          CNAME
+    Name/Host:     rsc
+    Target/Value:  risiko-schnell-check.pages.dev
+    Proxy status:  Proxied (orange cloud) if this zone is managed on Cloudflare;
+                   otherwise a standard (unproxied) CNAME is fine.
+
+This is additive only — no existing records need to change, and it won't
+affect the main markusdan.com site or email.
+
+---
+Current DNS setup, for reference (looked up via public WHOIS/DNS, current as
+of 2026-08-17):
+
+- Registrar: Bluehost Inc. (via FastDomain)
+- Nameservers: ns1.bluehost.com, ns2.bluehost.com
+  -> DNS for markusdan.com is managed through the Bluehost account, not
+     through Cloudflare or WPEngine.
+- Root domain (markusdan.com) A record: 35.187.53.28
+- www.markusdan.com: CNAME to markusdan.wpengine.com
+  -> The main site is hosted on WPEngine; a "wpe-verification=markusdan"
+     TXT record confirms this.
+- MX: mail.markusdan.com (mail is handled separately from the web host)
+
+So: the CNAME needs to be added wherever the Bluehost account for this
+domain is managed.
+
+Thanks!
