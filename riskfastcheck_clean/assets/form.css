@@ -47,6 +47,7 @@
 .rsc-quiz .hero {
   padding: 0 0 42px;
   border-bottom: 1px solid var(--line);
+  text-align: center;
 }
 
 
@@ -56,51 +57,25 @@
   font-size: 40px;
   line-height: 1.18;
   letter-spacing: 0;
-  font-weight: 300;
+  font-weight: 500;
 }
 
 .rsc-quiz .lede {
-  margin: 0 22px 54px;
+  margin: 0 22px 18px;
   max-width: 1120px;
   color: var(--text);
+  font-family: var(--headline);
   font-size: 32px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.35;
 }
 
-.rsc-quiz .progress {
-  display: grid;
-  gap: 6px;
+.rsc-quiz .hero-note {
   margin: 0 22px;
-  padding-top: 46px;
-  border-top: 1px solid var(--line);
-}
-
-.rsc-quiz .progress-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 13px;
+  max-width: 1120px;
   color: var(--muted);
-}
-
-.rsc-quiz .progress-meta strong {
-  color: var(--text);
-  font-weight: 400;
-}
-
-.rsc-quiz .progress-bar {
-  height: 18px;
-  background: #ffffff;
-  border: 1px solid #cccccc;
-  border-radius: 0;
-  overflow: hidden;
-}
-
-.rsc-quiz .progress-fill {
-  height: 100%;
-  background: #007faa;
-  border-radius: inherit;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 
@@ -531,14 +506,14 @@
   }
 
   .rsc-quiz .lede {
-    margin: 0 12px 34px;
+    margin: 0 12px 12px;
     font-size: 22px;
   }
 
-  .rsc-quiz .progress {
+  .rsc-quiz .hero-note {
     margin-left: 12px;
     margin-right: 12px;
-    padding-top: 28px;
+    font-size: 13px;
   }
 
   .rsc-quiz form {

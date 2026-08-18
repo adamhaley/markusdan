@@ -546,21 +546,6 @@ function initAccessibility(form) {
   form.querySelectorAll(".error").forEach((error) => {
     error.setAttribute("role", "alert");
   });
-
-  const progressBar = document.querySelector(".progress-bar");
-  const progressFill = document.querySelector(".progress-fill");
-  const progressLabel = document.querySelector(".progress-meta strong");
-
-  if (progressBar && progressFill) {
-    const width = Number.parseFloat(progressFill.style.width || "0");
-    progressBar.setAttribute("role", "progressbar");
-    progressBar.setAttribute("aria-valuemin", "0");
-    progressBar.setAttribute("aria-valuemax", "100");
-    progressBar.setAttribute("aria-valuenow", String(Number.isFinite(width) ? width : 0));
-    if (progressLabel) {
-      progressBar.setAttribute("aria-label", `Fortschritt: ${progressLabel.textContent.trim()}`);
-    }
-  }
 }
 
 function bindNavigation(form) {
