@@ -26,7 +26,7 @@ checked the moment WordPress access exists.
 
 ## Architecture recap (why this matters)
 
-- Each quiz step is its own static HTML file (`step-1.html` … `step-7.html`),
+- Each quiz step is its own static HTML file (`schritt-1.html` … `schritt-7.html`),
   navigated between via full-page `window.location.href` redirects driven by
   `data-next`/`data-prev` attributes — not a single-page app.
 - Answers are held in `sessionStorage` (`assets/form.js`), not submitted
@@ -106,7 +106,7 @@ other plugin's global.
 
 `STEP_CONFIG_PATH = "assets/steps.json?v=..."` and the `form.css` `<link>`
 are relative URLs, resolved against whatever URL the page lives at. Today
-that's flat filenames (`step-1.html`) so it works. Under OP3 the page will
+that's flat filenames (`schritt-1.html`) so it works. Under OP3 the page will
 live at some WP-generated slug (e.g. `/risk-fast-check/schritt-1/`), and a
 relative path will 404. These need to become absolute URLs before porting —
 either pointing back at the current Cloudflare-hosted `assets/` folder
@@ -119,7 +119,7 @@ those files live under WP.
 
 ### 5. Inter-step navigation is hardcoded filenames, not portable
 
-`data-next="step-2.html"` drives `window.location.href` on every step.
+`data-next="schritt-2.html"` drives `window.location.href` on every step.
 Under OP3 each step becomes its own page with its own WP-assigned URL —
 every `data-next`/`data-prev` attribute across all 7 steps needs to be
 rewritten by hand to match whatever URL structure OP3 gives the new pages.

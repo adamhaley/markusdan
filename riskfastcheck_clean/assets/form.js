@@ -716,7 +716,7 @@ function init() {
     clearState();
   }
   if (shouldReturnToStart(form)) {
-    window.location.href = "step-1.html";
+    window.location.href = "schritt-1.html";
     return;
   }
   renderStepVideo(form);

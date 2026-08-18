@@ -1,0 +1,9 @@
+# Old English step URLs -> current German schritt URLs.
+# Cloudflare Pages reads this file automatically on every deploy.
+/step-1.html  /schritt-1.html  301
+/step-2.html  /schritt-2.html  301
+/step-3.html  /schritt-3.html  301
+/step-4.html  /schritt-4.html  301
+/step-5.html  /schritt-5.html  301
+/step-6.html  /schritt-6.html  301
+/step-7.html  /schritt-7.html  301
