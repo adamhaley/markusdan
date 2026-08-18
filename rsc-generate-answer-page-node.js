@@ -5,6 +5,12 @@ const RENDER_NODE_NAME = 'Render Video';
 const RENDER_STATUS_BASE_URL = 'https://renders.megyk.com';
 const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt.\nBitte um einen Moment Geduld. Es zahlt sich aus.';
 
+const PITCH_LETTERS = {
+  pitch_a_bank: 'A',
+  pitch_b_life_insurance: 'B',
+  pitch_c_everything_else: 'C',
+  pitch_d_broke: 'D',
+};
 const ctaConfig = $('CTA Config').first().json;
 
 const resolved = $('Call').first().json;
@@ -13,6 +19,18 @@ const isRendered = DELIVERY_MODE === 'rendered';
 
 const pitchKey = String(resolved.pitchKey || '').trim();
 const cta = ctaConfig[pitchKey] || null;
+
+const normalizedAnswers = resolved.normalizedAnswers || {};
+const answerScores = [1, 2, 3, 4, 5, 6]
+  .map((step) => {
+    const code = String(normalizedAnswers[step] || '').trim();
+    const letter = code.slice(-1).toLowerCase();
+    const score = letter.charCodeAt(0) - 'a'.charCodeAt(0);
+    return Number.isFinite(score) && score >= 0 ? score : 0;
+  })
+  .join('');
+const pitchLetter = PITCH_LETTERS[pitchKey] || '';
+const trackingCode = `${answerScores}${pitchLetter}`;
 
 const sequence = resolved.sequence || [];
 const videoIds = sequence
@@ -50,9 +68,12 @@ const videoToggleMarkup = '<button id="videoToggle" class="video-toggle" type="b
 
 const ctaMarkup = cta
   ? `<div id="ctaPanel" class="cta-panel" hidden>
-      <p class="cta-heading">${cta.heading}</p>
+      ${cta.heading ? `<p class="cta-heading">${cta.heading}</p>` : ''}
       <div class="cta-buttons">
-        ${cta.buttons.map((button) => `<a class="cta-button" href="${button.href}">${button.label}</a>`).join('\n        ')}
+        ${cta.buttons.map((button) => {
+          const href = String(button.href || '').replace('xxxxxx', trackingCode);
+          return `<a class="cta-button" href="${href}">${button.label}</a>`;
+        }).join('\n        ')}
       </div>
     </div>`
   : '';
@@ -71,7 +92,6 @@ const clientScript = `
     let index = 0;
     let player;
     let shouldPlayWithAudio = false;
-    let pitchStartTime = null;
 
     const ctaPanel = document.getElementById('ctaPanel');
 
@@ -84,18 +104,6 @@ const clientScript = `
     function hideCta() {
       if (ctaPanel) {
         ctaPanel.hidden = true;
-      }
-    }
-
-    function handleVideoTimeUpdate() {
-      if (pitchStartTime === null || !ctaPanel) {
-        return;
-      }
-
-      if (videoElement.currentTime >= pitchStartTime) {
-        showCta();
-      } else {
-        hideCta();
       }
     }
 
@@ -124,6 +132,7 @@ const clientScript = `
 
     function showReplay() {
       hideVideoToggle();
+      showCta();
     }
 
     function updateProgress(data) {
@@ -145,9 +154,6 @@ const clientScript = `
 
         if (data.status === 'complete' && data.videoUrl) {
           progressPanel.hidden = true;
-
-          const pitchSegment = (data.segments || []).find((segment) => segment.type === 'pitch');
-          pitchStartTime = pitchSegment ? Number(pitchSegment.startTime) : null;
           hideCta();
 
           videoElement.src = data.videoUrl;
@@ -269,7 +275,6 @@ const clientScript = `
       });
 
       videoElement.addEventListener('ended', showReplay);
-      videoElement.addEventListener('timeupdate', handleVideoTimeUpdate);
     }
 
     poster.addEventListener('click', startSequence);
