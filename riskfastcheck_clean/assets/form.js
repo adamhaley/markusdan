@@ -652,24 +652,42 @@ async function renderStepVideo(form) {
       }
 
       const player = new window.Vimeo.Player(iframe);
+      const videoFrame = slot.querySelector(".video-frame");
 
-      const startOverlay = slot.querySelector(".video-start-overlay");
-
-      if (startOverlay) {
-        startOverlay.addEventListener("click", async () => {
-          startOverlay.disabled = true;
+      function attachUnmuteHandler(overlay) {
+        overlay.addEventListener("click", async () => {
+          overlay.disabled = true;
 
           try {
             await player.setMuted(false);
             await player.setVolume(1);
             setStepVideoAudioPreference(true);
             await player.play();
-            startOverlay.remove();
+            overlay.remove();
           } catch {
-            startOverlay.disabled = false;
-            startOverlay.textContent = "Erneut versuchen";
+            overlay.disabled = false;
+            overlay.textContent = "Erneut versuchen";
           }
         });
+      }
+
+      function showUnmuteOverlay() {
+        if (!videoFrame || videoFrame.querySelector(".video-start-overlay")) {
+          return;
+        }
+
+        const overlay = document.createElement("button");
+        overlay.type = "button";
+        overlay.className = "video-start-overlay";
+        overlay.textContent = "Video mit Ton starten";
+        attachUnmuteHandler(overlay);
+        videoFrame.appendChild(overlay);
+      }
+
+      const startOverlay = slot.querySelector(".video-start-overlay");
+
+      if (startOverlay) {
+        attachUnmuteHandler(startOverlay);
       }
 
       player.on("volumechange", (event) => {
@@ -679,9 +697,23 @@ async function renderStepVideo(form) {
       });
 
       if (shouldPlayWithAudio) {
-        player.play().catch(() => {
-          setStepVideoAudioPreference(false);
-        });
+        // Some mobile browsers silently block unmuted autoplay even when
+        // the visitor already opted into audio on a previous step, since a
+        // remembered preference isn't a fresh user gesture. Some reject the
+        // play() call outright; others resolve it while force-muting the
+        // video instead. Fall back to a one-tap overlay in both cases,
+        // rather than forgetting the preference.
+        player
+          .play()
+          .then(() => player.getMuted())
+          .then((isMuted) => {
+            if (isMuted) {
+              showUnmuteOverlay();
+            }
+          })
+          .catch(() => {
+            showUnmuteOverlay();
+          });
       }
     } catch {
       // Leave the iframe in place even if the Player API fails to load.
