@@ -324,6 +324,32 @@
       ],
       "id": "c95b4d3c-221f-4105-9d2b-476300c9ff5f",
       "name": "CTA Config"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/1212339314134627/events",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"event_name\": \"generate_lead\",\n      \"event_time\": {{ Math.floor(Date.now() / 1000) }},\n      \"event_id\": \"{{ $('Webhook').first().json.body.event_id }}\",\n      \"action_source\": \"website\",\n      \"event_source_url\": \"https://rsc.markusdan.com/schritt-6\",\n      \n\"user_data\": {\n  \"client_ip_address\": \"{{ $('Webhook').first().json.headers['x-forwarded-for'] }}\",\n  \"client_user_agent\": \"{{ $('Webhook').first().json.headers['user-agent'] }}\"\n}\n\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -96,
+        672
+      ],
+      "id": "51b9c888-4e8a-4c81-ac73-161e0db597d8",
+      "name": "Send Meta Pixel Event",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "Rd98G6wPrpyWAqhh",
+          "name": "Meta CONVERSIONS API TOKEN"
+        }
+      }
     }
   ],
   "pinData": {
@@ -395,6 +421,11 @@
             "node": "Call",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Send Meta Pixel Event",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -461,7 +492,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "189e6a91-4d85-4ff2-8ed1-a89deee84b46",
+  "versionId": "c05244a7-d2bd-4328-b291-f110d51206fa",
   "meta": {
     "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
   },
