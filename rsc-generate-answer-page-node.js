@@ -463,11 +463,16 @@ const html = `<!doctype html>
     }
 
     .cta-panel {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
       display: grid;
-      gap: 0.75rem;
+      align-content: center;
       justify-items: center;
+      gap: 0.75rem;
       text-align: center;
-      padding: 0.5rem 0 0;
+      padding: 1.5rem;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.72) 100%);
     }
 
     .cta-panel[hidden] {
@@ -516,9 +521,8 @@ const html = `<!doctype html>
         <progress id="progressBar" max="100" value="0"></progress>
         <span id="progressLabel">0%</span>
       </div>
+      ${ctaMarkup}
     </div>
-
-    ${ctaMarkup}
   </div>
 
   ${vimeoApiScript}
