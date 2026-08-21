@@ -45,14 +45,14 @@
 
 
 .rsc-quiz .hero {
-  padding: 0 0 42px;
+  padding: 0 0 14px;
   border-bottom: 1px solid var(--line);
   text-align: center;
 }
 
 
 .rsc-quiz h1 {
-  margin: 44px 22px 20px;
+  margin: 18px 22px 8px;
   font-family: var(--headline);
   font-size: 40px;
   line-height: 1.18;
@@ -61,7 +61,7 @@
 }
 
 .rsc-quiz .lede {
-  margin: 0 22px 18px;
+  margin: 0 22px 6px;
   max-width: 1120px;
   color: var(--text);
   font-family: var(--headline);
@@ -80,7 +80,7 @@
 
 
 .rsc-quiz form {
-  padding: 18px 22px 20px;
+  padding: 10px 22px 20px;
 }
 
 .rsc-quiz .section-note {
@@ -110,7 +110,7 @@
 }
 
 .rsc-quiz .video-slot {
-  margin: 0 0 2rem;
+  margin: 0 0 0.75rem;
 }
 
 .rsc-quiz .video-card {
@@ -405,8 +405,8 @@
 }
 
 .rsc-quiz .site-header {
-  padding-top: 35px;
-  padding-bottom: 35px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .rsc-quiz .site-footer {
