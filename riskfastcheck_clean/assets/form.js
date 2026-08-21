@@ -3,6 +3,8 @@ const STORAGE_KEY = "risk-fast-check-form";
 const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
 const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/fe28dcfc-b0d2-4c67-b447-c5225b82f8dd";
 const VIDEO_AUDIO_PREFERENCE_KEY = "rsc-video-audio-enabled";
+const CONSENT_STORAGE_KEY = "rsc-cookie-consent";
+const PRIVACY_POLICY_URL = "https://markusdan.com/datenschutzerklaerung/";
 const START_STEP = "1";
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
@@ -725,7 +727,71 @@ async function renderStepVideo(form) {
   }
 }
 
+function getStoredConsent() {
+  try {
+    return localStorage.getItem(CONSENT_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setStoredConsent(value) {
+  try {
+    localStorage.setItem(CONSENT_STORAGE_KEY, value);
+  } catch {
+    // Ignore storage failures; the banner will just show again next visit.
+  }
+}
+
+function applyConsent(granted) {
+  const state = granted ? "granted" : "denied";
+  window.dataLayer = window.dataLayer || [];
+  if (typeof window.gtag === "function") {
+    window.gtag("consent", "update", {
+      ad_storage: state,
+      ad_user_data: state,
+      ad_personalization: state,
+      analytics_storage: state,
+    });
+  }
+}
+
+function initConsentBanner() {
+  if (getStoredConsent() !== null) {
+    return;
+  }
+
+  const banner = document.createElement("div");
+  banner.className = "consent-banner";
+  banner.innerHTML = `
+    <p class="consent-banner__text">
+      Wir verwenden Cookies, um die Nutzung dieser Seite zu analysieren. Mehr dazu in unserer
+      <a href="${PRIVACY_POLICY_URL}" target="_blank" rel="noopener">Datenschutzerklärung</a>.
+    </p>
+    <div class="consent-banner__actions">
+      <button type="button" class="link-button" data-consent="reject">Ablehnen</button>
+      <button type="button" class="button" data-consent="accept">Akzeptieren</button>
+    </div>
+  `;
+
+  banner.addEventListener("click", (event) => {
+    const action = event.target.closest("[data-consent]")?.dataset.consent;
+    if (!action) {
+      return;
+    }
+
+    const granted = action === "accept";
+    setStoredConsent(granted ? "granted" : "denied");
+    applyConsent(granted);
+    banner.remove();
+  });
+
+  document.body.appendChild(banner);
+}
+
 function init() {
+  initConsentBanner();
+
   const form = document.querySelector("form[data-step]");
   if (!form) {
     return;
