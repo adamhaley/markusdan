@@ -4,6 +4,8 @@ const DELIVERY_MODE = 'rendered';
 const RENDER_NODE_NAME = 'Render Video';
 const RENDER_STATUS_BASE_URL = 'https://renders.megyk.com';
 const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt.\nBitte um einen Moment Geduld. Es zahlt sich aus.';
+// DEH-31: preserve the "rendering in real time" effect even on a cache hit.
+const CACHED_RENDER_DELAY_MS = 15000;
 
 const PITCH_LETTERS = {
   pitch_a_bank: 'A',
@@ -97,6 +99,7 @@ const clientScript = `
     const embedUrls = ${JSON.stringify(embedUrls)};
     const renderJobId = ${JSON.stringify(renderJobId)};
     const renderStatusUrl = ${JSON.stringify(renderStatusUrl)};
+    const CACHED_RENDER_DELAY_MS = ${JSON.stringify(CACHED_RENDER_DELAY_MS)};
     const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';
 
     let index = 0;
@@ -152,6 +155,16 @@ const clientScript = `
       progressStage.textContent = ${JSON.stringify(PROGRESS_MESSAGE)};
     }
 
+    async function runFakeProgress(durationMs) {
+      const stepMs = 500;
+      const steps = Math.max(1, Math.round(durationMs / stepMs));
+
+      for (let step = 1; step <= steps; step += 1) {
+        await new Promise((resolve) => setTimeout(resolve, stepMs));
+        updateProgress({ percentage: Math.round((step / steps) * 100) });
+      }
+    }
+
     async function pollRenderJob() {
       while (true) {
         const response = await fetch(renderStatusUrl, { headers: { Accept: 'application/json' } });
@@ -160,9 +173,14 @@ const clientScript = `
         }
 
         const data = await response.json();
-        updateProgress(data);
 
         if (data.status === 'complete' && data.videoUrl) {
+          if (data.cached) {
+            await runFakeProgress(CACHED_RENDER_DELAY_MS);
+          } else {
+            updateProgress(data);
+          }
+
           progressPanel.hidden = true;
           hideCta();
 
@@ -174,6 +192,8 @@ const clientScript = `
           videoElement.play().catch(handlePlayFailure);
           return;
         }
+
+        updateProgress(data);
 
         if (data.status === 'error') {
           throw new Error(data.error || 'Video rendering failed');
