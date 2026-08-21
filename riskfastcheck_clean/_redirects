@@ -6,4 +6,8 @@
 /step-4.html  /schritt-4.html  301
 /step-5.html  /schritt-5.html  301
 /step-6.html  /schritt-6.html  301
-/step-7.html  /schritt-7.html  301
+
+# schritt-7 (optional feedback step) was deprecated; schritt-6 now submits
+# directly. Send any stale links to the end of the live flow instead of 404s.
+/step-7.html    /schritt-6.html  301
+/schritt-7.html /schritt-6.html  301

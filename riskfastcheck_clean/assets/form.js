@@ -585,6 +585,8 @@ function bindNavigation(form) {
 
     try {
       const html = await submitResults(form);
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "questionnaire_complete" });
       clearState();
       document.open();
       document.write(html);

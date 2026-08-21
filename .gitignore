@@ -5,3 +5,7 @@ data
 *.swo
 .DS_Store
 .idea
+
+# Contains a live Meta Conversions API token in plaintext; see
+# docs/rfc-tracking-instructions.md for the git-safe transcription.
+docs/rfc-tracking-instructions.pdf
