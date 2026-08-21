@@ -353,25 +353,25 @@
 
 .rsc-quiz .button {
   padding: 0.95rem 1.9rem;
-  background: #007faa;
-  color: #fff;
+  background: #d7a84a;
+  color: #1b1408;
   font-weight: 400;
   letter-spacing: 0;
   box-shadow: none;
-  border: 1px solid #007faa;
+  border: 1px solid #d7a84a;
 }
 
 .rsc-quiz .button:hover {
-  background: #2685c6;
-  border-color: #2685c6;
+  background: #e6bb67;
+  border-color: #e6bb67;
 }
 
 .rsc-quiz .link-button {
   padding: 0.95rem 1.9rem;
   background: #fff;
-  color: #007faa;
+  color: #d7a84a;
   font-weight: 400;
-  border: 1px solid #007faa;
+  border: 1px solid #d7a84a;
 }
 
 .rsc-quiz .link-button:hover {

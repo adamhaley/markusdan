@@ -1,3 +1,9 @@
+# Root URL -> quiz start. A real edge redirect instead of index.html's old
+# meta-refresh, which caused a brief flash of unstyled content before
+# navigating.
+/            /schritt-1.html  301
+/index.html  /schritt-1.html  301
+
 # Old English step URLs -> current German schritt URLs.
 # Cloudflare Pages reads this file automatically on every deploy.
 /step-1.html  /schritt-1.html  301
