@@ -11,6 +11,14 @@ const PITCH_LETTERS = {
   pitch_c_everything_else: 'C',
   pitch_d_broke: 'D',
 };
+
+// DEH-38: pitch B gets fixed heading text above its CTA buttons.
+const PITCH_HEADING_OVERRIDES = {
+  pitch_b_life_insurance:
+    '<strong>Schnell-Check mit Kontaktdaten wiederholen – nur Fragen, kein Video.</strong><br>\n' +
+    '<strong>Auswertung per E-Mail und persönliche Analyse am Telefon.</strong>',
+};
+
 const ctaConfig = $('CTA Config').first().json;
 
 const resolved = $('Call').first().json;
@@ -66,9 +74,11 @@ const posterMarkup = isRendered
   : '<div id="poster" class="poster"></div>';
 const videoToggleMarkup = '<button id="videoToggle" class="video-toggle" type="button" aria-label="Pause video" hidden></button>';
 
+const ctaHeading = PITCH_HEADING_OVERRIDES[pitchKey] || cta?.heading;
+
 const ctaMarkup = cta
   ? `<div id="ctaPanel" class="cta-panel" hidden>
-      ${cta.heading ? `<p class="cta-heading">${cta.heading}</p>` : ''}
+      ${ctaHeading ? `<p class="cta-heading">${ctaHeading}</p>` : ''}
       <div class="cta-buttons">
         ${cta.buttons.map((button) => {
           const href = String(button.href || '').replace('xxxxxx', trackingCode);
