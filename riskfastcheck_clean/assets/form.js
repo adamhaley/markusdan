@@ -792,6 +792,16 @@ function initConsentBanner() {
   document.body.appendChild(banner);
 }
 
+function pushStepViewEvent(form) {
+  const step = Number(form.dataset.step || 0);
+  if (!step) {
+    return;
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: `RFCstep_${step}_view` });
+}
+
 function init() {
   initConsentBanner();
 
@@ -807,6 +817,7 @@ function init() {
     window.location.href = "schritt-1.html";
     return;
   }
+  pushStepViewEvent(form);
   renderStepVideo(form);
   initAccessibility(form);
   bindTextFields(form);
