@@ -502,6 +502,8 @@ async function submitResults(form) {
   state.submittedAt = new Date().toISOString();
   setState(state);
   const payload = buildResultsPayload(state);
+  const eventId = crypto.randomUUID();
+  payload.event_id = eventId;
 
   const response = await fetch(SUBMIT_WEBHOOK_URL, {
     method: "POST",
@@ -516,7 +518,8 @@ async function submitResults(form) {
     throw new Error(`Webhook submission failed with status ${response.status}`);
   }
 
-  return response.text();
+  const html = await response.text();
+  return { html, eventId };
 }
 
 function showSubmissionError(form) {
@@ -586,9 +589,9 @@ function bindNavigation(form) {
     }
 
     try {
-      const html = await submitResults(form);
+      const { html, eventId } = await submitResults(form);
       window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ event: "questionnaire_complete" });
+      window.dataLayer.push({ event: "questionnaire_complete", event_id: eventId });
       clearState();
       document.open();
       document.write(html);
