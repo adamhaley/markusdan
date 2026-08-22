@@ -101,6 +101,11 @@ const clientScript = `
     const renderStatusUrl = ${JSON.stringify(renderStatusUrl)};
     const CACHED_RENDER_DELAY_MS = ${JSON.stringify(CACHED_RENDER_DELAY_MS)};
     const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';
+    // requestFullscreen() needs a user gesture, and rendered-mode video autoplays
+    // with none — so mobile gets a tap-to-start gate to provide one; desktop keeps
+    // the existing autoplay-on-load behavior with no fullscreen attempt.
+    const isMobile = /Android|iPhone|iPod|Mobile/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
 
     let index = 0;
     let player;
@@ -126,6 +131,7 @@ const clientScript = `
       shouldPlayWithAudio = false;
     }
 
+    const frame = document.getElementById('frame');
     const poster = document.getElementById('poster');
     const videoElement = document.getElementById('video');
     const videoToggle = document.getElementById('videoToggle');
@@ -166,6 +172,9 @@ const clientScript = `
     }
 
     async function pollRenderJob() {
+      progressPanel.hidden = false;
+      updateProgress({ percentage: 0 });
+
       while (true) {
         const response = await fetch(renderStatusUrl, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
@@ -280,7 +289,17 @@ const clientScript = `
       });
     }
 
+    function requestFrameFullscreen() {
+      try {
+        const request = frame?.requestFullscreen || frame?.webkitRequestFullscreen;
+        request?.call(frame)?.catch?.(() => {});
+      } catch {
+        // Unsupported (e.g. in-app browsers, older iOS) — fall back to the normal in-page layout.
+      }
+    }
+
     function startSequence() {
+      requestFrameFullscreen();
       index = 0;
       hidePoster();
       hideVideoToggle();
@@ -333,8 +352,11 @@ const clientScript = `
     }
 
     if (deliveryMode === 'rendered') {
-      updateProgress({ percentage: 0 });
-      pollRenderJob().catch(handlePlayFailure);
+      if (isMobile) {
+        showPoster();
+      } else {
+        pollRenderJob().catch(handlePlayFailure);
+      }
     } else {
       startSequence();
     }
@@ -385,6 +407,16 @@ const html = `<!doctype html>
       border-radius: 18px;
       overflow: hidden;
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    .frame:fullscreen,
+    .frame:-webkit-full-screen {
+      width: 100vw;
+      height: 100vh;
+      aspect-ratio: auto;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
     }
 
     .poster {
@@ -512,11 +544,11 @@ const html = `<!doctype html>
 </head>
 <body>
   <div class="shell">
-    <div class="frame">
+    <div class="frame" id="frame">
       ${posterMarkup}
       ${mediaMarkup}
       ${videoToggleMarkup}
-      <div id="progressPanel" class="render-progress" role="status" aria-live="polite">
+      <div id="progressPanel" class="render-progress" role="status" aria-live="polite" hidden>
         <strong id="progressStage">${PROGRESS_MESSAGE}</strong>
         <progress id="progressBar" max="100" value="0"></progress>
         <span id="progressLabel">0%</span>
