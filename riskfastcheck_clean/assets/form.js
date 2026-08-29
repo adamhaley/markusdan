@@ -782,7 +782,7 @@ function init() {
     clearState();
   }
   if (shouldReturnToStart(form)) {
-    window.location.href = "schritt-1.html";
+    window.location.href = "schritt-1";
     return;
   }
   pushStepViewEvent(form);
