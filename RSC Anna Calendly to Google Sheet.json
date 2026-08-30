@@ -1,0 +1,266 @@
+{
+  "name": "RSC Anna Calendly to Google Sheet",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "invitee.created"
+        ]
+      },
+      "type": "n8n-nodes-base.calendlyTrigger",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        224
+      ],
+      "id": "8e90a6e7-c0b8-4293-81ee-9381ba620f0a",
+      "name": "Calendly Trigger",
+      "webhookId": "5b8c1120-c97d-49d7-ae88-50927385a7c6",
+      "credentials": {
+        "calendlyOAuth2Api": {
+          "id": "E8yvhWaoA7dfzPl5",
+          "name": "Calendly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e9cf023e-dabc-40a0-9f20-670a4e7f348c",
+              "leftValue": "={{ $json.payload.scheduled_event.event_type }}",
+              "rightValue": "=https://api.calendly.com/event_types/e6f36650-2c52-4c9e-9664-225f59538aad",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -112,
+        224
+      ],
+      "id": "7f35ce7c-8e43-45e7-a059-1a07d6defaf3",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a2b3c4d-0001-4000-8000-000000000001",
+              "name": "date",
+              "value": "={{ $json.payload.scheduled_event.start_time.toDateTime().setZone($json.payload.timezone).toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "1a2b3c4d-0001-4000-8000-000000000002",
+              "name": "time",
+              "value": "={{ $json.payload.scheduled_event.start_time.toDateTime().setZone($json.payload.timezone).toFormat('HH:mm') }}",
+              "type": "string"
+            },
+            {
+              "id": "1a2b3c4d-0001-4000-8000-000000000003",
+              "name": "calendlyEventName",
+              "value": "={{ $json.payload.scheduled_event.name }}",
+              "type": "string"
+            },
+            {
+              "id": "1a2b3c4d-0001-4000-8000-000000000004",
+              "name": "sequence",
+              "value": "={{ $json.payload.tracking.utm_content }}",
+              "type": "string"
+            },
+            {
+              "id": "1a2b3c4d-0001-4000-8000-000000000005",
+              "name": "name",
+              "value": "={{ $json.payload.name }}",
+              "type": "string"
+            },
+            {
+              "id": "1a2b3c4d-0001-4000-8000-000000000006",
+              "name": "email",
+              "value": "={{ $json.payload.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        224
+      ],
+      "id": "9a036004-c996-4d73-89be-23bba463fdf6",
+      "name": "Map Sheet Columns"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1A8iAZnyNVKZj-ySxryx00oTBqEzkpgdNqXu5M9K3RWA",
+          "mode": "list",
+          "cachedResultName": "RSC Calendly Bookings – Anna Streeb",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A8iAZnyNVKZj-ySxryx00oTBqEzkpgdNqXu5M9K3RWA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 661138750,
+          "mode": "list",
+          "cachedResultName": "calendly-invites-tracker-template",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A8iAZnyNVKZj-ySxryx00oTBqEzkpgdNqXu5M9K3RWA/edit#gid=661138750"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.date }}",
+            "Time": "={{ $json.time }}",
+            "Calendly Event Name": "={{ $json.calendlyEventName }}",
+            "Sequence": "={{ $json.sequence }}",
+            "Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendly Event Name",
+              "displayName": "Calendly Event Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sequence",
+              "displayName": "Sequence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        304,
+        224
+      ],
+      "id": "d3abbc38-dfe0-45eb-83ed-f6ce46fb5f5d",
+      "name": "Append to Google Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qJ5ck4AVx9Jx37Fr",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Calendly Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Map Sheet Columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Sheet Columns": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "28c8401b-855e-4b28-a351-423dd869e458",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
+  },
+  "nodeGroups": [],
+  "id": "Qmirm6zEYQzm83xw",
+  "tags": []
+}

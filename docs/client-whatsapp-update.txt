@@ -1,0 +1,6 @@
+
+✅ DEH-31 — Added an artificial delay for cached video renders (psychological effect)
+✅ DEH-32 — Overlaid the CTA buttons on the final video frame
+✅ DEH-38 — Fixed heading text above the pitch B CTA buttons
+✅ DEH-39 — Tightened up header/hero/video spacing so more is visible above the fold
+

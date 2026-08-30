@@ -1,0 +1,25 @@
+OK summary - 
+1. Links all changed to remove the .html so there is no accidental double-pinging of events
+
+2. Consent/privacy notice gap - fixed. The page previously claimed the
+   evaluation was anonymous and that no personal data is collected,
+   despite GA4 tracking running on the page — which your Claude flagged
+   as "a real friction point under DSGVO/TTDSG." The footer also only
+   linked to Impressum, with no Datenschutzerklärung. Both fixed:
+   hero-note wording softened to match what's actually happening (no
+   name/email/phone required, not "anonymous"), and a Datenschutzerklärung
+   link added to the footer on all 6 steps. Also verified directly (fresh
+   incognito test) that GA4 does not actually set any cookies until consent is given via our banner.
+
+3. Cookie domain scoping - Verified directly in the browser on
+   rsc.markusdan.com: the _ga and _ga_BM66MKWBDH cookies are both scoped
+   to .markusdan.com (the root domain), which is exactly right for
+   cross-subdomain tracking between markusdan.com and rsc.markusdan.com.
+
+4. GTM access — the access you gave me is to the GA dashboard. I need
+   GTM access specifically (the container is GTM-NJPGLLZW) to fix the
+   funnel step-view and conversion events, which aren't reaching GA4 at
+   all right now. (dashboard setting, not addressable in code)
+
+5. Need to confirm the longer pitch videos (A/B/C, ~26 min each) are the
+   ones you intend to use? That adds real time to how long the final video takes to render (I'm seeing over 15mins for final answer) - if these are the ones you plan to use, we'll need a performance strategy to address that. Already looked into some options.

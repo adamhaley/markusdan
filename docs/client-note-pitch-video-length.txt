@@ -1,0 +1,26 @@
+Hey — found something on the render side worth flagging.
+
+Pitch videos A, B, and C are each 26m20s long; Pitch D is 94 seconds.
+
+The length is what's driving the slower final-video generation you may
+have noticed — downloading and processing a 26-minute source clip takes
+real time no matter how well-tuned the server is. We already fixed the
+CPU/concurrency issue from before (that's solid now), but a 25-40 min
+combined video (6 short answer clips + a ~26-min pitch) just isn't
+something anyone can render "in real time" for someone waiting on a page.
+
+Wanted to check with you directly rather than assume anything, since I
+know these lengths may be intentional on your end:
+
+1. If you'd rather the pitch videos be shorter (closer to Pitch D), that
+   would make the current live-render experience fast on its own — no
+   further work needed on our side beyond swapping the files.
+2. If the longer pitch content is intentional, we'd want to move to an
+   async model instead of a live progress bar — something like "check
+   back later" via a bookmarkable link, or email when it's ready. Worth
+   flagging: an email-based version conflicts with the "no name, no
+   email, no phone required" wording we just added to the quiz per your
+   request — so that's a real tradeoff worth deciding deliberately, not
+   something we'd want to just build around.
+
+Let me know which direction makes sense for what you're going for.
