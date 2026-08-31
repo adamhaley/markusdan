@@ -224,14 +224,38 @@ const clientScript = `
       const start = performance.now();
       await new Promise((resolve) => {
         function step(now) {
-          const t = Math.min(1, (now - start) / CROSSFADE_MS);
-          front.style.opacity = String(1 - t);
-          back.style.opacity = String(t);
-          front.volume = shouldPlayWithAudio ? 1 - t : 0;
-          back.volume = shouldPlayWithAudio ? t : 0;
-          if (t < 1) {
-            requestAnimationFrame(step);
-          } else {
+          // Clamp both ends: requestAnimationFrame's timestamp can land a
+          // hair before a performance.now() call made moments earlier (a
+          // real, documented browser timing quirk), making the first
+          // frame's (now - start) slightly negative. Un-clamped, that
+          // pushed (1 - t) past 1 and threw when assigned to .volume
+          // (which requires [0, 1]) - an uncaught exception that killed
+          // the animation loop mid-frame, so it never scheduled another
+          // frame or resolved the crossfade's promise. That's what looked
+          // like a permanent freeze.
+          //
+          // The try/catch below is a second line of defense against the
+          // same failure shape from any other cause: whatever throws, still
+          // finish the crossfade (jump straight to the end state) instead
+          // of leaving this promise pending forever and silently freezing
+          // the whole sequence with no visible error to the visitor.
+          try {
+            const t = Math.max(0, Math.min(1, (now - start) / CROSSFADE_MS));
+            front.style.opacity = String(1 - t);
+            back.style.opacity = String(t);
+            front.volume = shouldPlayWithAudio ? 1 - t : 0;
+            back.volume = shouldPlayWithAudio ? t : 0;
+            if (t < 1) {
+              requestAnimationFrame(step);
+            } else {
+              resolve();
+            }
+          } catch (e) {
+            console.error('[RSC] Crossfade animation frame failed, finishing transition immediately', e);
+            front.style.opacity = '0';
+            back.style.opacity = '1';
+            front.volume = 0;
+            back.volume = shouldPlayWithAudio ? 1 : 0;
             resolve();
           }
         }
