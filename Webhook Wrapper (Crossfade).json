@@ -1,0 +1,475 @@
+{
+  "name": "Webhook Wrapper (Crossfade)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d9e002a0-a764-46be-b4ee-237200be38f9",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        464
+      ],
+      "id": "03f41d0d-2ea9-49d1-b8cb-4b05c6282119",
+      "name": "Webhook",
+      "webhookId": "d9e002a0-a764-46be-b4ee-237200be38f9"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ryhu6xynPYdjdgD7",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/ryhu6xynPYdjdgD7"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "real_estate_ownership": "={{ $json.body.real_estate_ownership }}",
+            "real_estate_investment_amount": "={{ $json.body.real_estate_investment_amount }}",
+            "securities_ownership": "={{ $json.body.securities_ownership }}",
+            "securities_investment_amount": "={{ $json.body.securities_investment_amount }}",
+            "precious_metals_ownership": "={{ $json.body.precious_metals_ownership }}",
+            "precious_metals_investment_amount": "={{ $json.body.precious_metals_investment_amount }}",
+            "life_insurance_ownership": "={{ $json.body.life_insurance_ownership }}",
+            "life_insurance_monthly_payment": "={{ $json.body.life_insurance_monthly_payment }}",
+            "bank_savings_ownership": "={{ $json.body.bank_savings_ownership }}",
+            "bank_savings_amount": "={{ $json.body.bank_savings_amount }}",
+            "alternative_assets_ownership": "={{ $json.body.alternative_assets_ownership }}",
+            "alternative_assets_investment_amount": "={{ $json.body.alternative_assets_investment_amount }}",
+            "feedback": "={{ $json.body.feedback }}",
+            "submittedAt": "={{ $json.body.submittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "real_estate_ownership",
+              "displayName": "real_estate_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "real_estate_investment_amount",
+              "displayName": "real_estate_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_ownership",
+              "displayName": "securities_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "securities_investment_amount",
+              "displayName": "securities_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_ownership",
+              "displayName": "precious_metals_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "precious_metals_investment_amount",
+              "displayName": "precious_metals_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_ownership",
+              "displayName": "life_insurance_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "life_insurance_monthly_payment",
+              "displayName": "life_insurance_monthly_payment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_ownership",
+              "displayName": "bank_savings_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "bank_savings_amount",
+              "displayName": "bank_savings_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_ownership",
+              "displayName": "alternative_assets_ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "alternative_assets_investment_amount",
+              "displayName": "alternative_assets_investment_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "feedback",
+              "displayName": "feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -112,
+        464
+      ],
+      "id": "dbfb5339-cf17-4bb4-9572-cdfc7f84ae38",
+      "name": "Call"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "sequence",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        128,
+        464
+      ],
+      "id": "6ff1d57a-4610-4522-8eb8-df3bdf98edab",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.vimeo.com/videos/{{ $json.videoId }}?fields=play",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        352,
+        464
+      ],
+      "id": "865f2945-a7ce-4d15-b13b-8600d8615f54",
+      "name": "Get Play URL",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "REPLACE_WITH_VIMEO_API_CREDENTIAL_ID",
+          "name": "Vimeo API"
+        }
+      },
+      "notesInFlow": false,
+      "notes": "Credential ID is a placeholder -- reselect the real 'Vimeo API' Bearer Auth credential in this node after import."
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node: \"Merge Play URLs\"\n// Runs after: Call (resolver) -> Loop Over Items (over resolved.sequence)\n//   -> HTTP Request (\"GET https://api.vimeo.com/videos/{{ $json.videoId }}?fields=play\",\n//      generic credential / HTTP Header Auth, e.g. a new \"Vimeo API\" credential\n//      with Authorization: Bearer <RSC_VIMEO_ACCESS_TOKEN> -- same pattern\n//      already used by the \"Render Video\" node for the render service's own\n//      API key). Replaces \"Render Video\" in this workflow entirely.\n//\n// n8n's default looped-HTTP-Request execution is sequential, not parallel --\n// that's fine here: even 6-7 sequential Vimeo calls (a couple of seconds)\n// is comfortably absorbed by the ~12s artificial \"generating your results\"\n// delay the answer page already shows, so there's no need to fight for\n// concurrency in the n8n workflow itself.\n//\n// Set this Code node to \"Run Once for All Items\" so it receives one input\n// item per looped clip and can reassemble them into a single sequence.\n//\n// IMPORTANT -- verify once wired up in n8n: this assumes each looped item's\n// json still carries the original `videoId` field (from the loop's input)\n// alongside the HTTP Request node's own response fields. If the HTTP\n// Request node's output replaces the item instead of merging with it,\n// enable its \"include input fields\" / similar option, or adjust the\n// `videoId` lookup below to match however the loop actually threads it\n// through -- not something verifiable without hands-on access to the\n// live workflow.\n\nconst VIDEO_WIDTH = 1280;\n\nfunction pickPlayUrl(playField) {\n  const progressive = playField?.progressive || [];\n\n  if (!progressive.length) {\n    throw new Error('No progressive playback files in Vimeo response');\n  }\n\n  // Same selection logic as the old render service's getVimeoFile():\n  // prefer the smallest rendition that still meets our target width.\n  const sufficientWidth = progressive\n    .filter((file) => Number(file.width || 0) >= VIDEO_WIDTH)\n    .sort((a, b) => Number(a.width || 0) - Number(b.width || 0));\n  const largestAvailable = [...progressive].sort((a, b) => Number(b.width || 0) - Number(a.width || 0));\n  const file = sufficientWidth[0] || largestAvailable[0];\n\n  if (!file?.link) {\n    throw new Error('No downloadable play link in Vimeo response');\n  }\n\n  return file.link;\n}\n\nconst resolved = $('Call').first().json;\nconst loopedItems = $input.all();\n\nconst playUrlByVideoId = {};\nfor (const item of loopedItems) {\n  const videoId = String(item.json.videoId || '').trim();\n  if (!videoId) {\n    throw new Error('A looped item is missing videoId -- check the loop is carrying input fields through to the HTTP Request node\\'s output');\n  }\n  playUrlByVideoId[videoId] = pickPlayUrl(item.json.play);\n}\n\nconst enrichedSequence = (resolved.sequence || []).map((clip) => ({\n  ...clip,\n  playUrl: playUrlByVideoId[clip.videoId],\n}));\n\nconst missing = enrichedSequence.find((clip) => !clip.playUrl);\nif (missing) {\n  throw new Error(`No play URL resolved for clip: ${missing.label}`);\n}\n\nreturn [\n  {\n    json: {\n      ...resolved,\n      sequence: enrichedSequence,\n    },\n  },\n];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        464
+      ],
+      "id": "ea0dbe5a-0692-4d1a-9fee-92299aa4ba8f",
+      "name": "Merge Play URLs"
+    },
+    {
+      "parameters": {
+        "url": "=https://vimeo.com/api/oembed.json?url={{ encodeURIComponent('https://vimeo.com/' + $('Call').first().json.sequence[0].videoId) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        464
+      ],
+      "id": "654cef92-3d41-4ffb-985e-f253ba0a6372",
+      "name": "Get Thumbnail URL"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "436c91ab-f134-4d20-86bd-0b181350e9be",
+              "name": "pitch_a_bank",
+              "value": "{\n    \"heading\": \"Reden Sie mit dem Deutschen Edelsteinhaus:\",\n    \"buttons\": [\n      { \"label\": \"15-Minuten-Gespräch vereinbaren\", \"href\": \"https://calendly.com/anna-streeb-deutsches-edelsteinhaus/15-minuten-orientierungsgespraech?utm_source=rsc-live-A&utm_content=xxxxxx\" }\n    ]\n  }",
+              "type": "object"
+            },
+            {
+              "id": "521d156b-34d2-4e5f-a5f4-21696a142c8a",
+              "name": "pitch_b_life_insurance",
+              "value": "  {\n    \"heading\": \"Alle Fragen noch einmal durchgehen - Ihre Daten werden auch abgefragt, um Sie für die Detailauswertung kontaktieren zu können.\",\n    \"buttons\": [\n      { \"label\": \"Risiko-Schnell-Check starten\", \"href\": \"https://markusdan.com/neu/risiko-schnell-check/risiko-schnellcheck/?utm_source=rsc-live-B&utm_content=xxxxxx\" }\n    ]\n  }\n",
+              "type": "object"
+            },
+            {
+              "id": "4b802de9-9902-4953-996b-51d7d5a8dbdd",
+              "name": "pitch_c_everything_else",
+              "value": "  {\n    \"heading\": \"Reden Sie mit dem Deutschen Edelsteinhaus:\",\n    \"buttons\": [\n      { \"label\": \"15-Minuten-Gespräch vereinbaren\", \"href\": \"https://calendly.com/anna-streeb-deutsches-edelsteinhaus/15-minuten-orientierungsgespraech?utm_source=rsc-live-C&utm_content=xxxxxx\" }\n    ]\n  }\n",
+              "type": "object"
+            },
+            {
+              "id": "6dd42ae2-367a-4c94-ba62-348210d23f88",
+              "name": "pitch_d_broke",
+              "value": "{\n  \"heading\": \"\",\n  \"buttons\": [\n    { \"label\": \"Check wiederholen »\", \"href\": \"https://rsc.markusdan.com/schritt-1\" },\n    { \"label\": \"Buch: \\\"Größte Gefahren\\\" auf Amazon\", \"href\": \"https://markusdan.com/neu/buch/spezialangebot/?utm_source=rsc-live-D&utm_content=xxxxxx\" }\n  ]\n}\n",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1024,
+        464
+      ],
+      "id": "6ec44896-3b1d-4bf0-9344-b28bb6f90dd0",
+      "name": "CTA Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "// HTML Generator Code node -- crossfade-streaming workflow.\n// Replaces rsc-generate-answer-page-node.js's \"rendered\" delivery mode\n// entirely: nothing is server-rendered anymore. Every clip (answers +\n// pitch) streams directly from Vimeo via its `play`-field URL (fetched by\n// the \"Fetch Play URLs\" node upstream) and is crossfaded client-side with\n// two stacked <video> elements. Validated locally against real project\n// clips before this was built -- see the crossfade POC referenced in the\n// 2026-08-31 planning notes.\nconst PLAY_URLS_NODE_NAME = 'Merge Play URLs';\nconst PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt.\\nBitte um einen Moment Geduld. Es zahlt sich aus.';\n// Deliberately artificial -- there's no render step left to wait for, but\n// the client specifically wants this pacing kept (DEH-31 origin): an\n// instant reveal reads as less \"custom-built for you\" than a short\n// build-up does. Unconditional now; there's no cache-hit/miss distinction\n// left to key it off.\nconst GENERATING_DELAY_MS = 12000;\n// How long to wait for the next clip to report itself ready to play\n// smoothly before starting its crossfade anyway. Preloading starts right\n// after the previous swap (each clip runs 1-2 min, so there's normally\n// plenty of lead time) -- this timeout only matters on a slow connection\n// where that isn't enough, and starting anyway beats hanging indefinitely.\nconst CLIP_READY_TIMEOUT_MS = 4000;\nconst CROSSFADE_MS = 350;\n\nconst PITCH_LETTERS = {\n  pitch_a_bank: 'A',\n  pitch_b_life_insurance: 'B',\n  pitch_c_everything_else: 'C',\n  pitch_d_broke: 'D',\n};\n\n// DEH-38: pitch B gets fixed heading text above its CTA buttons.\nconst PITCH_HEADING_OVERRIDES = {\n  pitch_b_life_insurance:\n    '<strong>Schnell-Check mit Kontaktdaten wiederholen – nur Fragen, kein Video.</strong><br>\\n' +\n    '<strong>Auswertung per E-Mail und persönliche Analyse am Telefon.</strong>',\n};\n\nconst ctaConfig = $('CTA Config').first().json;\n\nconst resolved = $(PLAY_URLS_NODE_NAME).first().json;\nconst oembed = $('Get Thumbnail URL').first().json;\n\nconst pitchKey = String(resolved.pitchKey || '').trim();\nconst cta = ctaConfig[pitchKey] || null;\n\nconst normalizedAnswers = resolved.normalizedAnswers || {};\nconst answerScores = [1, 2, 3, 4, 5, 6]\n  .map((step) => {\n    const code = String(normalizedAnswers[step] || '').trim();\n    const letter = code.slice(-1).toLowerCase();\n    const score = letter.charCodeAt(0) - 'a'.charCodeAt(0);\n    return Number.isFinite(score) && score >= 0 ? score : 0;\n  })\n  .join('');\nconst pitchLetter = PITCH_LETTERS[pitchKey] || '';\nconst trackingCode = `${answerScores}${pitchLetter}`;\n\nconst sequence = resolved.sequence || [];\nconst clips = sequence\n  .map((item) => ({ label: String(item.label || ''), url: String(item.playUrl || '').trim() }))\n  .filter((clip) => clip.url);\n\nif (!clips.length) {\n  throw new Error('No playable clips provided');\n}\n\nconst thumbnailUrl = String(oembed.thumbnail_url_with_play_button || '').trim();\n\nconst ctaHeading = PITCH_HEADING_OVERRIDES[pitchKey] || cta?.heading;\n\nconst ctaMarkup = cta\n  ? `<div id=\"ctaPanel\" class=\"cta-panel\" hidden>\n      ${ctaHeading ? `<p class=\"cta-heading\">${ctaHeading}</p>` : ''}\n      <div class=\"cta-buttons\">\n        ${cta.buttons.map((button) => {\n          const href = String(button.href || '').replace('xxxxxx', trackingCode);\n          return `<a class=\"cta-button\" href=\"${href}\">${button.label}</a>`;\n        }).join('\\n        ')}\n      </div>\n    </div>`\n  : '';\n\nconst clientScript = `\n    const clips = ${JSON.stringify(clips)};\n    const GENERATING_DELAY_MS = ${JSON.stringify(GENERATING_DELAY_MS)};\n    const CLIP_READY_TIMEOUT_MS = ${JSON.stringify(CLIP_READY_TIMEOUT_MS)};\n    const CROSSFADE_MS = ${JSON.stringify(CROSSFADE_MS)};\n    const AUDIO_PREFERENCE_KEY = 'rsc-video-audio-enabled';\n\n    let shouldPlayWithAudio = false;\n\n    const ctaPanel = document.getElementById('ctaPanel');\n\n    function showCta() {\n      if (ctaPanel) {\n        ctaPanel.hidden = false;\n      }\n    }\n\n    try {\n      shouldPlayWithAudio = window.sessionStorage.getItem(AUDIO_PREFERENCE_KEY) === 'true';\n    } catch {\n      shouldPlayWithAudio = false;\n    }\n\n    const poster = document.getElementById('poster');\n    const videoA = document.getElementById('videoA');\n    const videoB = document.getElementById('videoB');\n    const videoToggle = document.getElementById('videoToggle');\n    const progressPanel = document.getElementById('progressPanel');\n    const progressBar = document.getElementById('progressBar');\n    const progressLabel = document.getElementById('progressLabel');\n    const progressStage = document.getElementById('progressStage');\n\n    function rememberAudioPreference(muted, volume) {\n      if (muted === false && Number(volume || 0) > 0) {\n        shouldPlayWithAudio = true;\n        try {\n          window.sessionStorage.setItem(AUDIO_PREFERENCE_KEY, 'true');\n        } catch {}\n      }\n    }\n\n    function updateProgress(percentage) {\n      const clamped = Math.max(0, Math.min(100, percentage));\n      progressBar.value = clamped;\n      progressLabel.textContent = clamped + '%';\n      progressStage.textContent = ${JSON.stringify(PROGRESS_MESSAGE)};\n    }\n\n    async function runFakeProgress(durationMs) {\n      const stepMs = 500;\n      const steps = Math.max(1, Math.round(durationMs / stepMs));\n\n      for (let step = 1; step <= steps; step += 1) {\n        await new Promise((resolve) => setTimeout(resolve, stepMs));\n        updateProgress(Math.round((step / steps) * 100));\n      }\n    }\n\n    function hidePoster() {\n      poster.style.display = 'none';\n    }\n\n    function showPoster() {\n      poster.style.display = 'block';\n    }\n\n    function showVideoToggle() {\n      if (videoToggle) {\n        videoToggle.hidden = false;\n      }\n    }\n\n    function hideVideoToggle() {\n      if (videoToggle) {\n        videoToggle.hidden = true;\n      }\n    }\n\n    function updateVideoToggle(isPlaying) {\n      if (!videoToggle) {\n        return;\n      }\n      videoToggle.setAttribute('aria-label', isPlaying ? 'Pause video' : 'Play video');\n    }\n\n    function handlePlayFailure(error) {\n      showPoster();\n      console.error(error);\n    }\n\n    // readyState >= 3 (HAVE_FUTURE_DATA) means it can play forward smoothly\n    // without immediately stalling for more data.\n    function waitUntilReady(videoEl) {\n      if (videoEl.readyState >= 3) {\n        return Promise.resolve();\n      }\n      return new Promise((resolve) => {\n        let settled = false;\n        const finish = () => {\n          if (settled) return;\n          settled = true;\n          videoEl.removeEventListener('canplay', finish);\n          resolve();\n        };\n        videoEl.addEventListener('canplay', finish);\n        setTimeout(finish, CLIP_READY_TIMEOUT_MS);\n      });\n    }\n\n    let front = videoA;\n    let back = videoB;\n    let clipIndex = 0;\n    let crossfading = false;\n    let crossfadeTriggered = false;\n\n    function loadInto(videoEl, clip) {\n      videoEl.src = clip.url;\n      videoEl.load();\n    }\n\n    async function startCrossfade() {\n      if (crossfading) return;\n      crossfading = true;\n      if (videoToggle) videoToggle.disabled = true;\n\n      const nextIndex = clipIndex + 1;\n      if (nextIndex >= clips.length) {\n        crossfading = false;\n        if (videoToggle) videoToggle.disabled = false;\n        return;\n      }\n\n      await waitUntilReady(back);\n      back.currentTime = 0;\n      back.muted = !shouldPlayWithAudio;\n      try { await back.play(); } catch (e) { console.error('back.play() failed', e); }\n\n      const start = performance.now();\n      await new Promise((resolve) => {\n        function step(now) {\n          const t = Math.min(1, (now - start) / CROSSFADE_MS);\n          front.style.opacity = String(1 - t);\n          back.style.opacity = String(t);\n          front.volume = shouldPlayWithAudio ? 1 - t : 0;\n          back.volume = shouldPlayWithAudio ? t : 0;\n          if (t < 1) {\n            requestAnimationFrame(step);\n          } else {\n            resolve();\n          }\n        }\n        requestAnimationFrame(step);\n      });\n\n      front.pause();\n\n      const oldFront = front;\n      front = back;\n      back = oldFront;\n      clipIndex = nextIndex;\n      crossfadeTriggered = false;\n      crossfading = false;\n      if (videoToggle) videoToggle.disabled = false;\n\n      const followIndex = clipIndex + 1;\n      if (followIndex < clips.length) {\n        back.style.opacity = '0';\n        back.volume = 0;\n        loadInto(back, clips[followIndex]);\n      }\n    }\n\n    function onTimeUpdate() {\n      if (crossfading || crossfadeTriggered) return;\n      const seconds = CROSSFADE_MS / 1000;\n      if (front.duration && front.currentTime >= front.duration - seconds) {\n        crossfadeTriggered = true;\n        startCrossfade();\n      }\n    }\n\n    videoA.addEventListener('timeupdate', () => { if (front === videoA) onTimeUpdate(); });\n    videoB.addEventListener('timeupdate', () => { if (front === videoB) onTimeUpdate(); });\n    videoA.addEventListener('play', () => { if (front === videoA) updateVideoToggle(true); });\n    videoB.addEventListener('play', () => { if (front === videoB) updateVideoToggle(true); });\n    videoA.addEventListener('pause', () => { if (front === videoA) updateVideoToggle(false); });\n    videoB.addEventListener('pause', () => { if (front === videoB) updateVideoToggle(false); });\n    videoA.addEventListener('volumechange', () => rememberAudioPreference(videoA.muted, videoA.volume));\n    videoB.addEventListener('volumechange', () => rememberAudioPreference(videoB.muted, videoB.volume));\n\n    function handleSequenceEnded() {\n      if (clipIndex === clips.length - 1) {\n        hideVideoToggle();\n        showCta();\n      }\n    }\n    videoA.addEventListener('ended', () => { if (front === videoA) handleSequenceEnded(); });\n    videoB.addEventListener('ended', () => { if (front === videoB) handleSequenceEnded(); });\n\n    if (videoToggle) {\n      videoToggle.addEventListener('click', () => {\n        if (crossfading) return;\n        const playback = front.paused ? front.play() : front.pause();\n        playback?.catch(handlePlayFailure);\n      });\n    }\n\n    async function start() {\n      hidePoster();\n      hideVideoToggle();\n      updateProgress(0);\n\n      loadInto(front, clips[0]);\n      if (clips.length > 1) {\n        loadInto(back, clips[1]);\n      }\n\n      await Promise.all([\n        runFakeProgress(GENERATING_DELAY_MS),\n        waitUntilReady(front),\n      ]);\n\n      progressPanel.hidden = true;\n      front.muted = !shouldPlayWithAudio;\n      try {\n        await front.play();\n        showVideoToggle();\n        updateVideoToggle(true);\n      } catch (e) {\n        handlePlayFailure(e);\n      }\n    }\n\n    poster.addEventListener('click', start);\n    start().catch(handlePlayFailure);\n`;\n\nconst html = `<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Video Sequence</title>\n  <style>\n    :root {\n      --text: #f5f1e8;\n      --muted: #b8b1a3;\n      --accent: #d7a84a;\n      --accent-hover: #e6bb67;\n    }\n\n    * {\n      box-sizing: border-box;\n    }\n\n    body {\n      margin: 0;\n      min-height: 100vh;\n      display: grid;\n      place-items: center;\n      background:\n        radial-gradient(circle at top, rgba(215, 168, 74, 0.16), transparent 32rem),\n        linear-gradient(180deg, #0a0a0a 0%, #000 100%);\n      color: var(--text);\n      font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    }\n\n    .shell {\n      width: min(96vw, 960px);\n      display: grid;\n      gap: 1rem;\n    }\n\n    .frame {\n      position: relative;\n      width: 100%;\n      aspect-ratio: 16 / 9;\n      background: #000;\n      border: 1px solid rgba(255, 255, 255, 0.08);\n      border-radius: 18px;\n      overflow: hidden;\n      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);\n    }\n\n    .poster {\n      position: absolute;\n      inset: 0;\n      background-color: #000;\n      background-image: url('${thumbnailUrl}');\n      background-size: cover;\n      background-position: center;\n      z-index: 2;\n      cursor: pointer;\n    }\n\n    #videoA,\n    #videoB {\n      position: absolute;\n      inset: 0;\n      width: 100%;\n      height: 100%;\n      object-fit: contain;\n      background: #000;\n      z-index: 1;\n    }\n\n    .video-toggle {\n      position: absolute;\n      inset: 0;\n      z-index: 3;\n      width: 100%;\n      height: 100%;\n      padding: 0;\n      border: 0;\n      background: transparent;\n      cursor: pointer;\n    }\n\n    .video-toggle:focus-visible {\n      outline: 3px solid var(--accent);\n      outline-offset: -6px;\n    }\n\n    .render-progress {\n      position: absolute;\n      inset: 50% 10% auto;\n      z-index: 4;\n      transform: translateY(-50%);\n      color: #f5f1e8;\n      text-align: center;\n    }\n\n    .render-progress strong {\n      display: block;\n      white-space: pre-line;\n      text-wrap: balance;\n    }\n\n    .render-progress[hidden] {\n      display: none;\n    }\n\n    .render-progress progress {\n      display: block;\n      width: 100%;\n      height: 0.75rem;\n      margin: 0.75rem 0;\n      accent-color: #d7a84a;\n    }\n\n    .cta-panel {\n      position: absolute;\n      inset: 0;\n      z-index: 4;\n      display: grid;\n      align-content: center;\n      justify-items: center;\n      gap: 0.75rem;\n      text-align: center;\n      padding: 1.5rem;\n      background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.72) 100%);\n    }\n\n    .cta-panel[hidden] {\n      display: none;\n    }\n\n    .cta-heading {\n      margin: 0;\n      font-size: 1.1rem;\n      color: var(--text);\n    }\n\n    .cta-buttons {\n      display: flex;\n      flex-wrap: wrap;\n      gap: 0.75rem;\n      justify-content: center;\n    }\n\n    .cta-button {\n      display: inline-block;\n      padding: 0.6rem 1.4rem;\n      border-radius: 0;\n      background: var(--accent);\n      color: #1a1305;\n      font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n      text-decoration: none;\n      font-weight: bold;\n      transition: background 0.15s ease;\n    }\n\n    .cta-button:hover {\n      background: var(--accent-hover);\n    }\n\n  </style>\n</head>\n<body>\n  <div class=\"shell\">\n    <div class=\"frame\">\n      <div id=\"poster\" class=\"poster\" style=\"display:none\"></div>\n      <video id=\"videoA\" playsinline preload=\"auto\"></video>\n      <video id=\"videoB\" playsinline preload=\"auto\"></video>\n      <button id=\"videoToggle\" class=\"video-toggle\" type=\"button\" aria-label=\"Pause video\" hidden></button>\n      <div id=\"progressPanel\" class=\"render-progress\" role=\"status\" aria-live=\"polite\">\n        <strong id=\"progressStage\">${PROGRESS_MESSAGE}</strong>\n        <progress id=\"progressBar\" max=\"100\" value=\"0\"></progress>\n        <span id=\"progressLabel\">0%</span>\n      </div>\n      ${ctaMarkup}\n    </div>\n  </div>\n\n  <script>\n${clientScript}\n  </script>\n</body>\n</html>`;\n\nreturn [\n  {\n    json: {\n      html,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        464
+      ],
+      "id": "228f76d9-7adf-4c8a-8fd3-5b1d0ebddc24",
+      "name": "Generate Answer Page"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1472,
+        464
+      ],
+      "id": "ef8abebb-ab1e-437c-ad32-85357e0fa36c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/1212339314134627/events",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"event_name\": \"generate_lead\",\n      \"event_time\": {{ Math.floor(Date.now() / 1000) }},\n      \"event_id\": \"{{ $('Webhook').first().json.body.event_id }}\",\n      \"action_source\": \"website\",\n      \"event_source_url\": \"https://rsc.markusdan.com/schritt-6\",\n      \n\"user_data\": {\n  \"client_ip_address\": \"{{ $('Webhook').first().json.headers['x-forwarded-for'] }}\",\n  \"client_user_agent\": \"{{ $('Webhook').first().json.headers['user-agent'] }}\"\n}\n\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -112,
+        672
+      ],
+      "id": "92c92b43-5abd-4448-b49a-74a1b332b820",
+      "name": "Send Meta Pixel Event",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "Rd98G6wPrpyWAqhh",
+          "name": "Meta CONVERSIONS API TOKEN"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Call",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Meta Pixel Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Get Play URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Play URL": {
+      "main": [
+        [
+          {
+            "node": "Merge Play URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Play URLs": {
+      "main": [
+        [
+          {
+            "node": "Get Thumbnail URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Thumbnail URL": {
+      "main": [
+        [
+          {
+            "node": "CTA Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CTA Config": {
+      "main": [
+        [
+          {
+            "node": "Generate Answer Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Answer Page": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
