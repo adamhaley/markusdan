@@ -293,6 +293,13 @@ const clientScript = `
       hideVideoToggle();
       updateProgress(0);
 
+      // Both videos default to full opacity until a crossfade explicitly
+      // sets it -- without this, the preloaded "back" clip (later in DOM
+      // order, same z-index) paints over the "front" clip that's actually
+      // playing, so you'd hear audio but see a static frame of the wrong clip.
+      front.style.opacity = '1';
+      back.style.opacity = '0';
+
       loadInto(front, clips[0]);
       if (clips.length > 1) {
         loadInto(back, clips[1]);
