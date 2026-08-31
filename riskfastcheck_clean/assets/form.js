@@ -1,7 +1,7 @@
 (() => {
 const STORAGE_KEY = "risk-fast-check-form";
 const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
-const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/fe28dcfc-b0d2-4c67-b447-c5225b82f8dd";
+const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/d9e002a0-a764-46be-b4ee-237200be38f9";
 const VIDEO_AUDIO_PREFERENCE_KEY = "rsc-video-audio-enabled";
 const CONSENT_STORAGE_KEY = "rsc-cookie-consent";
 const PRIVACY_POLICY_URL = "https://markusdan.com/datenschutzerklaerung/";
