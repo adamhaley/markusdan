@@ -210,8 +210,11 @@ const clientScript = `
       if (nextIndex >= clips.length) {
         crossfading = false;
         if (videoToggle) videoToggle.disabled = false;
+        console.log('[RSC] Sequence complete after clip ' + (clipIndex + 1) + '/' + clips.length + ' ("' + clips[clipIndex].label + '")');
         return;
       }
+
+      console.log('[RSC] Crossfade starting: clip ' + (clipIndex + 1) + '/' + clips.length + ' ("' + clips[clipIndex].label + '") -> clip ' + (nextIndex + 1) + '/' + clips.length + ' ("' + clips[nextIndex].label + '")');
 
       await waitUntilReady(back);
       back.currentTime = 0;
@@ -245,11 +248,14 @@ const clientScript = `
       crossfading = false;
       if (videoToggle) videoToggle.disabled = false;
 
+      console.log('[RSC] Now on clip ' + (clipIndex + 1) + '/' + clips.length + ' ("' + clips[clipIndex].label + '")');
+
       const followIndex = clipIndex + 1;
       if (followIndex < clips.length) {
         back.style.opacity = '0';
         back.volume = 0;
         loadInto(back, clips[followIndex]);
+        console.log('[RSC] Preloading clip ' + (followIndex + 1) + '/' + clips.length + ' ("' + clips[followIndex].label + '") in background');
       }
     }
 
@@ -322,6 +328,7 @@ const clientScript = `
         // paint over front, since it's later in DOM order at the same
         // z-index).
         front.style.opacity = '1';
+        console.log('[RSC] Sequence started: ' + clips.length + ' clips total. Now on clip 1/' + clips.length + ' ("' + clips[0].label + '")');
         showVideoToggle();
         updateVideoToggle(true);
       } catch (e) {
