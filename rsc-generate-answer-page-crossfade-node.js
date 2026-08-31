@@ -6,7 +6,7 @@
 // two stacked <video> elements. Validated locally against real project
 // clips before this was built -- see the crossfade POC referenced in the
 // 2026-08-31 planning notes.
-const PLAY_URLS_NODE_NAME = 'Fetch Play URLs';
+const PLAY_URLS_NODE_NAME = 'Merge Play URLs';
 const PROGRESS_MESSAGE = 'Ihre individuelle Auswertung wird in Echtzeit erstellt.\nBitte um einen Moment Geduld. Es zahlt sich aus.';
 // Deliberately artificial -- there's no render step left to wait for, but
 // the client specifically wants this pacing kept (DEH-31 origin): an
