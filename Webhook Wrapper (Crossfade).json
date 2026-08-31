@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -336,
-        464
+        -432,
+        832
       ],
-      "id": "03f41d0d-2ea9-49d1-b8cb-4b05c6282119",
+      "id": "41b5c071-274b-4b06-b847-a9c6ddd84685",
       "name": "Webhook",
       "webhookId": "d9e002a0-a764-46be-b4ee-237200be38f9"
     },
@@ -195,10 +195,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -112,
-        464
+        -208,
+        832
       ],
-      "id": "dbfb5339-cf17-4bb4-9572-cdfc7f84ae38",
+      "id": "0cb2fc01-312f-4644-868a-843626f1030b",
       "name": "Call"
     },
     {
@@ -209,10 +209,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        128,
-        464
+        48,
+        832
       ],
-      "id": "6ff1d57a-4610-4522-8eb8-df3bdf98edab",
+      "id": "408dedab-cdef-467b-a22e-e37b2def0d2c",
       "name": "Split Out"
     },
     {
@@ -231,32 +231,31 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        352,
-        464
+        272,
+        832
       ],
-      "id": "865f2945-a7ce-4d15-b13b-8600d8615f54",
+      "id": "0db9c2d1-eac5-4523-a492-3ed1bead8d05",
       "name": "Get Play URL",
+      "notesInFlow": false,
       "credentials": {
         "httpBearerAuth": {
-          "id": "REPLACE_WITH_VIMEO_API_CREDENTIAL_ID",
+          "id": "qRnddca8ZlVmBa3Q",
           "name": "Vimeo API"
         }
       },
-      "notesInFlow": false,
       "notes": "Credential ID is a placeholder -- reselect the real 'Vimeo API' Bearer Auth credential in this node after import."
     },
     {
       "parameters": {
-        "jsCode": "// n8n Code node: \"Merge Play URLs\"\n// Runs after: Call (resolver) -> Split Out (fieldToSplitOut: \"sequence\")\n//   -> HTTP Request (\"GET https://api.vimeo.com/videos/{{ $json.videoId }}?fields=play\",\n//      generic credential / Bearer Auth, the \"Vimeo API\" credential --\n//      same pattern the old \"Render Video\" node used for the render\n//      service's own API key, just Bearer instead of Header). Replaces\n//      \"Render Video\" in this workflow entirely.\n//\n// n8n's default looped-HTTP-Request execution is sequential, not parallel --\n// that's fine here: even 6-7 sequential Vimeo calls (a couple of seconds)\n// is comfortably absorbed by the ~12s artificial \"generating your results\"\n// delay the answer page already shows, so there's no need to fight for\n// concurrency in the n8n workflow itself.\n//\n// Set this Code node to \"Run Once for All Items\" so it receives one input\n// item per looped clip and can reassemble them into a single sequence.\n//\n// Pairs by array INDEX, not by looking up a carried-through videoId field --\n// confirmed via a real execution that the HTTP Request node's output\n// (v4.4, this instance) replaces the item entirely rather than merging in\n// the original input fields, so videoId doesn't survive into $json here.\n// Split Out and the per-item HTTP Request both preserve item order, so\n// index-pairing against resolved.sequence is reliable regardless.\n//\n// Also handles the Vimeo response arriving as a stringified JSON blob\n// under a `data` field (seen in a real execution when the HTTP Request\n// node's Response Format was left on \"Autodetect\") in addition to the\n// expected parsed object directly on `.play`, in case the node's\n// \"Response Format: JSON\" setting isn't applied for any reason.\n\nconst VIDEO_WIDTH = 1280;\n\nfunction pickPlayUrl(playField) {\n  const progressive = playField?.progressive || [];\n\n  if (!progressive.length) {\n    throw new Error('No progressive playback files in Vimeo response');\n  }\n\n  // Same selection logic as the old render service's getVimeoFile():\n  // prefer the smallest rendition that still meets our target width.\n  const sufficientWidth = progressive\n    .filter((file) => Number(file.width || 0) >= VIDEO_WIDTH)\n    .sort((a, b) => Number(a.width || 0) - Number(b.width || 0));\n  const largestAvailable = [...progressive].sort((a, b) => Number(b.width || 0) - Number(a.width || 0));\n  const file = sufficientWidth[0] || largestAvailable[0];\n\n  if (!file?.link) {\n    throw new Error('No downloadable play link in Vimeo response');\n  }\n\n  return file.link;\n}\n\nfunction extractPlayField(itemJson) {\n  if (itemJson.play) {\n    return itemJson.play;\n  }\n  // Fallback for the \"Autodetect\" response-format case: the whole Vimeo\n  // response body arrives as a JSON string under `data`.\n  if (typeof itemJson.data === 'string') {\n    try {\n      return JSON.parse(itemJson.data).play;\n    } catch {\n      return undefined;\n    }\n  }\n  return undefined;\n}\n\nconst resolved = $('Call').first().json;\nconst sequence = resolved.sequence || [];\nconst loopedItems = $input.all();\n\nif (loopedItems.length !== sequence.length) {\n  throw new Error(\n    `Expected ${sequence.length} looped play-URL results (one per clip in sequence), got ${loopedItems.length}`,\n  );\n}\n\nconst enrichedSequence = sequence.map((clip, index) => ({\n  ...clip,\n  playUrl: pickPlayUrl(extractPlayField(loopedItems[index].json)),\n}));\n\nreturn [\n  {\n    json: {\n      ...resolved,\n      sequence: enrichedSequence,\n    },\n  },\n];\n",
-        "mode": "runOnceForAllItems"
+        "jsCode": "// n8n Code node: \"Merge Play URLs\"\n// Runs after: Call (resolver) -> Split Out (fieldToSplitOut: \"sequence\")\n//   -> HTTP Request (\"GET https://api.vimeo.com/videos/{{ $json.videoId }}?fields=play\",\n//      generic credential / Bearer Auth, the \"Vimeo API\" credential --\n//      same pattern the old \"Render Video\" node used for the render\n//      service's own API key, just Bearer instead of Header). Replaces\n//      \"Render Video\" in this workflow entirely.\n//\n// n8n's default looped-HTTP-Request execution is sequential, not parallel --\n// that's fine here: even 6-7 sequential Vimeo calls (a couple of seconds)\n// is comfortably absorbed by the ~12s artificial \"generating your results\"\n// delay the answer page already shows, so there's no need to fight for\n// concurrency in the n8n workflow itself.\n//\n// Set this Code node to \"Run Once for All Items\" so it receives one input\n// item per looped clip and can reassemble them into a single sequence.\n//\n// Pairs by array INDEX, not by looking up a carried-through videoId field --\n// confirmed via a real execution that the HTTP Request node's output\n// (v4.4, this instance) replaces the item entirely rather than merging in\n// the original input fields, so videoId doesn't survive into $json here.\n// Split Out and the per-item HTTP Request both preserve item order, so\n// index-pairing against resolved.sequence is reliable regardless.\n//\n// Also handles the Vimeo response arriving as a stringified JSON blob\n// under a `data` field (seen in a real execution when the HTTP Request\n// node's Response Format was left on \"Autodetect\") in addition to the\n// expected parsed object directly on `.play`, in case the node's\n// \"Response Format: JSON\" setting isn't applied for any reason.\n\nconst VIDEO_WIDTH = 1280;\n\nfunction pickPlayUrl(playField) {\n  const progressive = playField?.progressive || [];\n\n  if (!progressive.length) {\n    throw new Error('No progressive playback files in Vimeo response');\n  }\n\n  // Same selection logic as the old render service's getVimeoFile():\n  // prefer the smallest rendition that still meets our target width.\n  const sufficientWidth = progressive\n    .filter((file) => Number(file.width || 0) >= VIDEO_WIDTH)\n    .sort((a, b) => Number(a.width || 0) - Number(b.width || 0));\n  const largestAvailable = [...progressive].sort((a, b) => Number(b.width || 0) - Number(a.width || 0));\n  const file = sufficientWidth[0] || largestAvailable[0];\n\n  if (!file?.link) {\n    throw new Error('No downloadable play link in Vimeo response');\n  }\n\n  return file.link;\n}\n\nfunction extractPlayField(itemJson) {\n  if (itemJson.play) {\n    return itemJson.play;\n  }\n  // Fallback for the \"Autodetect\" response-format case: the whole Vimeo\n  // response body arrives as a JSON string under `data`.\n  if (typeof itemJson.data === 'string') {\n    try {\n      return JSON.parse(itemJson.data).play;\n    } catch {\n      return undefined;\n    }\n  }\n  return undefined;\n}\n\nconst resolved = $('Call').first().json;\nconst sequence = resolved.sequence || [];\nconst loopedItems = $input.all();\n\nif (loopedItems.length !== sequence.length) {\n  throw new Error(\n    `Expected ${sequence.length} looped play-URL results (one per clip in sequence), got ${loopedItems.length}`,\n  );\n}\n\nconst enrichedSequence = sequence.map((clip, index) => ({\n  ...clip,\n  playUrl: pickPlayUrl(extractPlayField(loopedItems[index].json)),\n}));\n\nreturn [\n  {\n    json: {\n      ...resolved,\n      sequence: enrichedSequence,\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
-        464
+        496,
+        832
       ],
-      "id": "ea0dbe5a-0692-4d1a-9fee-92299aa4ba8f",
+      "id": "0a730a0c-b46a-47fd-9f7f-1d936f99a332",
       "name": "Merge Play URLs"
     },
     {
@@ -267,10 +266,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        800,
-        464
+        720,
+        832
       ],
-      "id": "654cef92-3d41-4ffb-985e-f253ba0a6372",
+      "id": "20ee3e60-1341-42da-8814-8590daa17188",
       "name": "Get Thumbnail URL"
     },
     {
@@ -308,10 +307,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1024,
-        464
+        944,
+        832
       ],
-      "id": "6ec44896-3b1d-4bf0-9344-b28bb6f90dd0",
+      "id": "f2db0c0a-0031-444a-829e-5b53909e4d48",
       "name": "CTA Config"
     },
     {
@@ -321,10 +320,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1248,
-        464
+        1168,
+        832
       ],
-      "id": "228f76d9-7adf-4c8a-8fd3-5b1d0ebddc24",
+      "id": "5c2e5d0d-36f1-4a26-b784-b7cb36b1d505",
       "name": "Generate Answer Page"
     },
     {
@@ -342,10 +341,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1472,
-        464
+        1392,
+        832
       ],
-      "id": "ef8abebb-ab1e-437c-ad32-85357e0fa36c",
+      "id": "6acf61af-243a-497c-96e9-1085ddb16841",
       "name": "Respond to Webhook"
     },
     {
@@ -362,10 +361,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -112,
-        672
+        -208,
+        1040
       ],
-      "id": "92c92b43-5abd-4448-b49a-74a1b332b820",
+      "id": "3e553ba7-b126-44e9-9f49-5e7869492d31",
       "name": "Send Meta Pixel Event",
       "credentials": {
         "httpQueryAuth": {
@@ -375,6 +374,7 @@
       }
     }
   ],
+  "pinData": {},
   "connections": {
     "Webhook": {
       "main": [
@@ -470,12 +470,17 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
+  "versionId": "d78aa16e-74af-4ed8-ad65-e73a62ace4f6",
+  "meta": {
+    "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
+  },
   "nodeGroups": [],
+  "id": "EdLYgLPDDaqQ6Kwx",
   "tags": []
 }
