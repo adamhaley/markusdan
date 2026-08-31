@@ -293,11 +293,13 @@ const clientScript = `
       hideVideoToggle();
       updateProgress(0);
 
-      // Both videos default to full opacity until a crossfade explicitly
-      // sets it -- without this, the preloaded "back" clip (later in DOM
-      // order, same z-index) paints over the "front" clip that's actually
-      // playing, so you'd hear audio but see a static frame of the wrong clip.
-      front.style.opacity = '1';
+      // Both videos start invisible -- otherwise the "front" clip's own
+      // first frame becomes visible as soon as it buffers enough to decode
+      // one (well before the generating delay finishes or play() is ever
+      // called), which reads as a stray thumbnail sitting under the
+      // progress overlay. Revealed only once playback actually starts,
+      // below.
+      front.style.opacity = '0';
       back.style.opacity = '0';
 
       loadInto(front, clips[0]);
@@ -314,6 +316,12 @@ const clientScript = `
       front.muted = !shouldPlayWithAudio;
       try {
         await front.play();
+        // Only reveal front here, once playback has actually begun -- back
+        // stays at 0 until a crossfade explicitly sets it (same reasoning
+        // as above: it's preloaded well ahead of time and would otherwise
+        // paint over front, since it's later in DOM order at the same
+        // z-index).
+        front.style.opacity = '1';
         showVideoToggle();
         updateVideoToggle(true);
       } catch (e) {
