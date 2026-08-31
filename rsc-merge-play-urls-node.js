@@ -1,10 +1,10 @@
 // n8n Code node: "Merge Play URLs"
-// Runs after: Call (resolver) -> Loop Over Items (over resolved.sequence)
+// Runs after: Call (resolver) -> Split Out (fieldToSplitOut: "sequence")
 //   -> HTTP Request ("GET https://api.vimeo.com/videos/{{ $json.videoId }}?fields=play",
-//      generic credential / HTTP Header Auth, e.g. a new "Vimeo API" credential
-//      with Authorization: Bearer <RSC_VIMEO_ACCESS_TOKEN> -- same pattern
-//      already used by the "Render Video" node for the render service's own
-//      API key). Replaces "Render Video" in this workflow entirely.
+//      generic credential / Bearer Auth, the "Vimeo API" credential --
+//      same pattern the old "Render Video" node used for the render
+//      service's own API key, just Bearer instead of Header). Replaces
+//      "Render Video" in this workflow entirely.
 //
 // n8n's default looped-HTTP-Request execution is sequential, not parallel --
 // that's fine here: even 6-7 sequential Vimeo calls (a couple of seconds)
@@ -15,14 +15,18 @@
 // Set this Code node to "Run Once for All Items" so it receives one input
 // item per looped clip and can reassemble them into a single sequence.
 //
-// IMPORTANT -- verify once wired up in n8n: this assumes each looped item's
-// json still carries the original `videoId` field (from the loop's input)
-// alongside the HTTP Request node's own response fields. If the HTTP
-// Request node's output replaces the item instead of merging with it,
-// enable its "include input fields" / similar option, or adjust the
-// `videoId` lookup below to match however the loop actually threads it
-// through -- not something verifiable without hands-on access to the
-// live workflow.
+// Pairs by array INDEX, not by looking up a carried-through videoId field --
+// confirmed via a real execution that the HTTP Request node's output
+// (v4.4, this instance) replaces the item entirely rather than merging in
+// the original input fields, so videoId doesn't survive into $json here.
+// Split Out and the per-item HTTP Request both preserve item order, so
+// index-pairing against resolved.sequence is reliable regardless.
+//
+// Also handles the Vimeo response arriving as a stringified JSON blob
+// under a `data` field (seen in a real execution when the HTTP Request
+// node's Response Format was left on "Autodetect") in addition to the
+// expected parsed object directly on `.play`, in case the node's
+// "Response Format: JSON" setting isn't applied for any reason.
 
 const VIDEO_WIDTH = 1280;
 
@@ -48,27 +52,36 @@ function pickPlayUrl(playField) {
   return file.link;
 }
 
+function extractPlayField(itemJson) {
+  if (itemJson.play) {
+    return itemJson.play;
+  }
+  // Fallback for the "Autodetect" response-format case: the whole Vimeo
+  // response body arrives as a JSON string under `data`.
+  if (typeof itemJson.data === 'string') {
+    try {
+      return JSON.parse(itemJson.data).play;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
 const resolved = $('Call').first().json;
+const sequence = resolved.sequence || [];
 const loopedItems = $input.all();
 
-const playUrlByVideoId = {};
-for (const item of loopedItems) {
-  const videoId = String(item.json.videoId || '').trim();
-  if (!videoId) {
-    throw new Error('A looped item is missing videoId -- check the loop is carrying input fields through to the HTTP Request node\'s output');
-  }
-  playUrlByVideoId[videoId] = pickPlayUrl(item.json.play);
+if (loopedItems.length !== sequence.length) {
+  throw new Error(
+    `Expected ${sequence.length} looped play-URL results (one per clip in sequence), got ${loopedItems.length}`,
+  );
 }
 
-const enrichedSequence = (resolved.sequence || []).map((clip) => ({
+const enrichedSequence = sequence.map((clip, index) => ({
   ...clip,
-  playUrl: playUrlByVideoId[clip.videoId],
+  playUrl: pickPlayUrl(extractPlayField(loopedItems[index].json)),
 }));
-
-const missing = enrichedSequence.find((clip) => !clip.playUrl);
-if (missing) {
-  throw new Error(`No play URL resolved for clip: ${missing.label}`);
-}
 
 return [
   {
