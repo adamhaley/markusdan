@@ -103,3 +103,37 @@ This one event should push to all three destinations:
   - GA4 DebugView / Realtime report
   - Google Ads "Tag diagnostics"
   - Meta Events Manager "Test Events" tool
+
+## 2026-09-03 update: tags confirmed working, reporting layer is new scope
+
+Client reported "GTM seems to have stopped working" (no `RFCstep_N_view`
+events visible in GA4). Full diagnosis (GTM Preview/Tag Assistant, direct
+inspection of the published `gtm.js` container config, GA4 Data filters,
+event modifications, and a clean phone test on a separate network) found:
+
+- The `CE - RFC Step View (regex)` trigger (`RFCstep_.*_view`) and its GA4
+  event tag are correctly configured and firing — confirmed via Tag
+  Assistant ("GA4 Event - RFC Step View." fired 6 times) and via a phone
+  test on a network separate from the dev machine, which showed
+  `RFCstep_2_view` through `RFCstep_6_view` landing in GA4 Realtime.
+- The dev machine's own browser/network was silently blocking the actual
+  `collect` requests to Google's endpoints (consistent 503s, `gtm.js`
+  never even requested as a page subresource) — this is what made it look
+  broken locally. Not a site or GTM config issue.
+- Site code, GTM triggers/tags, and GA4 ingestion are all working
+  correctly. **This is closed as a false alarm on the tracking-code side.**
+
+What actually needs work: the two existing Explorations
+(`v1 RFC Question Conversion Funnel`, `v2 RFC Question Conversion Funnel`,
+both owned by **Novaticom PPC**, the client's PPC agency — see also the
+`splittest.novaticom.com` conversion pixel on schritt-1) are built on
+`page_location contains /schritt-N` conditions, not on the actual
+`RFCstep_N_view`/`generate_lead` event names. That's brittle (breaks on
+URL changes, and doesn't reflect the final page at all since it's swapped
+in via `document.write()` with no real navigation) and is why the client
+isn't seeing the visibility he expects, despite tracking itself working.
+
+Client has agreed this is **new scope**: build a new GA4 Funnel
+Exploration keyed on the event names themselves
+(`RFCstep_1_view` → ... → `RFCstep_6_view` → `generate_lead`) instead of
+page URLs. Not yet built as of this note.
