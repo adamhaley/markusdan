@@ -122,6 +122,7 @@ const clientScript = `
     const videoA = document.getElementById('videoA');
     const videoB = document.getElementById('videoB');
     const videoToggle = document.getElementById('videoToggle');
+    const audioToggle = document.getElementById('audioToggle');
     const progressPanel = document.getElementById('progressPanel');
     const progressBar = document.getElementById('progressBar');
     const progressLabel = document.getElementById('progressLabel');
@@ -178,6 +179,18 @@ const clientScript = `
         return;
       }
       videoToggle.setAttribute('aria-label', isPlaying ? 'Pause video' : 'Play video');
+    }
+
+    function showAudioToggle() {
+      if (audioToggle && !shouldPlayWithAudio) {
+        audioToggle.hidden = false;
+      }
+    }
+
+    function hideAudioToggle() {
+      if (audioToggle) {
+        audioToggle.hidden = true;
+      }
     }
 
     function handlePlayFailure(error) {
@@ -318,6 +331,7 @@ const clientScript = `
     function handleSequenceEnded() {
       if (clipIndex === clips.length - 1) {
         hideVideoToggle();
+        hideAudioToggle();
         showCta();
       }
     }
@@ -329,6 +343,16 @@ const clientScript = `
         if (crossfading) return;
         const playback = front.paused ? front.play() : front.pause();
         playback?.catch(handlePlayFailure);
+      });
+    }
+
+    if (audioToggle) {
+      audioToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        rememberAudioPreference(false, 1);
+        front.muted = false;
+        front.volume = 1;
+        hideAudioToggle();
       });
     }
 
@@ -369,6 +393,7 @@ const clientScript = `
         console.log('[RSC] Sequence started: ' + clips.length + ' clips total. Now on clip 1/' + clips.length + ' ("' + clips[0].label + '")');
         showVideoToggle();
         updateVideoToggle(true);
+        showAudioToggle();
       } catch (e) {
         handlePlayFailure(e);
       }
@@ -487,6 +512,28 @@ const html = `<!doctype html>
       outline-offset: -6px;
     }
 
+    .audio-toggle {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.55);
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .audio-toggle:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     .render-progress {
       position: absolute;
       inset: 50% 10% auto;
@@ -569,6 +616,7 @@ const html = `<!doctype html>
       <video id="videoA" playsinline preload="auto"></video>
       <video id="videoB" playsinline preload="auto"></video>
       <button id="videoToggle" class="video-toggle" type="button" aria-label="Pause video" hidden></button>
+      <button id="audioToggle" class="audio-toggle" type="button" aria-label="Ton aktivieren" hidden>🔇 Ton aktivieren</button>
       <div id="progressPanel" class="render-progress" role="status" aria-live="polite">
         <strong id="progressStage">${PROGRESS_MESSAGE}</strong>
         <progress id="progressBar" max="100" value="0"></progress>
