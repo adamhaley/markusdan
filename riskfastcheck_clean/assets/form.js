@@ -615,7 +615,7 @@ async function renderStepVideo(form) {
     return;
   }
 
-  if (readField("utm_medium") === "no_video") {
+  if (readField("utm_medium") === "novid") {
     return;
   }
 
