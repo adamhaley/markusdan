@@ -496,8 +496,7 @@ function buildResultsPayload(state) {
   return payload;
 }
 
-async function submitResults(form) {
-  saveCurrentFormValues(form);
+async function submitResults() {
   const state = getState();
   state.submittedAt = new Date().toISOString();
   setState(state);
@@ -522,20 +521,43 @@ async function submitResults(form) {
   return { html, eventId };
 }
 
-function showSubmissionError(form) {
-  let summary = form.querySelector("[data-validation-summary]");
+function showResultsError(container) {
+  let summary = container.querySelector("[data-validation-summary]");
   if (!summary) {
     summary = document.createElement("div");
     summary.className = "validation-summary";
     summary.setAttribute("data-validation-summary", "");
     summary.setAttribute("role", "alert");
     summary.setAttribute("tabindex", "-1");
-    form.prepend(summary);
+    container.prepend(summary);
   }
 
-  summary.textContent = "Die Übermittlung ist fehlgeschlagen. Bitte versuchen Sie es erneut.";
+  summary.innerHTML = 'Die Übermittlung ist fehlgeschlagen. <a href="schritt-6">Bitte versuchen Sie es erneut.</a>';
   summary.classList.add("is-visible");
   summary.focus();
+}
+
+async function initResultsPage(container) {
+  const state = getState();
+  if (getMissingRequiredFlowKeys(state).length) {
+    window.location.href = "schritt-1";
+    return;
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: "RFCstep_7_view" });
+
+  try {
+    const { html, eventId } = await submitResults();
+    window.dataLayer.push({ event: "generate_lead", event_id: eventId });
+    clearState();
+    document.open();
+    document.write(html);
+    document.close();
+  } catch (error) {
+    console.error(error);
+    showResultsError(container);
+  }
 }
 
 function initAccessibility(form) {
@@ -581,29 +603,7 @@ function bindNavigation(form) {
       return;
     }
 
-    const submitButton = form.querySelector("button[type='submit']");
-    const originalButtonText = submitButton ? submitButton.textContent : "";
-    if (submitButton) {
-      submitButton.disabled = true;
-      submitButton.textContent = "Wird übermittelt...";
-    }
-
-    try {
-      const { html, eventId } = await submitResults(form);
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ event: "generate_lead", event_id: eventId });
-      clearState();
-      document.open();
-      document.write(html);
-      document.close();
-    } catch (error) {
-      console.error(error);
-      showSubmissionError(form);
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent = originalButtonText;
-      }
-    }
+    window.location.href = "auswertung";
   });
 }
 
@@ -612,6 +612,10 @@ async function renderStepVideo(form) {
   const slot = form.querySelector("[data-video-slot]");
 
   if (!slot || !step) {
+    return;
+  }
+
+  if (readField("utm_medium") === "no_video") {
     return;
   }
 
@@ -773,6 +777,12 @@ function pushStepViewEvent(form) {
 function init() {
   initConsentBanner();
 
+  const resultsContainer = document.querySelector("[data-results-page]");
+  if (resultsContainer) {
+    initResultsPage(resultsContainer);
+    return;
+  }
+
   const form = document.querySelector("form[data-step]");
   if (!form) {
     return;
@@ -786,12 +796,12 @@ function init() {
     return;
   }
   pushStepViewEvent(form);
+  hydrateHiddenUtmFields(form);
   renderStepVideo(form);
   initAccessibility(form);
   bindTextFields(form);
   bindExclusiveChoices(form);
   normalizeOwnershipAndDetailChoice(form);
-  hydrateHiddenUtmFields(form);
   bindNavigation(form);
 }
 

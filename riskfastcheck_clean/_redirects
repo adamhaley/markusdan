@@ -13,6 +13,7 @@
 /schritt-4.html  /schritt-4  301
 /schritt-5.html  /schritt-5  301
 /schritt-6.html  /schritt-6  301
+/auswertung.html /auswertung 301
 
 # Old English step URLs -> current German schritt URLs.
 # Cloudflare Pages reads this file automatically on every deploy.
