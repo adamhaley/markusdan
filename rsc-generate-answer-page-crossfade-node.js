@@ -75,7 +75,8 @@ const ctaMarkup = cta
       <div class="cta-buttons">
         ${cta.buttons.map((button) => {
           const href = String(button.href || '').replace('xxxxxx', trackingCode);
-          return `<a class="cta-button" href="${href}">${button.label}</a>`;
+          const label = String(button.label || '');
+          return `<a class="cta-button" href="${href}" data-cta-label="${label.replace(/"/g, '&quot;')}">${label}</a>`;
         }).join('\n        ')}
       </div>
     </div>`
@@ -96,6 +97,19 @@ const clientScript = `
       if (ctaPanel) {
         ctaPanel.hidden = false;
       }
+    }
+
+    if (ctaPanel) {
+      ctaPanel.querySelectorAll('.cta-button').forEach((button) => {
+        button.addEventListener('click', () => {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: 'rsc_cta_click',
+            cta_label: button.dataset.ctaLabel || '',
+            cta_href: button.getAttribute('href') || '',
+          });
+        });
+      });
     }
 
     try {
@@ -370,6 +384,29 @@ const html = `<!doctype html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Video Sequence</title>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    var rscStoredConsent = 'denied';
+    try {
+      if (localStorage.getItem('rsc-cookie-consent') === 'granted') {
+        rscStoredConsent = 'granted';
+      }
+    } catch (e) {}
+    gtag('consent', 'default', {
+      'ad_storage': rscStoredConsent,
+      'ad_user_data': rscStoredConsent,
+      'ad_personalization': rscStoredConsent,
+      'analytics_storage': rscStoredConsent
+    });
+  </script>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-NJPGLLZW');</script>
+  <!-- End Google Tag Manager -->
   <style>
     :root {
       --text: #f5f1e8;
