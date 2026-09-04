@@ -339,7 +339,7 @@ const clientScript = `
       });
     }
 
-    async function start() {
+    async function prepare() {
       hidePoster();
       hideVideoToggle();
       updateProgress(0);
@@ -364,6 +364,9 @@ const clientScript = `
       ]);
 
       progressPanel.hidden = true;
+    }
+
+    async function playFront() {
       front.muted = !shouldPlayWithAudio;
       try {
         await front.play();
@@ -381,15 +384,34 @@ const clientScript = `
       }
     }
 
-    function startWithAudio() {
-      rememberAudioPreference(false, 1);
-      hideStartOverlay();
-      start().catch(handlePlayFailure);
+    async function start() {
+      await prepare();
+      await playFront();
     }
 
+    async function prepareThenPromptForAudio() {
+      await prepare();
+      showPoster();
+      if (startOverlay) {
+        startOverlay.hidden = false;
+      }
+    }
+
+    function startWithAudio() {
+      rememberAudioPreference(false, 1);
+      hidePoster();
+      hideStartOverlay();
+      playFront();
+    }
+
+    // Once poster is showing, prepare() has already finished (either the
+    // deferred no-audio flow below, or an autoplay failure after an
+    // already-prepared start()) -- clips are preloaded, so this only ever
+    // needs to (re)start playback, never redo the loading sequence.
     poster.addEventListener('click', () => {
       if (shouldPlayWithAudio) {
-        start().catch(handlePlayFailure);
+        hidePoster();
+        playFront();
       } else {
         startWithAudio();
       }
@@ -408,13 +430,13 @@ const clientScript = `
       // autoplay this soon after the user gesture that navigated here.
       start().catch(handlePlayFailure);
     } else {
-      // Mirrors the step-1 "tap to start" pattern: no autoplay attempt,
-      // no chance of a silent playthrough with no way to enable sound --
-      // the first tap both grants audio and starts playback.
-      showPoster();
-      if (startOverlay) {
-        startOverlay.hidden = false;
-      }
+      // Mirrors the step-1 "tap to start" pattern: let the loading
+      // sequence run to completion first, then -- once the clip is
+      // actually ready -- show the tap-to-start button instead of
+      // autoplaying. No chance of a silent playthrough with no way to
+      // enable sound: the first tap both grants audio and starts
+      // playback.
+      prepareThenPromptForAudio().catch(handlePlayFailure);
     }
 `;
 
