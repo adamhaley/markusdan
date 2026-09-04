@@ -36,43 +36,55 @@ repo does not touch the running service.
 - **Ownership**: client's own DigitalOcean VPS — not billed to us, and not
   a Cloudflare concern at all.
 
-## 3. n8n workflow — `Webhook Wrapper.json` (client's n8n instance)
+## 3. n8n workflow — `Webhook Wrapper (Crossfade).json` (client's n8n instance)
 
-This is an **n8n workflow export**, not application source — it's the
-orchestration layer that calls the render service, then serves the
-personalized answer page. Several of its nodes embed inline JavaScript
-("Code" nodes) whose logic is *mirrored* at the repo root as standalone
-`rsc-*-node.js` files purely so they're readable/editable/diffable outside
-n8n's UI:
+**This is the live production workflow as of the 2026-08-31 cutover**
+(commit `1bf3fc8`) — `assets/form.js`'s submit handler points at it, not
+the older `Webhook Wrapper.json`. It streams the original Vimeo clips
+directly and crossfades them client-side (two stacked `<video>` elements),
+replacing the earlier server-side render pipeline entirely. It's an **n8n
+workflow export**, not application source — the orchestration layer that
+resolves the quiz answers and serves the personalized answer page.
+Several of its nodes embed inline JavaScript ("Code" nodes) whose logic is
+*mirrored* at the repo root as standalone `rsc-*-node.js` files purely so
+they're readable/editable/diffable outside n8n's UI:
 
-| Root-level mirror file            | n8n node name          |
-|------------------------------------|-------------------------|
-| `rsc-generate-answer-page-node.js` | `Generate Answer Page` |
-| `rsc-resolve-pitch-node.js`        | (resolve-pitch node)   |
-| `rsc-parse-answers-node.js`        | (parse-answers node)   |
+| Root-level mirror file                       | n8n node name           |
+|-----------------------------------------------|--------------------------|
+| `rsc-generate-answer-page-crossfade-node.js`   | `Generate Answer Page`  |
+| `rsc-fetch-play-urls-node.js`                  | (fetch-play-urls node)  |
+| `rsc-resolve-pitch-node.js`                    | (resolve-pitch node)    |
+| `rsc-parse-answers-node.js`                    | (parse-answers node)    |
 
-**Critical**: editing `rsc-generate-answer-page-node.js` (or any other
-mirror file) in this repo does **nothing** in production by itself. The
-sync is manual and one-directional, driven by the repo owner, not by
-Claude:
+**`Webhook Wrapper.json` (no "Crossfade" suffix) is legacy/abandoned** —
+an earlier attempt at a more elaborate Lambda-based server-side render
+pipeline, with the pitch clip split out to play from Vimeo directly. It
+underperformed vs. the crossfade approach and was dropped in favor of it;
+its mirror is `rsc-generate-answer-page-node.js`. It's kept in the repo
+for history only — don't sync changes into it, and don't treat drift
+between it and its own n8n export as something to fix.
+
+**Critical**: editing a `rsc-*-node.js` mirror file in this repo does
+**nothing** in production by itself. The sync is manual and
+one-directional, driven by the repo owner, not by Claude:
 
 1. Claude edits the standalone `rsc-*-node.js` file in this repo.
 2. The owner manually copy-pastes that code into the matching Code node
    inside n8n's UI.
 3. The owner re-exports/re-downloads the workflow from n8n, which
-   overwrites `Webhook Wrapper.json` in this repo.
+   overwrites the matching `Webhook Wrapper*.json` in this repo.
 
-So **never edit `Webhook Wrapper.json` directly** — it gets clobbered by
-step 3 anyway, and doing so would fight the owner's workflow. Land changes
-only in the `rsc-*-node.js` mirror and say so; the owner handles the n8n
-side. Check whether a given change has already been synced (i.e. whether
-`Webhook Wrapper.json` has been re-downloaded since) with a quick script,
-e.g.:
+So **never edit `Webhook Wrapper (Crossfade).json` (or `Webhook
+Wrapper.json`) directly** — it gets clobbered by step 3 anyway, and doing
+so would fight the owner's workflow. Land changes only in the
+`rsc-*-node.js` mirror and say so; the owner handles the n8n side. Check
+whether a given change has already been synced (i.e. whether the export
+has been re-downloaded since) with a quick script, e.g.:
 
 ```bash
 python3 -c "
 import json
-with open('Webhook Wrapper.json') as f:
+with open('Webhook Wrapper (Crossfade).json') as f:
     data = json.load(f)
 for node in data['nodes']:
     if node['name'] == 'Generate Answer Page':
