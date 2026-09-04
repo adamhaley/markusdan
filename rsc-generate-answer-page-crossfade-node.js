@@ -122,7 +122,7 @@ const clientScript = `
     const videoA = document.getElementById('videoA');
     const videoB = document.getElementById('videoB');
     const videoToggle = document.getElementById('videoToggle');
-    const audioToggle = document.getElementById('audioToggle');
+    const startOverlay = document.getElementById('startOverlay');
     const progressPanel = document.getElementById('progressPanel');
     const progressBar = document.getElementById('progressBar');
     const progressLabel = document.getElementById('progressLabel');
@@ -181,15 +181,9 @@ const clientScript = `
       videoToggle.setAttribute('aria-label', isPlaying ? 'Pause video' : 'Play video');
     }
 
-    function showAudioToggle() {
-      if (audioToggle && !shouldPlayWithAudio) {
-        audioToggle.hidden = false;
-      }
-    }
-
-    function hideAudioToggle() {
-      if (audioToggle) {
-        audioToggle.hidden = true;
+    function hideStartOverlay() {
+      if (startOverlay) {
+        startOverlay.hidden = true;
       }
     }
 
@@ -331,7 +325,6 @@ const clientScript = `
     function handleSequenceEnded() {
       if (clipIndex === clips.length - 1) {
         hideVideoToggle();
-        hideAudioToggle();
         showCta();
       }
     }
@@ -343,16 +336,6 @@ const clientScript = `
         if (crossfading) return;
         const playback = front.paused ? front.play() : front.pause();
         playback?.catch(handlePlayFailure);
-      });
-    }
-
-    if (audioToggle) {
-      audioToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        rememberAudioPreference(false, 1);
-        front.muted = false;
-        front.volume = 1;
-        hideAudioToggle();
       });
     }
 
@@ -393,14 +376,46 @@ const clientScript = `
         console.log('[RSC] Sequence started: ' + clips.length + ' clips total. Now on clip 1/' + clips.length + ' ("' + clips[0].label + '")');
         showVideoToggle();
         updateVideoToggle(true);
-        showAudioToggle();
       } catch (e) {
         handlePlayFailure(e);
       }
     }
 
-    poster.addEventListener('click', start);
-    start().catch(handlePlayFailure);
+    function startWithAudio() {
+      rememberAudioPreference(false, 1);
+      hideStartOverlay();
+      start().catch(handlePlayFailure);
+    }
+
+    poster.addEventListener('click', () => {
+      if (shouldPlayWithAudio) {
+        start().catch(handlePlayFailure);
+      } else {
+        startWithAudio();
+      }
+    });
+
+    if (startOverlay) {
+      startOverlay.addEventListener('click', (event) => {
+        event.stopPropagation();
+        startWithAudio();
+      });
+    }
+
+    if (shouldPlayWithAudio) {
+      // Audio was already granted on an earlier step -- autoplay
+      // immediately, same as before. Browsers generally allow unmuted
+      // autoplay this soon after the user gesture that navigated here.
+      start().catch(handlePlayFailure);
+    } else {
+      // Mirrors the step-1 "tap to start" pattern: no autoplay attempt,
+      // no chance of a silent playthrough with no way to enable sound --
+      // the first tap both grants audio and starts playback.
+      showPoster();
+      if (startOverlay) {
+        startOverlay.hidden = false;
+      }
+    }
 `;
 
 const html = `<!doctype html>
@@ -512,26 +527,19 @@ const html = `<!doctype html>
       outline-offset: -6px;
     }
 
-    .audio-toggle {
+    .start-overlay {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 5;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 0.9rem;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.55);
-      color: var(--text);
-      font-size: 0.85rem;
+      inset: 50% auto auto 50%;
+      z-index: 3;
+      transform: translate(-50%, -50%);
+      border: 0;
+      border-radius: 0;
+      padding: 0.85rem 1.25rem;
+      background: #d7a84a;
+      color: #1b1408;
+      font: inherit;
       cursor: pointer;
-    }
-
-    .audio-toggle:focus-visible {
-      outline: 3px solid var(--accent);
-      outline-offset: 2px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
     }
 
     .render-progress {
@@ -616,7 +624,7 @@ const html = `<!doctype html>
       <video id="videoA" playsinline preload="auto"></video>
       <video id="videoB" playsinline preload="auto"></video>
       <button id="videoToggle" class="video-toggle" type="button" aria-label="Pause video" hidden></button>
-      <button id="audioToggle" class="audio-toggle" type="button" aria-label="Ton aktivieren" hidden>🔇 Ton aktivieren</button>
+      <button id="startOverlay" class="start-overlay" type="button" hidden>Video starten</button>
       <div id="progressPanel" class="render-progress" role="status" aria-live="polite">
         <strong id="progressStage">${PROGRESS_MESSAGE}</strong>
         <progress id="progressBar" max="100" value="0"></progress>
