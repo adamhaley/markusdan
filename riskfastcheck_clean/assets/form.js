@@ -1,5 +1,6 @@
 (() => {
 const STORAGE_KEY = "risk-fast-check-form";
+const RESULTS_CACHE_KEY = "risk-fast-check-results-cache";
 const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
 const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/d9e002a0-a764-46be-b4ee-237200be38f9";
 const VIDEO_AUDIO_PREFERENCE_KEY = "rsc-video-audio-enabled";
@@ -521,6 +522,19 @@ async function submitResults() {
   return { html, eventId };
 }
 
+function readCachedResults() {
+  try {
+    const raw = sessionStorage.getItem(RESULTS_CACHE_KEY);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.html ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 function showResultsError(container) {
   let summary = container.querySelector("[data-validation-summary]");
   if (!summary) {
@@ -548,9 +562,11 @@ async function initResultsPage(container) {
   window.dataLayer.push({ event: "RFCstep_7_view" });
 
   try {
-    const { html, eventId } = await submitResults();
+    const cached = readCachedResults();
+    const { html, eventId } = cached || (await submitResults());
     window.dataLayer.push({ event: "generate_lead", event_id: eventId });
     clearState();
+    sessionStorage.removeItem(RESULTS_CACHE_KEY);
     document.open();
     document.write(html);
     document.close();
@@ -603,8 +619,46 @@ function bindNavigation(form) {
       return;
     }
 
-    window.location.href = "auswertung";
+    await prefetchResultsAndNavigate(form);
   });
+}
+
+async function prefetchResultsAndNavigate(form) {
+  const submitButton = form.querySelector('button[type="submit"]');
+  const originalLabel = submitButton ? submitButton.textContent : "";
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Wird geladen …";
+  }
+
+  try {
+    const { html, eventId } = await submitResults();
+    sessionStorage.setItem(RESULTS_CACHE_KEY, JSON.stringify({ html, eventId }));
+    window.location.href = "auswertung";
+  } catch (error) {
+    console.error(error);
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = originalLabel;
+    }
+    showSubmitError(form);
+  }
+}
+
+function showSubmitError(form) {
+  let summary = form.querySelector("[data-validation-summary]");
+  if (!summary) {
+    summary = document.createElement("div");
+    summary.className = "validation-summary";
+    summary.setAttribute("data-validation-summary", "");
+    summary.setAttribute("role", "alert");
+    summary.setAttribute("tabindex", "-1");
+    form.prepend(summary);
+  }
+
+  summary.textContent = "Die Übermittlung ist fehlgeschlagen. Bitte versuchen Sie es erneut.";
+  summary.classList.add("is-visible");
+  summary.focus();
 }
 
 async function renderStepVideo(form) {
@@ -790,6 +844,7 @@ function init() {
   form.setAttribute("autocomplete", "off");
   if (shouldClearState(form)) {
     clearState();
+    sessionStorage.removeItem(RESULTS_CACHE_KEY);
   }
   if (shouldReturnToStart(form)) {
     window.location.href = "schritt-1";
