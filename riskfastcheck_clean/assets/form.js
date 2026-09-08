@@ -5,6 +5,7 @@ const STEP_CONFIG_PATH = "assets/steps.json?v=20260713b";
 const SUBMIT_WEBHOOK_URL = "https://n8n.megyk.com/webhook/d9e002a0-a764-46be-b4ee-237200be38f9";
 const VIDEO_AUDIO_PREFERENCE_KEY = "rsc-video-audio-enabled";
 const CONSENT_STORAGE_KEY = "rsc-cookie-consent";
+const SHARED_CONSENT_COOKIE = "md_consent";
 const PRIVACY_POLICY_URL = "https://markusdan.com/datenschutzerklaerung/";
 const START_STEP = "1";
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
@@ -756,7 +757,36 @@ async function renderStepVideo(form) {
   }
 }
 
+function getSharedConsentCookie() {
+  try {
+    const match = document.cookie.match(
+      new RegExp("(?:^|; )" + SHARED_CONSENT_COOKIE + "=([^;]*)")
+    );
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setSharedConsentCookie(value) {
+  try {
+    document.cookie =
+      SHARED_CONSENT_COOKIE + "=" + encodeURIComponent(value) +
+      "; Domain=.markusdan.com; Path=/; Max-Age=31536000; SameSite=Lax; Secure";
+  } catch {
+    // Ignore cookie failures; the localStorage fallback still applies.
+  }
+}
+
 function getStoredConsent() {
+  // A visitor may have already consented on markusdan.com before reaching
+  // the quiz (or vice versa) — honor that shared choice first so they're
+  // not reprompted mid-funnel.
+  const shared = getSharedConsentCookie();
+  if (shared === "granted" || shared === "denied") {
+    return shared;
+  }
+
   try {
     return localStorage.getItem(CONSENT_STORAGE_KEY);
   } catch {
@@ -770,6 +800,7 @@ function setStoredConsent(value) {
   } catch {
     // Ignore storage failures; the banner will just show again next visit.
   }
+  setSharedConsentCookie(value);
 }
 
 function applyConsent(granted) {
