@@ -78,6 +78,13 @@
   line-height: 1.5;
 }
 
+/* Steps from 1b onward drop the headline/subheadline to surface the
+   question faster; compensate for the top margin that came with the
+   removed h1. */
+.rsc-quiz .hero--compact {
+  padding-top: 18px;
+}
+
 
 .rsc-quiz form {
   padding: 10px 22px 20px;
@@ -190,6 +197,13 @@
   font-size: 14px;
   font-weight: 400;
   letter-spacing: 0;
+}
+
+/* Client feedback (2026-09-14): the primary question on steps 1b+ was
+   hard to spot with the headline removed, so make it stand out more. */
+.rsc-quiz .choice-group legend.legend-emphasis {
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .rsc-quiz .req {
