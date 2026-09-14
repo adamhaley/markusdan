@@ -8,8 +8,11 @@ const CONSENT_STORAGE_KEY = "rsc-cookie-consent";
 const SHARED_CONSENT_COOKIE = "md_consent";
 const PRIVACY_POLICY_URL = "https://markusdan.com/datenschutzerklaerung/";
 const START_STEP = "1";
+const STEP_ORDER = ["1", "1b", "1c", "2", "3", "4", "5", "6"];
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
+  "wealth_building_years",
+  "wealth_concern",
   "real_estate_ownership",
   "securities_ownership",
   "precious_metals_ownership",
@@ -31,6 +34,8 @@ const OUTPUT_KEYS = [
   "utm_campaign",
   "utm_content",
   "utm_term",
+  "wealth_building_years",
+  "wealth_concern",
   "real_estate_ownership",
   "real_estate_investment_amount",
   "securities_ownership",
@@ -100,7 +105,9 @@ function shouldClearState(form) {
 }
 
 function shouldReturnToStart(form) {
-  return Number(form.dataset.step || START_STEP) > Number(START_STEP) && !readField("real_estate_ownership");
+  const stepIndex = STEP_ORDER.indexOf(form.dataset.step || START_STEP);
+  const startIndex = STEP_ORDER.indexOf(START_STEP);
+  return stepIndex > startIndex && !readField("wealth_building_years");
 }
 
 function isReload() {
@@ -852,7 +859,7 @@ function initConsentBanner() {
 }
 
 function pushStepViewEvent(form) {
-  const step = Number(form.dataset.step || 0);
+  const step = form.dataset.step;
   if (!step) {
     return;
   }

@@ -8,6 +8,8 @@
 # .html requests -> canonical extensionless URL, so any old bookmarked/
 # indexed .html link converges on the same GA4 page path as internal nav.
 /schritt-1.html  /schritt-1  301
+/schritt-1b.html /schritt-1b 301
+/schritt-1c.html /schritt-1c 301
 /schritt-2.html  /schritt-2  301
 /schritt-3.html  /schritt-3  301
 /schritt-4.html  /schritt-4  301
