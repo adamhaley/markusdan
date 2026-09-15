@@ -7,9 +7,48 @@
 // Advanced-mode Pages Function: this file replaces Cloudflare Pages'
 // default static-asset handling entirely, so every non-/metrics/ request
 // must be explicitly forwarded to env.ASSETS.fetch(request) below.
+//
+// Server-side step-view logging: a redundancy measure requested by the
+// client (2026-09-14) so funnel tracking doesn't have a single point of
+// failure in Google's client-side tag stack (ad blockers, JS disabled,
+// consent denial, or a GTM/GA4 outage all miss nothing here, since this
+// fires before the page is even served). Best-effort only -- logging
+// failures must never affect the page response, hence ctx.waitUntil +
+// the try/catch in logStepView.
+const STEP_LOG_WEBHOOK_URL = 'https://n8n.megyk.com/webhook/adb27565-9057-43a3-b9a9-f74a26a00427';
+const STEP_LOG_PATHS = new Set([
+  '/schritt-1',
+  '/schritt-1b',
+  '/schritt-1c',
+  '/schritt-2',
+  '/schritt-3',
+  '/schritt-4',
+  '/schritt-5',
+  '/schritt-6',
+]);
+
+async function logStepView(pathname) {
+  try {
+    await fetch(STEP_LOG_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        step: pathname.replace('/schritt-', ''),
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  } catch {
+    // Best-effort only; never let a webhook failure affect the page response.
+  }
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (request.method === 'GET' && STEP_LOG_PATHS.has(url.pathname)) {
+      ctx.waitUntil(logStepView(url.pathname));
+    }
 
     if (url.pathname.startsWith('/metrics/')) {
       const newRequest = new Request(request);

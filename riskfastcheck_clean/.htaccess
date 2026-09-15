@@ -1,0 +1,8 @@
+# Local-dev only: mirrors Cloudflare Pages' extensionless URL resolution
+# (e.g. /schritt-1b -> schritt-1b.html) so the quiz's internal links work
+# the same way here as they do in production. Not used by Cloudflare
+# Pages itself (not Apache) — this file only matters for local Apache.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]
