@@ -9,6 +9,7 @@ const SHARED_CONSENT_COOKIE = "md_consent";
 const PRIVACY_POLICY_URL = "https://markusdan.com/datenschutzerklaerung/";
 const START_STEP = "1";
 const STEP_ORDER = ["1", "1b", "1c", "2", "3", "4", "5", "6"];
+const AUTO_ADVANCE_DELAY_MS = 400;
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
   "wealth_building_years",
@@ -472,6 +473,39 @@ function validateForm(form) {
   return true;
 }
 
+function hasCompleteRequiredGroups(form) {
+  return [...form.querySelectorAll("[data-required-group]")]
+    .every((group) => [...group.querySelectorAll("input[type='checkbox'], input[type='radio']")]
+      .some((choice) => choice.checked));
+}
+
+function hasCompleteDetailRequirements(form) {
+  return Object.entries(DETAIL_FIELD_BY_OWNERSHIP_FIELD).every(([ownershipFieldName, detailFieldName]) => {
+    const ownershipChoice = form.querySelector(
+      `input[data-group="${ownershipFieldName}"]:checked`
+    );
+    const detailGroup = getDetailChoiceGroup(form, detailFieldName);
+
+    if (!ownershipChoice || !detailGroup || ownershipChoice.value !== "Ja") {
+      return true;
+    }
+
+    return [...detailGroup.querySelectorAll("input[type='checkbox'], input[type='radio']")]
+      .some((choice) => choice.checked);
+  });
+}
+
+function hasCompleteNativeRequiredFields(form) {
+  return [...form.querySelectorAll("input[required], textarea[required]")]
+    .every((field) => field.checkValidity());
+}
+
+function isReadyForAutoAdvance(form) {
+  return hasCompleteNativeRequiredFields(form)
+    && hasCompleteRequiredGroups(form)
+    && hasCompleteDetailRequirements(form);
+}
+
 function hydrateHiddenUtmFields(form) {
   const params = new URLSearchParams(window.location.search);
   UTM_KEYS.forEach((key) => {
@@ -609,9 +643,16 @@ function bindNavigation(form) {
     });
   }
 
+  if (next) {
+    bindAutoAdvance(form, next);
+  }
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!validateForm(form)) {
+      if (next) {
+        setAutoAdvanceState(next, false);
+      }
       return;
     }
     saveCurrentFormValues(form);
@@ -629,6 +670,49 @@ function bindNavigation(form) {
 
     await prefetchResultsAndNavigate(form);
   });
+}
+
+function bindAutoAdvance(form, next) {
+  let autoAdvanceTimer;
+
+  form.addEventListener("change", (event) => {
+    if (!event.target.matches("input[type='radio'][data-group]")) {
+      return;
+    }
+
+    window.clearTimeout(autoAdvanceTimer);
+    setAutoAdvanceState(next, false);
+
+    if (!isReadyForAutoAdvance(form)) {
+      return;
+    }
+
+    setAutoAdvanceState(next, true);
+    autoAdvanceTimer = window.setTimeout(() => {
+      form.requestSubmit();
+    }, AUTO_ADVANCE_DELAY_MS);
+  });
+}
+
+function setAutoAdvanceState(next, isAdvancing) {
+  if (!next.dataset.defaultLabel) {
+    next.dataset.defaultLabel = next.textContent.trim();
+  }
+
+  if (isAdvancing) {
+    next.style.minWidth = `${next.getBoundingClientRect().width}px`;
+    next.textContent = `${next.dataset.defaultLabel} ...`;
+    next.classList.add("is-auto-advancing");
+    next.setAttribute("aria-busy", "true");
+    next.disabled = true;
+    return;
+  }
+
+  next.textContent = next.dataset.defaultLabel;
+  next.classList.remove("is-auto-advancing");
+  next.removeAttribute("aria-busy");
+  next.disabled = false;
+  next.style.minWidth = "";
 }
 
 async function prefetchResultsAndNavigate(form) {
