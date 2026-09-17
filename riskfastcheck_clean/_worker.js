@@ -25,15 +25,38 @@ const STEP_LOG_PATHS = new Set([
   '/schritt-4',
   '/schritt-5',
   '/schritt-6',
+  // Variant B (branching flow A/B test, see llm-wiki plan 2026-09-17) --
+  // same webhook, a `variant` field distinguishes the rows so the existing
+  // n8n workflow/Sheet formulas need updating to read it, not just append it.
+  '/variante-b/schritt-1',
+  '/variante-b/schritt-1b',
+  '/variante-b/schritt-2',
+  '/variante-b/schritt-2a',
+  '/variante-b/schritt-3',
+  '/variante-b/schritt-3a',
+  '/variante-b/schritt-4',
+  '/variante-b/schritt-4a',
+  '/variante-b/schritt-5',
+  '/variante-b/schritt-5a',
+  '/variante-b/schritt-6',
+  '/variante-b/schritt-6a',
+  '/variante-b/schritt-7',
+  '/variante-b/schritt-7a',
 ]);
 
 async function logStepView(pathname) {
   try {
+    const isVariantB = pathname.startsWith('/variante-b/');
+    const step = isVariantB
+      ? pathname.replace('/variante-b/schritt-', '')
+      : pathname.replace('/schritt-', '');
+
     await fetch(STEP_LOG_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        step: pathname.replace('/schritt-', ''),
+        step,
+        variant: isVariantB ? 'B' : 'A',
         timestamp: new Date().toISOString(),
       }),
     });

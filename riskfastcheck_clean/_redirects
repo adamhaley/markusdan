@@ -30,3 +30,21 @@
 # directly. Send any stale links to the end of the live flow instead of 404s.
 /step-7.html    /schritt-6  301
 /schritt-7.html /schritt-6  301
+
+# Variant B (branching flow A/B test) -- same .html -> extensionless
+# canonicalization as the Variant A pages above.
+/variante-b/schritt-1.html   /variante-b/schritt-1   301
+/variante-b/schritt-1b.html  /variante-b/schritt-1b  301
+/variante-b/schritt-2.html   /variante-b/schritt-2   301
+/variante-b/schritt-2a.html  /variante-b/schritt-2a  301
+/variante-b/schritt-3.html   /variante-b/schritt-3   301
+/variante-b/schritt-3a.html  /variante-b/schritt-3a  301
+/variante-b/schritt-4.html   /variante-b/schritt-4   301
+/variante-b/schritt-4a.html  /variante-b/schritt-4a  301
+/variante-b/schritt-5.html   /variante-b/schritt-5   301
+/variante-b/schritt-5a.html  /variante-b/schritt-5a  301
+/variante-b/schritt-6.html   /variante-b/schritt-6   301
+/variante-b/schritt-6a.html  /variante-b/schritt-6a  301
+/variante-b/schritt-7.html   /variante-b/schritt-7   301
+/variante-b/schritt-7a.html  /variante-b/schritt-7a  301
+/variante-b/auswertung.html  /variante-b/auswertung  301
