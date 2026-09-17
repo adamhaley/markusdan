@@ -1,6 +1,6 @@
 # markusdan repo architecture
 
-This repo contains **three independently-deployed systems** that share a git
+This repo contains **four independently-deployed systems** that share a git
 history but do not share a deploy mechanism. Before touching a file, check
 which system it belongs to below — editing a file here does not mean it's
 live anywhere until the matching deploy step happens.
@@ -101,6 +101,38 @@ fullscreening `.frame` (not just the video) is what keeps the CTA visible.
 
 - **Ownership**: client's own n8n instance (`n8n.megyk.com`) — not billed
   to us.
+
+## 4. n8n workflow — `RSC Tracking.json` (client's n8n instance)
+
+A separate, unrelated n8n workflow from the answer-page one above — same
+n8n instance, different webhook, different purpose. It's the receiving end
+of `riskfastcheck_clean/_worker.js`'s server-side step-view logging: each
+quiz page view POSTs `{ step, variant, timestamp }` to its webhook
+(`adb27565-9057-43a3-b9a9-f74a26a00427`), and it appends a row to the `RSC
+Tracking` Google Sheet (`docs.google.com/spreadsheets/d/1K_hF6Ur5UqxjJA8rh8IkJn9A6lf2S5g5kWeUiFwPV5o`).
+Added 2026-09-14 as a tracking redundancy measure independent of GTM/GA4;
+extended 2026-09-17 for the Variant B branching-flow A/B test (see llm-wiki
+plan `risk-fast-check-static-quiz/plans/2026-09-17.md`).
+
+Same mirror/sync convention as the answer-page workflow above:
+
+| Root-level mirror file                        | n8n node name          |
+|------------------------------------------------|-------------------------|
+| `rsc-tracking-normalize-step-view-node.js`      | `Normalize Step View`  |
+
+The workflow's other node (`Append row in sheet1`, a Google Sheets node)
+has no inline code, so nothing to mirror there — its column mapping and the
+Sheet's header row are config, not code, and can only be changed directly
+in n8n's UI / the Sheet itself. As of this writing that node and Sheet
+still only have `timestamp`/`date`/`step` columns; the `Normalize Step
+View` mirror already emits a `variant` field (defaulted to `"A"`) that
+isn't captured anywhere downstream yet — a `variant` column needs adding
+to both the node's field mapping and the Sheet before it'll show up in
+rows.
+
+**Same rule applies**: never edit `RSC Tracking.json` directly — land
+changes in `rsc-tracking-normalize-step-view-node.js`, the owner pastes it
+into n8n's Code node, then re-exports to refresh `RSC Tracking.json` here.
 
 ## Jira ticket → system map (DEH project, `gordank.atlassian.net`)
 

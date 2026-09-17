@@ -3,33 +3,32 @@
   "nodes": [
     {
       "parameters": {
+        "jsCode": "// Mirror of the \"Normalize Step View\" Code node in the \"RSC Tracking\" n8n\n// workflow (RSC Tracking.json), kept here purely for readability/diffing\n// outside n8n's UI -- see markusdan repo AGENTS.md/CLAUDE.md for the sync\n// process. Editing this file does nothing in production by itself: the\n// owner copy-pastes it into the matching n8n Code node, then re-exports the\n// workflow, which overwrites RSC Tracking.json in this repo.\nconst item = $input.first().json;\nconst body = item.body || item;\n\nconst rawTimestamp = body.timestamp || new Date().toISOString();\nconst parsedDate = new Date(rawTimestamp);\nconst timestamp = Number.isNaN(parsedDate.getTime())\n  ? new Date().toISOString()\n  : parsedDate.toISOString();\n\nconst berlinDate = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'Europe/Berlin',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n}).format(new Date(timestamp));\n\nreturn [\n  {\n    json: {\n      timestamp,\n      date: berlinDate,\n      step: String(body.step || '').trim(),\n      // Added for the Variant B branching-flow A/B test (see llm-wiki plan\n      // 2026-09-17) -- defaults to \"A\" so older requests that predate the\n      // variant field still log consistently.\n      variant: String(body.variant || 'A').trim(),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        -208
+      ],
+      "id": "ead447bd-5b18-4a58-b14e-a3342161226a",
+      "name": "Normalize Step View"
+    },
+    {
+      "parameters": {
         "httpMethod": "POST",
         "path": "adb27565-9057-43a3-b9a9-f74a26a00427",
-        "responseMode": "onReceived",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        0,
-        0
+        -368,
+        -208
       ],
-      "id": "7fa39517-7a03-4ef4-94c5-656517b04aaf",
-      "name": "Webhook",
+      "id": "cb0d8881-ff5a-44a6-ae8f-f4911b864abd",
+      "name": "Webhook1",
       "webhookId": "adb27565-9057-43a3-b9a9-f74a26a00427"
-    },
-    {
-      "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst body = item.body || item;\n\nconst rawTimestamp = body.timestamp || new Date().toISOString();\nconst parsedDate = new Date(rawTimestamp);\nconst timestamp = Number.isNaN(parsedDate.getTime())\n  ? new Date().toISOString()\n  : parsedDate.toISOString();\n\nconst berlinDate = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'Europe/Berlin',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n}).format(new Date(timestamp));\n\nreturn [\n  {\n    json: {\n      timestamp,\n      date: berlinDate,\n      step: String(body.step || '').trim(),\n    },\n  },\n];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        208,
-        0
-      ],
-      "id": "db285f46-ceed-4880-81fa-3850f8b6ad54",
-      "name": "Normalize Step View"
     },
     {
       "parameters": {
@@ -53,7 +52,8 @@
           "value": {
             "timestamp": "={{ $json.timestamp }}",
             "date": "={{ $json.date }}",
-            "step": "={{ $json.step }}"
+            "step": "={{ $json.step }}",
+            "variant": "={{ $json.variant }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -64,7 +64,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "date",
@@ -73,7 +74,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "step",
@@ -82,7 +84,18 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "variant",
+              "displayName": "variant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -93,11 +106,11 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        416,
-        0
+        48,
+        -208
       ],
-      "id": "97a74a1b-fbc0-4df8-b11f-13fe13379e07",
-      "name": "Append row in sheet",
+      "id": "58adf586-2779-468d-96cf-6270f88a64b2",
+      "name": "Append row in sheet1",
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "qJ5ck4AVx9Jx37Fr",
@@ -108,7 +121,18 @@
   ],
   "pinData": {},
   "connections": {
-    "Webhook": {
+    "Normalize Step View": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
       "main": [
         [
           {
@@ -118,25 +142,15 @@
           }
         ]
       ]
-    },
-    "Normalize Step View": {
-      "main": [
-        [
-          {
-            "node": "Append row in sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": false
   },
-  "versionId": "b2eb579e-952d-480c-bde8-236fb9d8e5ba",
+  "versionId": "57facb34-b5cc-4de2-891e-9cb1437a2476",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0a1535091d9aa08924749a816438820dbcd60489c6352757a3e5df80f2b6e736"
