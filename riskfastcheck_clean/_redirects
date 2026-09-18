@@ -51,36 +51,8 @@
 /schnellcheck/auswertung.html  /schnellcheck/auswertung  301
 
 # Old /variante-b/ path -- redirect to the renamed /schnellcheck/ path in
-# case it was already shared/bookmarked before the rename.
-/variante-b/schritt-1   /schnellcheck/schritt-1   301
-/variante-b/schritt-1b  /schnellcheck/schritt-1b  301
-/variante-b/schritt-2   /schnellcheck/schritt-2   301
-/variante-b/schritt-2a  /schnellcheck/schritt-2a  301
-/variante-b/schritt-3   /schnellcheck/schritt-3   301
-/variante-b/schritt-3a  /schnellcheck/schritt-3a  301
-/variante-b/schritt-4   /schnellcheck/schritt-4   301
-/variante-b/schritt-4a  /schnellcheck/schritt-4a  301
-/variante-b/schritt-5   /schnellcheck/schritt-5   301
-/variante-b/schritt-5a  /schnellcheck/schritt-5a  301
-/variante-b/schritt-6   /schnellcheck/schritt-6   301
-/variante-b/schritt-6a  /schnellcheck/schritt-6a  301
-/variante-b/schritt-7   /schnellcheck/schritt-7   301
-/variante-b/schritt-7a  /schnellcheck/schritt-7a  301
-/variante-b/auswertung  /schnellcheck/auswertung  301
-
-# Same, for the old .html-suffixed direct links.
-/variante-b/schritt-1.html   /schnellcheck/schritt-1   301
-/variante-b/schritt-1b.html  /schnellcheck/schritt-1b  301
-/variante-b/schritt-2.html   /schnellcheck/schritt-2   301
-/variante-b/schritt-2a.html  /schnellcheck/schritt-2a  301
-/variante-b/schritt-3.html   /schnellcheck/schritt-3   301
-/variante-b/schritt-3a.html  /schnellcheck/schritt-3a  301
-/variante-b/schritt-4.html   /schnellcheck/schritt-4   301
-/variante-b/schritt-4a.html  /schnellcheck/schritt-4a  301
-/variante-b/schritt-5.html   /schnellcheck/schritt-5   301
-/variante-b/schritt-5a.html  /schnellcheck/schritt-5a  301
-/variante-b/schritt-6.html   /schnellcheck/schritt-6   301
-/variante-b/schritt-6a.html  /schnellcheck/schritt-6a  301
-/variante-b/schritt-7.html   /schnellcheck/schritt-7   301
-/variante-b/schritt-7a.html  /schnellcheck/schritt-7a  301
-/variante-b/auswertung.html  /schnellcheck/auswertung  301
+# case it was already shared/bookmarked before the rename. Splat handles
+# both extensionless and .html-suffixed old links in one rule; a .html
+# link takes one extra hop through the canonicalization block above,
+# which is fine for a rarely-hit legacy path.
+/variante-b/*  /schnellcheck/:splat  301
