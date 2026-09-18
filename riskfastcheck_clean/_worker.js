@@ -26,29 +26,30 @@ const STEP_LOG_PATHS = new Set([
   '/schritt-5',
   '/schritt-6',
   // Variant B (branching flow A/B test, see llm-wiki plan 2026-09-17) --
-  // same webhook, a `variant` field distinguishes the rows so the existing
-  // n8n workflow/Sheet formulas need updating to read it, not just append it.
-  '/variante-b/schritt-1',
-  '/variante-b/schritt-1b',
-  '/variante-b/schritt-2',
-  '/variante-b/schritt-2a',
-  '/variante-b/schritt-3',
-  '/variante-b/schritt-3a',
-  '/variante-b/schritt-4',
-  '/variante-b/schritt-4a',
-  '/variante-b/schritt-5',
-  '/variante-b/schritt-5a',
-  '/variante-b/schritt-6',
-  '/variante-b/schritt-6a',
-  '/variante-b/schritt-7',
-  '/variante-b/schritt-7a',
+  // lives at /schnellcheck/ rather than /variante-b/ per client request
+  // (2026-09-17, WhatsApp: "The wording of variant-b makes it obvious...").
+  // Same webhook, a `variant` field distinguishes the rows.
+  '/schnellcheck/schritt-1',
+  '/schnellcheck/schritt-1b',
+  '/schnellcheck/schritt-2',
+  '/schnellcheck/schritt-2a',
+  '/schnellcheck/schritt-3',
+  '/schnellcheck/schritt-3a',
+  '/schnellcheck/schritt-4',
+  '/schnellcheck/schritt-4a',
+  '/schnellcheck/schritt-5',
+  '/schnellcheck/schritt-5a',
+  '/schnellcheck/schritt-6',
+  '/schnellcheck/schritt-6a',
+  '/schnellcheck/schritt-7',
+  '/schnellcheck/schritt-7a',
 ]);
 
 async function logStepView(pathname) {
   try {
-    const isVariantB = pathname.startsWith('/variante-b/');
+    const isVariantB = pathname.startsWith('/schnellcheck/');
     const step = isVariantB
-      ? pathname.replace('/variante-b/schritt-', '')
+      ? pathname.replace('/schnellcheck/schritt-', '')
       : pathname.replace('/schritt-', '');
 
     await fetch(STEP_LOG_WEBHOOK_URL, {
