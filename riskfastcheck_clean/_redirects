@@ -67,3 +67,20 @@
 /variante-b/schritt-7   /schnellcheck/schritt-7   301
 /variante-b/schritt-7a  /schnellcheck/schritt-7a  301
 /variante-b/auswertung  /schnellcheck/auswertung  301
+
+# Same, for the old .html-suffixed direct links.
+/variante-b/schritt-1.html   /schnellcheck/schritt-1   301
+/variante-b/schritt-1b.html  /schnellcheck/schritt-1b  301
+/variante-b/schritt-2.html   /schnellcheck/schritt-2   301
+/variante-b/schritt-2a.html  /schnellcheck/schritt-2a  301
+/variante-b/schritt-3.html   /schnellcheck/schritt-3   301
+/variante-b/schritt-3a.html  /schnellcheck/schritt-3a  301
+/variante-b/schritt-4.html   /schnellcheck/schritt-4   301
+/variante-b/schritt-4a.html  /schnellcheck/schritt-4a  301
+/variante-b/schritt-5.html   /schnellcheck/schritt-5   301
+/variante-b/schritt-5a.html  /schnellcheck/schritt-5a  301
+/variante-b/schritt-6.html   /schnellcheck/schritt-6   301
+/variante-b/schritt-6a.html  /schnellcheck/schritt-6a  301
+/variante-b/schritt-7.html   /schnellcheck/schritt-7   301
+/variante-b/schritt-7a.html  /schnellcheck/schritt-7a  301
+/variante-b/auswertung.html  /schnellcheck/auswertung  301
