@@ -51,8 +51,7 @@
 /schnellcheck/auswertung.html  /schnellcheck/auswertung  301
 
 # Old /variante-b/ path -- redirect to the renamed /schnellcheck/ path in
-# case it was already shared/bookmarked before the rename. Splat handles
-# both extensionless and .html-suffixed old links in one rule; a .html
-# link takes one extra hop through the canonicalization block above,
-# which is fine for a rarely-hit legacy path.
+# case it was already shared/bookmarked before the rename. Verified this
+# splat handles both extensionless and .html-suffixed old links in a
+# single hop (Cloudflare normalizes .html before matching _redirects).
 /variante-b/*  /schnellcheck/:splat  301
