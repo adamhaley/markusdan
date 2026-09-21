@@ -657,7 +657,11 @@ function initAccessibility(form) {
 
 function bindNavigation(form) {
   const prev = form.querySelector("[data-prev]");
-  const next = form.querySelector("[data-next]");
+  // Falls back to any submit button so the final step (no data-next -- it
+  // submits to the results webhook instead of navigating) also gets the
+  // auto-advance behavior every other step has, rather than requiring a
+  // manual click at the one point that actually posts the lead.
+  const next = form.querySelector("[data-next]") || form.querySelector('button[type="submit"]');
 
   if (prev) {
     prev.addEventListener("click", () => {
@@ -679,7 +683,7 @@ function bindNavigation(form) {
     }
     saveCurrentFormValues(form);
 
-    if (next) {
+    if (next && next.dataset.next) {
       window.location.href = next.dataset.next;
       return;
     }
@@ -739,7 +743,12 @@ function setAutoAdvanceState(next, isAdvancing) {
 
 async function prefetchResultsAndNavigate(form) {
   const submitButton = form.querySelector('button[type="submit"]');
-  const originalLabel = submitButton ? submitButton.textContent : "";
+  // Prefer the pre-auto-advance label (setAutoAdvanceState stashes it here)
+  // over the button's current text, which may already read "... ..." if
+  // auto-advance fired on this same final step just before this ran.
+  const originalLabel = submitButton
+    ? submitButton.dataset.defaultLabel || submitButton.textContent
+    : "";
   if (submitButton) {
     submitButton.disabled = true;
     submitButton.textContent = "Wird geladen …";
