@@ -12,8 +12,8 @@ const STEP_ORDER = ["1", "1b", "1c", "2", "3", "4", "5", "6"];
 const AUTO_ADVANCE_DELAY_MS = 400;
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
-  "wealth_building_years",
-  "wealth_concern",
+  "residence",
+  "gender",
   "real_estate_ownership",
   "securities_ownership",
   "precious_metals_ownership",
@@ -49,8 +49,8 @@ const OUTPUT_KEYS = [
   "utm_campaign",
   "utm_content",
   "utm_term",
-  "wealth_building_years",
-  "wealth_concern",
+  "residence",
+  "gender",
   "real_estate_ownership",
   "real_estate_investment_amount",
   "securities_ownership",
