@@ -29,6 +29,20 @@ const DETAIL_FIELD_BY_OWNERSHIP_FIELD = {
   bank_savings_ownership: "bank_savings_amount",
   alternative_assets_ownership: "alternative_assets_investment_amount",
 };
+// 2026-09-21: the client dropped the per-asset amount picker in favor of a
+// single yes/no question per asset (see llm-wiki plan 2026-09-21). A "Ja"
+// answer now submits one of these fixed values instead of a user-picked
+// tier, chosen to match a specific existing Vimeo answer clip the client is
+// keeping (see rsc-vimeo-mapping-node.js / rsc-parse-answers-node.js) --
+// changing these values changes which result video a "Ja" answer plays.
+const FIXED_DETAIL_VALUE_BY_FIELD = {
+  real_estate_investment_amount: "€100.000 - €500.000",
+  securities_investment_amount: "€10.000 - €50.000",
+  precious_metals_investment_amount: "€10.000 - €50.000",
+  life_insurance_monthly_payment: "weniger als €100",
+  bank_savings_amount: "€10.000 - €50.000",
+  alternative_assets_investment_amount: "€10.000 - €50.000",
+};
 const OUTPUT_KEYS = [
   "utm_source",
   "utm_medium",
@@ -201,6 +215,14 @@ function syncOwnershipAndDetailChoice(form, field) {
   if (detailFieldName) {
     if (field.value === "Nein") {
       clearDetailChoice(form, detailFieldName);
+    } else if (
+      field.value === "Ja"
+      && FIXED_DETAIL_VALUE_BY_FIELD[detailFieldName]
+      && !getDetailChoiceGroup(form, detailFieldName)
+    ) {
+      // No visible amount-tier fieldset on this page (the simplified
+      // yes/no pages) -- submit the fixed value behind a "Ja" instead.
+      saveField(detailFieldName, FIXED_DETAIL_VALUE_BY_FIELD[detailFieldName]);
     }
     return;
   }
