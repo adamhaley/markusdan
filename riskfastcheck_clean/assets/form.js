@@ -122,7 +122,7 @@ function shouldClearState(form) {
 function shouldReturnToStart(form) {
   const stepIndex = STEP_ORDER.indexOf(form.dataset.step || START_STEP);
   const startIndex = STEP_ORDER.indexOf(START_STEP);
-  return stepIndex > startIndex && !readField("wealth_building_years");
+  return stepIndex > startIndex && !readField("residence");
 }
 
 function isReload() {
