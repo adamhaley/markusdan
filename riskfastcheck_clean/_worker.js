@@ -17,9 +17,11 @@
 // the try/catch in logStepView.
 const STEP_LOG_WEBHOOK_URL = 'https://n8n.megyk.com/webhook/adb27565-9057-43a3-b9a9-f74a26a00427';
 const STEP_LOG_PATHS = new Set([
+  // 2026-09-24: the two warm-up questions (schritt-1/1b) were dropped and
+  // real estate (formerly schritt-1c) renumbered down to schritt-1, so the
+  // Daily Summary Sheet's schritt1..schritt6 columns keep meaning the same
+  // six questions without any spreadsheet changes -- see llm-wiki plan.
   '/schritt-1',
-  '/schritt-1b',
-  '/schritt-1c',
   '/schritt-2',
   '/schritt-3',
   '/schritt-4',

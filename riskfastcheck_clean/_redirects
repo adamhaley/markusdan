@@ -8,14 +8,20 @@
 # .html requests -> canonical extensionless URL, so any old bookmarked/
 # indexed .html link converges on the same GA4 page path as internal nav.
 /schritt-1.html  /schritt-1  301
-/schritt-1b.html /schritt-1b 301
-/schritt-1c.html /schritt-1c 301
 /schritt-2.html  /schritt-2  301
 /schritt-3.html  /schritt-3  301
 /schritt-4.html  /schritt-4  301
 /schritt-5.html  /schritt-5  301
 /schritt-6.html  /schritt-6  301
 /auswertung.html /auswertung 301
+
+# 2026-09-24: the two warm-up questions (schritt-1/1b) were dropped and
+# real estate (formerly schritt-1c) renumbered down to schritt-1. Stale
+# links to the old intro steps land on the new first question instead of
+# 404ing. Splat handles both extensionless and .html-suffixed forms in one
+# hop, same as the /variante-b/ rule below.
+/schritt-1b*  /schritt-1  301
+/schritt-1c*  /schritt-1  301
 
 # Old English step URLs -> current German schritt URLs.
 # Cloudflare Pages reads this file automatically on every deploy.

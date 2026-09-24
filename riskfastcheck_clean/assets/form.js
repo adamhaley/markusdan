@@ -8,12 +8,15 @@ const CONSENT_STORAGE_KEY = "rsc-cookie-consent";
 const SHARED_CONSENT_COOKIE = "md_consent";
 const PRIVACY_POLICY_URL = "https://markusdan.com/datenschutzerklaerung/";
 const START_STEP = "1";
-const STEP_ORDER = ["1", "1b", "1c", "2", "3", "4", "5", "6"];
+// 2026-09-24: client dropped the two warm-up questions (residence, gender)
+// entirely -- real estate is now schritt-1, and everything downstream
+// renumbers down to a clean 1-6 (was 1/1b/1c/2-6) rather than just making
+// the old schritt-1c the entry point, so the Daily Summary Sheet's
+// hardcoded schritt1..schritt6 columns keep working unchanged.
+const STEP_ORDER = ["1", "2", "3", "4", "5", "6"];
 const AUTO_ADVANCE_DELAY_MS = 400;
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const REQUIRED_FLOW_KEYS = [
-  "residence",
-  "gender",
   "real_estate_ownership",
   "securities_ownership",
   "precious_metals_ownership",
@@ -49,8 +52,6 @@ const OUTPUT_KEYS = [
   "utm_campaign",
   "utm_content",
   "utm_term",
-  "residence",
-  "gender",
   "real_estate_ownership",
   "real_estate_investment_amount",
   "securities_ownership",
@@ -122,7 +123,7 @@ function shouldClearState(form) {
 function shouldReturnToStart(form) {
   const stepIndex = STEP_ORDER.indexOf(form.dataset.step || START_STEP);
   const startIndex = STEP_ORDER.indexOf(START_STEP);
-  return stepIndex > startIndex && !readField("residence");
+  return stepIndex > startIndex && !readField("real_estate_ownership");
 }
 
 function isReload() {
