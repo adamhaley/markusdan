@@ -793,9 +793,7 @@ async function renderStepVideo(form) {
     return;
   }
 
-  // Videos disabled per client request. Revert to the line below to restore.
-  // if (readField("utm_medium") === "novid") {
-  if (true) {
+  if (readField("utm_medium") === "novid") {
     return;
   }
 
