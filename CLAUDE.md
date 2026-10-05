@@ -123,12 +123,16 @@ Same mirror/sync convention as the answer-page workflow above:
 The workflow's other node (`Append row in sheet1`, a Google Sheets node)
 has no inline code, so nothing to mirror there — its column mapping and the
 Sheet's header row are config, not code, and can only be changed directly
-in n8n's UI / the Sheet itself. As of this writing that node and Sheet
-still only have `timestamp`/`date`/`step` columns; the `Normalize Step
-View` mirror already emits a `variant` field (defaulted to `"A"`) that
-isn't captured anywhere downstream yet — a `variant` column needs adding
-to both the node's field mapping and the Sheet before it'll show up in
-rows.
+in n8n's UI / the Sheet itself. The raw `Sheet1` tab now stores
+`timestamp`/`date`/`step`/`variant`, and the exported workflow maps all four.
+
+The `Daily Summary` tab was updated on 2026-09-27 for the six-step flow that
+went live on 2026-09-24. It reports Variant A step views and adjacent-step
+drop-off/conversion for dates from 2026-09-25 onward. `Legacy Summary
+(through Sep 24)` preserves the old 1/1b/1c layout. September 24 is a mixed
+transition day, so its legacy funnel ratios should not be read as a clean
+single-flow cohort. These metrics count page views, not unique visitors or
+verified person-level transitions.
 
 **Same rule applies**: never edit `RSC Tracking.json` directly — land
 changes in `rsc-tracking-normalize-step-view-node.js`, the owner pastes it

@@ -11,8 +11,8 @@ const START_STEP = "1";
 // 2026-09-24: client dropped the two warm-up questions (residence, gender)
 // entirely -- real estate is now schritt-1, and everything downstream
 // renumbers down to a clean 1-6 (was 1/1b/1c/2-6) rather than just making
-// the old schritt-1c the entry point, so the Daily Summary Sheet's
-// hardcoded schritt1..schritt6 columns keep working unchanged.
+// the old schritt-1c the entry point. The Daily Summary tab now follows
+// this six-step flow from 2026-09-25 onward.
 const STEP_ORDER = ["1", "2", "3", "4", "5", "6"];
 const AUTO_ADVANCE_DELAY_MS = 400;
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
