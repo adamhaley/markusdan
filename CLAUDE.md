@@ -13,9 +13,18 @@ two required radio questions; `assets/form.js` handles validation, state,
 and step-to-step navigation (`renderStepVideo()`, `mountVimeoPlayer`-style
 logic).
 
-- **Hosting**: Cloudflare Pages, on the site owner's own Cloudflare account
-  (free tier — static bandwidth/requests are unmetered, no billing risk
-  from traffic volume).
+- **Hosting**: Cloudflare Pages project `risiko-schnell-check`, in the
+  Cloudflare account "Markus Dan - Risk-Fast-Check" (originally Adam's own
+  "Adamhaley@gmail.com's Account"; it holds nothing else and has no payment
+  method). Until 2026-10-13 Adam was the sole member, despite an earlier
+  belief that the client had been given ownership. That day the client
+  (`reborndj@gmail.com`) was invited as a second Super Administrator and
+  the account was renamed: it is effectively the client's account now, and
+  Adam keeps his own Cloudflare work in a separate account. Adam stays on as a
+  member; removing himself is optional and not discussed with the client.
+  Free tier, but `_worker.js` runs on every request, so traffic counts
+  against the Workers free-tier daily request limit rather than the
+  unmetered static-asset allowance.
 - **Deploy scope**: the Pages project's *root directory* is set to
   `riskfastcheck_clean/`. A push only triggers a redeploy if the diff
   touches files under that folder — commits that only touch root-level
