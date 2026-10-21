@@ -107,7 +107,7 @@ services:
       - wordpress_data:/bitnami/wordpress
 
   mariadb:
-    image: bitnami/mariadb:latest
+    image: soldevelo/mariadb:latest
     container_name: wordpress-db
     restart: unless-stopped
     environment:
